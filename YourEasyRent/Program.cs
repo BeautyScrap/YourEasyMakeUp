@@ -9,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 builder.Services.Configure<DataBaseConfig>(
     builder.Configuration.GetSection("DataBaseSettings"));
 
-
 // Add services to the container.
 //var configuration = builder.Configuration;
 //var DataaseConfig = configuration.GetValue<string>("value");
@@ -30,7 +29,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 
 app.UseHttpsRedirection();
 
@@ -90,7 +88,3 @@ public class Startup
 
 }
 }
-
-
-
-
