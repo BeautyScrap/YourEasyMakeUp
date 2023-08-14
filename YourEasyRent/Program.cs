@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.Configure<DataBaseConfig>(
-    builder.Configuration.GetSection("DataBaseSettings"));
+builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));
 
 // This is the same as it used to be
 var databaseConfig = new DataBaseConfig();
@@ -19,10 +18,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));// добавить 2 лиентов через addsingletone  ниже
 
 var app = builder.Build();
 
-builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
