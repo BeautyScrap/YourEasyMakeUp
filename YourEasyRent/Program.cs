@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));
+builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));//  настройка сервиса DataBaseConfig, который представл€ет собой класс, содержащий конфигурационные параметры дл€ базы данных.  онфигурационные настройки дл€ DataBaseConfig будут считыватьс€ из секции "DataBaseSettings"
+
+builder.Services.AddSingleton<MongoCollection>(); // ¬ этой строке регистрируетс€ сервис MongoCollection в контейнере зависимостей.
 
 // This is the same as it used to be
 var databaseConfig = new DataBaseConfig();
