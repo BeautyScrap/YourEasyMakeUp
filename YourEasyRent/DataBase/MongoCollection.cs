@@ -16,7 +16,7 @@ namespace YourEasyRent.DataBase
 
         }
 
-        public IMongoCollection<Product> Products { get; } //добавила операторы для CRUD
+        public IMongoCollection<Product> Products { get; } //добавила операторы для CRUD  к IMongoCollection
 
         public async Task<List<Product>> GetAsync() =>
             await Products.Find(_ => true).ToListAsync();
