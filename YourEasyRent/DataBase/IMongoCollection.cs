@@ -4,7 +4,7 @@ using YourEasyRent.Entities;
 
 namespace YourEasyRent.DataBase
 {
-    public interface ICatalogContext
+    public interface IMongoCollection
     {
         public IMongoCollection<Product> Products { get; }  
     }
