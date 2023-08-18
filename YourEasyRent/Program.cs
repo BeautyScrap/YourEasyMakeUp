@@ -4,11 +4,14 @@ using MongoDB.Driver;
 using DnsClient;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using YourEasyRent.DataBase.Interfaces;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));//  настройка сервиса DataBaseConfig, который представл€ет собой класс, содержащий конфигурационные параметры дл€ базы данных.  онфигурационные настройки дл€ DataBaseConfig будут считыватьс€ из секции "DataBaseSettings"
 
-builder.Services.AddSingleton<MongoCollection>(); // ¬ этой строке регистрируетс€ сервис MongoCollection в контейнере зависимостей.
+builder.Services.AddSingleton<ProductRepository>(); // ¬ этой строке регистрируетс€ сервис MongoCollection в контейнере зависимостей.
 
 // This is the same as it used to be
 var databaseConfig = new DataBaseConfig();
@@ -21,6 +24,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));// добавить 2 лиентов через addsingletone  ниже
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+
 
 var app = builder.Build();
 
