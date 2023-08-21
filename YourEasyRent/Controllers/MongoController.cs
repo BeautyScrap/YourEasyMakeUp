@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using YourEasyRent.DataBase;
+using YourEasyRent.Entities;
+using YourEasyRent.DataBase.Interfaces;
 
 namespace YourEasyRent.Controllers
 {
@@ -7,8 +9,82 @@ namespace YourEasyRent.Controllers
     [Route("api/[controller]")]
     public class MongoController : ControllerBase
     {
-        private readonly MongoCollection _mongoCollection;
-        public MongoController(MongoCollection mongoCollection) => _mongoCollection = mongoCollection;  
-       
+        private readonly IProductRepository _repository;
+
+        public MongoController(IProductRepository productRepository) => _repository = productRepository;
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()//   не надо бобавлять в скобках Id, потому что мы должне получить все продукты, поэтому и в операторах его нет Task<IEnumerable<Product>> GetProducts()
+        {
+            var allProducts = await _repository.GetProducts();
+
+            return Ok(allProducts); // получаем все продукты
+
+        }
+        [HttpGet("{id:length(24)}")]
+        public async Task<ActionResult<Product>> GetById(string id)
+        {
+            var product = await _repository.GetById(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return Ok(product);
+        }
+
+        [HttpGet("{brand:length(24)}")]
+        public async Task<ActionResult<Product>> GetByBrand(string brand)
+        {
+            var brandProducts = await _repository.GetByBrand(brand);
+            if (brandProducts == null)
+            {
+                return NotFound();
+            }
+            return Ok(brandProducts);
+        }
+
+        [HttpGet("{brand:length(24)}")]
+        public async Task<ActionResult<Product>> GetByName(string name)
+        {
+            var nameProduct = await _repository.GetByName(name);
+            if (nameProduct == null)
+            {
+                return NotFound();
+            }
+            return Ok(nameProduct);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Product>> Post(Product newProduct)
+        {
+            await _repository.Create(newProduct);
+            return CreatedAtAction(nameof(GetById), new { id = newProduct.Id }, newProduct);
+
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateManyProducts(IEnumerable<Product> products)
+        {
+            if (products == null)
+            {
+                return BadRequest("Products data is missing.");
+            }
+
+            var createdIds = await _repository.CreateMany(products);
+            return Ok(createdIds);
+        }
+
+
+
+
+        //public MongoController(IProductRepository repository)
+        //{
+        //    _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+
+
+
+
+        //private readonly MongoCollection _mongoCollection;
+        //public MongoController(MongoCollection mongoCollection) => _mongoCollection = mongoCollection;  
+
     }
 }
