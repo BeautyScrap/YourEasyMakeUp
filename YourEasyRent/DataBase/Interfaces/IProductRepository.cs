@@ -13,10 +13,8 @@ namespace YourEasyRent.DataBase.Interfaces
         Task<Product> GetByName(string name);
         Task Create(Product newProduct); // метод POST
         Task<IEnumerable<string>> CreateMany(IEnumerable<Product> products); // метод  POST
-        Task<bool> Update(Product product); // метод PUT
-        Task<bool> Delete(Product deleteProduct); // метод DELETE
-
-
-
+        Task<bool> Update(string id, Product updateproduct); // метод PUT
+        Task<bool> Delete(string id); // метод DELETE
+       
     }
 }
