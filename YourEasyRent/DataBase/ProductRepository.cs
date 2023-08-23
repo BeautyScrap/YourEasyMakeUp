@@ -53,31 +53,29 @@ namespace YourEasyRent.DataBase
         {
             await _product.InsertManyAsync(products);
 
-            var createdIds = products.Select(p => p.Id);
+            var createdIds = products.Select(p => p.Id); // - Здесь создается коллекция идентификаторов продуктов, используя LINQ-запрос.
 
             return createdIds;
         }
-        //public async Task<IEnumerable<Product>> CreateMany(string products)
-        //{
-        //    await _product.InsertManyAsync(products);  
-
-        //}
+       
         // метод PUT
 
-        public async Task<bool> Update(string id, Product updateProduct)
+        public async Task<bool> Update(string id, Product updateProduct) // метод Update возвращает значение типа bool, указывающее на успешность операции обновления. Если операция обновления прошла успешно, метод вернет true
         {
-            await _product.ReplaceOneAsync(filter: _ => _.Id == id, updateProduct);
+            var filter = Builders<Product>.Filter.Eq(_ => _.Id, id); // создаю фильтр для поиска продукта по его идентификатору.
+            var updateResult = await _product.ReplaceOneAsync(filter, updateProduct);// выполняет замену документа с учетом заданного фильтра.
+            return updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;//возвращает true, если и операция была успешно подтверждена сервером (acknowledged), и хотя бы один документ был изменен в результате операции обновления.
+
         }
 
         //метод DELETE
         public async Task<bool> Delete(string id)
         {
-            await _product.DeleteOneAsync(filter: _ => _.Id == id);
-           
-
-            //await _products.DeleteOneAsync(_ => _.Id == id);
-            //_products.SaveChanges();
-
+            
+            var filter = Builders<Product>.Filter.Eq(_ => _.Id, id);
+            var deleteProduct = await _product.DeleteOneAsync(filter);//  Выполняет удаление элемента с учетом задаанного фильтра
+            return deleteProduct.IsAcknowledged && deleteProduct.DeletedCount > 0;
+                    
         }
 
 
