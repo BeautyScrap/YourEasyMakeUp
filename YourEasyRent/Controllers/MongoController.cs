@@ -74,17 +74,36 @@ namespace YourEasyRent.Controllers
         }
 
 
+        [HttpPut("{id:length(24)}")]
+        public async Task<IActionResult> UpdateProduct(string id, Product updateProduct)
+        {
+            var result = await _repository.Update(id, updateProduct);
+
+            if (result)
+            {
+                return Ok("Product updated successfully.");
+            }
+            return NotFound("Product not found or update failed.");
+        }
 
 
-        //public MongoController(IProductRepository repository)
-        //{
-        //    _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(string id)
+        {
+            var result = await _repository.Delete(id);
+
+            if (result)
+            {
+                return Ok("Product deleted successfully.");
+            }
+            return NotFound("Product not found or delete failed.");
+        }
 
 
 
 
-        //private readonly MongoCollection _mongoCollection;
-        //public MongoController(MongoCollection mongoCollection) => _mongoCollection = mongoCollection;  
+
+
 
     }
 }
