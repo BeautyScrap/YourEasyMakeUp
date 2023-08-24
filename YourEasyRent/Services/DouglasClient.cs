@@ -4,7 +4,7 @@ using YourEasyRent.Entities.Douglas;
 
 namespace YourEasyRent.Services
 {
-    public class DouglasClient
+    public class DouglasClient: IProductSiteClient
     {
         private readonly HttpClient _httpClient;
         private readonly Dictionary<Section, string> sectionMapping = new()
@@ -13,6 +13,8 @@ namespace YourEasyRent.Services
         };
         private readonly JsonSerializerOptions _options;
         //private static string _baseProductPageUrl = "https://www.douglas.de/de/p/";  
+
+        public Site Site => Site.Douglas;
 
         public DouglasClient()
         {
@@ -58,10 +60,7 @@ namespace YourEasyRent.Services
             
         }// а тут уже поставить сопоставление со своими названиями с названиями, которые выдает дуглас( как в золотом яблоке)
 
-        internal Task FetchFromSection(Section section)
-        {
-            throw new NotImplementedException();
-        }
+       
     }
 
 }
