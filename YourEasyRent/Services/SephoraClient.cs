@@ -9,7 +9,7 @@ using System.Globalization;
 
 namespace YourEasyRent.Services
 {
-    public class SephoraClient
+    public class SephoraClient:IProductSiteClient
 
     {
         private readonly string _baseUrl = $"https://www.sephora.de/";//  baseUrl стандартный адрес сайта
@@ -19,14 +19,14 @@ namespace YourEasyRent.Services
         {
             [Section.makeup] = "shop"
         };
-
+        public Site Site => Site.Sephora;
         public SephoraClient()
         {
             _httpClient =  new HttpClient();
             //_httpClient.BaseAddress = new Uri(_baseUrl);
 
         }
-        public async Task<IEnumerable<Product>> FetchFromSection(Section section)
+        public async Task<IEnumerable<Product>> FetchFromSection(Section section, int pageNumber)
 
         {
             var url = GetSectionUrl(sectionMapping[section]);
