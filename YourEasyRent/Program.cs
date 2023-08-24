@@ -5,8 +5,8 @@ using DnsClient;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using YourEasyRent.DataBase.Interfaces;
-
-
+using YourEasyRent.Services;
+using YourEasyRent.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));//  настройка сервиса DataBaseConfig, который представляет собой класс, содержащий конфигурационные параметры для базы данных. Конфигурационные настройки для DataBaseConfig будут считываться из секции "DataBaseSettings"
@@ -23,7 +23,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));// добавить 2 лиентов через addsingletone  ниже
+builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));
+builder.Services.AddHttpClient<IProductSiteClient, SephoraClient>();// добавить 2 лиентов 
+builder.Services.AddHttpClient<IProductSiteClient, DouglasClient>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 
