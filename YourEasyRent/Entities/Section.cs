@@ -1,4 +1,9 @@
-﻿namespace YourEasyRent.Entities
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace YourEasyRent.Entities
 {
     public enum Section
     {
