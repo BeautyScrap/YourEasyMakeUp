@@ -27,7 +27,7 @@ namespace YourEasyRent.DataBase
         {
             return await _product.Find(_ => true).ToListAsync();
         }
-        public async Task<Product> GetById(string id)
+        public async Task<Product> Get(string id)
         {
             return await _product.Find(_ => _.Id == id).FirstOrDefaultAsync();
         }

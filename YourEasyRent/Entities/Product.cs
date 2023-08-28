@@ -9,9 +9,9 @@ namespace YourEasyRent.Entities
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]   
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
-        [BsonId]
+        //[BsonId]
         [BsonRepresentation(BsonType.String)]
         public Site Site { get; set; }
         public string SiteId { get; set; }
@@ -23,7 +23,7 @@ namespace YourEasyRent.Entities
 
         public string Category { get; set; }
         public string Url { get; set; }
-        public string ImageUrl { get; internal set; }
+        public string ImageUrl { get; set; }
 
         public Product()
         {

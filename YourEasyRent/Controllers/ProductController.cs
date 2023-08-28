@@ -6,12 +6,13 @@ using YourEasyRent.DataBase.Interfaces;
 namespace YourEasyRent.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class MongoController : ControllerBase
+    [Route("api/v1/[controller]")] // было [Route("api/[controller]")]
+    public class ProductController : ControllerBase
     {
         private readonly IProductRepository _repository;
 
-        public MongoController(IProductRepository productRepository) => _repository = productRepository;
+        public ProductController(IProductRepository productRepository) => _repository = productRepository;
+
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()//   не надо бобавлять в скобках Id, потому что мы должне получить все продукты, поэтому и в операторах его нет Task<IEnumerable<Product>> GetProducts()
@@ -22,29 +23,29 @@ namespace YourEasyRent.Controllers
 
         }
         [HttpGet("{id:length(24)}")]
-        public async Task<ActionResult<Product>> GetById(string id)
+        public async Task<ActionResult<Product>> Get(string id)
         {
-            var product = await _repository.GetById(id);
+            var product = await _repository.Get(id);
             if (product == null)
             {
                 return NotFound();
             }
             return Ok(product);
         }
-
-        [HttpGet("{brand:length(24)}")]
-        public async Task<ActionResult<Product>> GetByBrand(string brand)
+        [Route("[action]/{brand}", Name = "GetProductByBrand")]
+        [HttpGet]
+        public async Task<ActionResult<Product>> GetProductByBrand(string brand)
         {
-            var brandProducts = await _repository.GetByBrand(brand);
-            if (brandProducts == null)
+            var brandProduct = await _repository.GetByBrand(brand);
+            if (brandProduct == null)
             {
                 return NotFound();
             }
-            return Ok(brandProducts);
+            return Ok(brandProduct);
         }
-
-        [HttpGet("{brand:length(24)}")]
-        public async Task<ActionResult<Product>> GetByName(string name)
+        [Route("[action]/{name}", Name = "GetProductByName")]
+        [HttpGet]
+        public async Task<ActionResult<Product>> GetProductByName(string name)
         {
             var nameProduct = await _repository.GetByName(name);
             if (nameProduct == null)
@@ -55,23 +56,13 @@ namespace YourEasyRent.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Product>> Post(Product newProduct)
+        public async Task<IActionResult> Post([FromBody]Product newProduct)
         {
             await _repository.Create(newProduct);
-            return CreatedAtAction(nameof(GetById), new { id = newProduct.Id }, newProduct);
+            return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
 
         }
-        [HttpPost]
-        public async Task<IActionResult> CreateManyProducts(IEnumerable<Product> products)
-        {
-            if (products == null)
-            {
-                return BadRequest("Products data is missing.");
-            }
-
-            var createdIds = await _repository.CreateMany(products);
-            return Ok(createdIds);
-        }
+        
 
 
         [HttpPut("{id:length(24)}")]
