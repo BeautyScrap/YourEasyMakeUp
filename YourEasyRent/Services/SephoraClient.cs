@@ -17,7 +17,7 @@ namespace YourEasyRent.Services
 
         private readonly Dictionary<Section, string> sectionMapping = new()
         {
-            [Section.makeup] = "shop"
+            [Section.Makeup] = "shop"
         };
         public Site Site => Site.Sephora;
         public SephoraClient()

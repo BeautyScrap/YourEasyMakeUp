@@ -9,7 +9,7 @@ namespace YourEasyRent.Services
         private readonly HttpClient _httpClient;
         private readonly Dictionary<Section, string> sectionMapping = new()
         {       
-            [Section.makeup] = "make-up"
+            [Section.Makeup] = "make-up"
         };
         private readonly JsonSerializerOptions _options;
         //private static string _baseProductPageUrl = "https://www.douglas.de/de/p/";  

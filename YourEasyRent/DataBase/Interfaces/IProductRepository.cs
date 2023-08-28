@@ -8,7 +8,7 @@ namespace YourEasyRent.DataBase.Interfaces
         // сделать сигнатуры как было в iproductrepositor
 
         Task<IEnumerable<Product>> GetProducts();//добавила операторы для CRUD  к IMongoCollection, метод GET
-        Task<Product> GetById(string id);
+        Task<Product> Get(string id);
         Task<Product> GetByBrand(string brand);
         Task<Product> GetByName(string name);
         Task Create(Product newProduct); // метод POST

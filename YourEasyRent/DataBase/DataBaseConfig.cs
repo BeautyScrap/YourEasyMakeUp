@@ -2,10 +2,9 @@
 {
     public class DataBaseConfig
     {
-        public string ConnectionString { get; }
-        public string DataBaseName { get; }
-
-        public string CollectionName { get; }   
+        public string ConnectionString { get; set; } = null!;
+        public string DataBaseName { get; set; } = null!;
+        public string CollectionName { get; set; } = null!;  
 
     }
 }
