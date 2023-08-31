@@ -58,7 +58,7 @@ namespace YourEasyRent.Controllers
 
         [Route("[action]/{brand}", Name = "GetProductByBrand")]
         [HttpGet]
-        public async Task<ActionResult<Product>> GetProductByBrand(string brand)
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductByBrand(string brand)
         {
             try
             {

@@ -9,7 +9,7 @@ namespace YourEasyRent.DataBase.Interfaces
 
         Task<IEnumerable<Product>> GetProducts();//добавила операторы для CRUD  к IMongoCollection, метод GET
         Task<Product> Get(string id);
-        Task<Product> GetByBrand(string brand);
+        Task<IEnumerable<Product>> GetByBrand(string brand);
         Task<Product> GetByName(string name);
         Task Create(Product newProduct); // метод POST
         Task<IEnumerable<string>> CreateMany(IEnumerable<Product> products); // метод  POST
