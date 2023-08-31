@@ -20,13 +20,18 @@ namespace YourEasyRent.Controllers
             try
             {
                 var allProducts = await _repository.GetProducts();
-                return Ok(allProducts);// получаем все продукты
+                if (allProducts == null)
+                {
+                    return NotFound();
+                }
+
+                return allProducts.ToList();   
             }
 
             catch (Exception ex) 
             {
                 Console.WriteLine($"[GetProducts] : {ex.Message}");
-                return StatusCode(422, "Unable to process the request.");
+                return StatusCode(500, "Internal Server Error.");
 
             }
         }
@@ -47,7 +52,7 @@ namespace YourEasyRent.Controllers
             catch (Exception ex) 
             {
                 Console.WriteLine($"[Get] : {ex.Message}");
-                return StatusCode(404, "Unable to process the request. Product not found");
+                return StatusCode(500, "Internal Server Error. Product not found");
             }
         }
 
@@ -57,18 +62,18 @@ namespace YourEasyRent.Controllers
         {
             try
             {
-                var brandProduct = await _repository.GetByBrand(brand);
-                if (brandProduct == null)
+                var brandProducts = await _repository.GetByBrand(brand);
+                if (brandProducts == null)
                 {
                     return NotFound();
                 }
-                return Ok(brandProduct);
+                return Ok(brandProducts);
             }
 
             catch (Exception ex) 
             {
                 Console.WriteLine($"[GetByBrand] : {ex.Message}");
-                return StatusCode(404, "Unable to process the request. Brand not found");
+                return StatusCode(500, "Internal Server Error. Brand not found");
             }
         }
 
@@ -98,7 +103,7 @@ namespace YourEasyRent.Controllers
             try
             {
                 await _repository.Create(newProduct);
-                return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
+                return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct); 
             }
             catch (Exception ex) 
             {
@@ -115,13 +120,25 @@ namespace YourEasyRent.Controllers
             try
             {
 
-                var result = await _repository.Update(id, updateProduct);
+                var product = await _repository.Get(id);
 
-                if (result)
+                if (product is null)
                 {
-                    return Ok("Product updated successfully.");
+                    return NotFound();
                 }
-                return NotFound("Product not found or update failed.");
+
+                updateProduct.Id = product.Id;
+
+                await _repository.Update(id, updateProduct);    
+
+                return Ok();
+                //var result = await _repository.Update(id, updateProduct);
+
+                //if (result)
+                //{
+                //    return Ok();
+                //}
+                //return NotFound("Product not found or update failed.");
             }
             catch(Exception ex) 
             {
