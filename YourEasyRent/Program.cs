@@ -24,10 +24,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));
-builder.Services.AddHttpClient<IProductSiteClient, SephoraClient>();// добавить 2 лиентов 
-builder.Services.AddHttpClient<IProductSiteClient, DouglasClient>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-
+builder.Services.AddHttpClient<ISephoraProductSiteClient, SephoraClient>();// добавить 2 лиентов 
+builder.Services.AddHttpClient<IDouglasProductSiteClient, DouglasClient>();
+builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 
 
 var app = builder.Build();

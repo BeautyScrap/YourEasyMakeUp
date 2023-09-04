@@ -32,9 +32,9 @@ namespace YourEasyRent.DataBase
             return await _product.Find(_ => _.Id == id).FirstOrDefaultAsync();
         }
 
-        public async Task<Product> GetByBrand(string brand)
+        public async Task<IEnumerable<Product>> GetByBrand(string brand)
         {
-            return await _product.Find(_ => _.Brand == brand).FirstOrDefaultAsync(); // обращеемся к объекту _ и используем его своейство Brand, где свойство нашего объекта Brand будет равно параметру Brand
+            return await _product.Find(_ => _.Brand == brand).ToListAsync(); // обращеемся к объекту _ и используем его своейство Brand, где свойство нашего объекта Brand будет равно параметру Brand
         }
        
 

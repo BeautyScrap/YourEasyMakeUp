@@ -4,7 +4,7 @@ using Amazon.Auth.AccessControlPolicy;
 
 namespace YourEasyRent.Services
 {
-    public interface IProductSiteClient
+    public interface ISephoraProductSiteClient
     {
         /// <summary>
         /// Source
@@ -14,7 +14,7 @@ namespace YourEasyRent.Services
         /// <summary>
         /// Does not throw on nonexistant category
         /// </summary>
-        /// <param name="section"></param>
+        /// <param name="section"></param>`1
         /// <param name="pageNumber"></param>
         /// <returns>List of products of a page, empty list of there is no products</returns>
         /// 

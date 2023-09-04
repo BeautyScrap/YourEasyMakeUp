@@ -4,7 +4,7 @@ using YourEasyRent.Entities.Douglas;
 
 namespace YourEasyRent.Services
 {
-    public class DouglasClient: IProductSiteClient
+    public class DouglasClient: IDouglasProductSiteClient
     {
         private readonly HttpClient _httpClient;
         private readonly Dictionary<Section, string> sectionMapping = new()
@@ -16,9 +16,9 @@ namespace YourEasyRent.Services
 
         public Site Site => Site.Douglas;
 
-        public DouglasClient()
+        public DouglasClient(HttpClient client)
         {
-            _httpClient = new HttpClient();
+            _httpClient = client;
             _options = new JsonSerializerOptions()
             {
                 PropertyNameCaseInsensitive = true
@@ -26,7 +26,7 @@ namespace YourEasyRent.Services
         }
 
 
-        public async Task<IEnumerable<Product>> FetchFromSection(Section section, int pageNumber)
+        public async Task<IEnumerable<Product>> FetchFromDouglasSection(Section section, int pageNumber)
         {
             //var url = GetSectionUrl(sectionMapping[section], pageNumber);
 

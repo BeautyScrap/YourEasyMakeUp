@@ -9,7 +9,7 @@ using System.Globalization;
 
 namespace YourEasyRent.Services
 {
-    public class SephoraClient:IProductSiteClient
+    public class SephoraClient:ISephoraProductSiteClient
 
     {
         private readonly string _baseUrl = $"https://www.sephora.de/";//  baseUrl стандартный адрес сайта
@@ -37,7 +37,7 @@ namespace YourEasyRent.Services
 
             var products = MapNodesToProduct(productCardNodes);
 
-
+            pageNumber = 10;
             return products;
 
 

@@ -17,50 +17,96 @@ namespace YourEasyRent.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()//   не надо бобавлять в скобках Id, потому что мы должне получить все продукты, поэтому и в операторах его нет Task<IEnumerable<Product>> GetProducts()
         {
-            var allProducts = await _repository.GetProducts();
+            try
+            {
+                var allProducts = await _repository.GetProducts();
+                if (allProducts == null)
+                {
+                    return NotFound();
+                }
 
-            return Ok(allProducts); // получаем все продукты
+                return allProducts.ToList();   
+            }
 
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"[GetProducts] : {ex.Message}");
+                return StatusCode(500, "Internal Server Error.");
+
+            }
         }
+
         [HttpGet("{id:length(24)}")]
         public async Task<ActionResult<Product>> Get(string id)
         {
-            var product = await _repository.Get(id);
-            if (product == null)
+            try
             {
-                return NotFound();
+                var product = await _repository.Get(id);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+                return Ok(product);
             }
-            return Ok(product);
+
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"[Get] : {ex.Message}");
+                return StatusCode(500, "Internal Server Error. Product not found");
+            }
         }
+
         [Route("[action]/{brand}", Name = "GetProductByBrand")]
         [HttpGet]
-        public async Task<ActionResult<Product>> GetProductByBrand(string brand)
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductByBrand(string brand)
         {
-            var brandProduct = await _repository.GetByBrand(brand);
-            if (brandProduct == null)
+            try
             {
-                return NotFound();
+                var brandProducts = await _repository.GetByBrand(brand);
+
+                return Ok(brandProducts);
             }
-            return Ok(brandProduct);
+
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"[GetByBrand] : {ex.Message}");
+                return StatusCode(500, "Internal Server Error. Brand not found");
+            }
         }
+
         [Route("[action]/{name}", Name = "GetProductByName")]
         [HttpGet]
         public async Task<ActionResult<Product>> GetProductByName(string name)
         {
-            var nameProduct = await _repository.GetByName(name);
-            if (nameProduct == null)
+            try
             {
-                return NotFound();
+                var nameProduct = await _repository.GetByName(name);
+                if (nameProduct == null)
+                {
+                    return NotFound();
+                }
+                return Ok(nameProduct);
             }
-            return Ok(nameProduct);
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"[GetByName] : {ex.Message}");
+                return StatusCode(404, "Unable to process the request. Name not found");
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody]Product newProduct)
         {
-            await _repository.Create(newProduct);
-            return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
-
+            try
+            {
+                await _repository.Create(newProduct);
+                return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct); 
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"[Create] : {ex.Message}");
+                return StatusCode(500, "Failed to create user.");
+            }
         }
         
 
@@ -68,26 +114,56 @@ namespace YourEasyRent.Controllers
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> UpdateProduct(string id, Product updateProduct)
         {
-            var result = await _repository.Update(id, updateProduct);
-
-            if (result)
+            try
             {
-                return Ok("Product updated successfully.");
+
+                var product = await _repository.Get(id);
+
+                if (product is null)
+                {
+                    return NotFound();
+                }
+
+                updateProduct.Id = product.Id;
+
+                await _repository.Update(id, updateProduct);    
+
+                return Ok();
+                //var result = await _repository.Update(id, updateProduct);
+
+                //if (result)
+                //{
+                //    return Ok();
+                //}
+                //return NotFound("Product not found or update failed.");
             }
-            return NotFound("Product not found or update failed.");
+            catch(Exception ex) 
+            {
+                Console.WriteLine($"[Update] : {ex.Message}");
+                return StatusCode(500, "Failed to update user.");
+            }
         }
 
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(string id)
         {
-            var result = await _repository.Delete(id);
-
-            if (result)
+            try
             {
-                return Ok("Product deleted successfully.");
+
+                var result = await _repository.Delete(id);
+
+                if (result)
+                {
+                    return Ok("Product deleted successfully.");
+                }
+                return NotFound("Product not found or delete failed.");
             }
-            return NotFound("Product not found or delete failed.");
+            catch(Exception ex)
+            {
+                Console.WriteLine($"[Delete] : {ex.Message}");
+                return StatusCode(500, "Failed to delete user.");
+            }
         }
 
 
