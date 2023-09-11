@@ -16,7 +16,6 @@ namespace YourEasyRentTest.Controllers
     public class ProductControllerTest
     {
         [Fact]
-
         public async Task GetProducts_Return_AllProducts()
         {
             // arrange
@@ -64,10 +63,49 @@ namespace YourEasyRentTest.Controllers
             //assert
             result.Should().BeOfType<ActionResult<IEnumerable<Product>>>()// использую ActionResult<IEnumerable<Product>?> и затем проверяем, что внутренний результат (.Result) является ObjectResult, а затем проверяем статус кода 500.
                 .Which.Result.Should().BeOfType<ObjectResult>()
-                .Which.StatusCode.Should().Be(500);
-             
+                .Which.StatusCode.Should().Be(500);           
 
         }
+
+        [Fact]
+        public async Task GetProductById_Return_OkResult()
+        {
+            //arrange
+            string OkProductId = "OkProductId";
+            var productRepoMock = new Mock<IProductRepository>();
+            productRepoMock.Setup(repo => repo.Get(It.IsAny<string>())).ReturnsAsync(new Product { Id = OkProductId });
+            var controller = new ProductController(productRepoMock.Object);
+
+            //act
+            var result = await controller.Get(OkProductId);
+
+            //assert
+            result.Should().BeOfType<ActionResult<Product>>()
+                .Which.Result.Should().BeOfType<OkObjectResult>()
+                .Which.Value.Should().BeOfType<Product>();
+
+        }
+        [Fact]
+        public async Task GetProductById_Return_NotFound()
+        {
+            //arrange
+            string NotProductId = "NotProductId";
+            var productRepoMock = new Mock<IProductRepository>();
+            productRepoMock.Setup(repo =>repo.Get(It.IsAny<string>())).ReturnsAsync((Product?)null);
+            var controller = new ProductController(productRepoMock.Object);
+
+            //act
+            var result = await controller.Get(NotProductId);
+
+
+            //assert
+            result.Should().BeOfType<ActionResult<Product>>()
+                .Which.Result.Should().BeOfType<NotFoundResult>();
+                //.Which.Value.Should().BeOfType<Product>();
+        }
+            
+
+
 
 
 

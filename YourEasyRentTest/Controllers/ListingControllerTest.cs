@@ -14,10 +14,6 @@ namespace YourEasyRentTest.Controllers
 {
     public class ListingControllerTest
     {
-        public ListingControllerTest()
-        {
-                
-        }
 
         [Fact]
         public async Task GetProducts_WhenAllClientsReturnProucts_ReturnsCombinedProuctsLiist()
