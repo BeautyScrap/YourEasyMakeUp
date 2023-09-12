@@ -63,6 +63,10 @@ namespace YourEasyRent.Controllers
             try
             {
                 var brandProducts = await _repository.GetByBrand(brand);
+                if (brandProducts == null)
+                { 
+                    return NotFound();  
+                }
 
                 return Ok(brandProducts);
             }
