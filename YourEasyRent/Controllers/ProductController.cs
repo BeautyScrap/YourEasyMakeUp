@@ -133,13 +133,7 @@ namespace YourEasyRent.Controllers
                 await _repository.Update(id, updateProduct);    
 
                 return Ok();
-                //var result = await _repository.Update(id, updateProduct);
-
-                //if (result)
-                //{
-                //    return Ok();
-                //}
-                //return NotFound("Product not found or update failed.");
+                
             }
             catch(Exception ex) 
             {

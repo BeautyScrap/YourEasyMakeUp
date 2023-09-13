@@ -227,37 +227,49 @@ namespace YourEasyRentTest.Controllers
         [Fact]  
         public async Task Post_CreateNewProduct_Successfully()
         {
-            var product = new Product
-            {
-                //Id = "test",
-                SiteId = "test",
-                Brand = "test", 
-                Name = "test",
-                Price = 123,
-                Category = "test",  
-                Url = "test",   
-                ImageUrl = "test"
-            };
+            // Arrange
+            var product = new Product();
             var productRepoMock = new Mock<IProductRepository>();
-            productRepoMock.Setup(repo => repo.Create(product)).Returns(new Product{ Id = "test", SiteId = "test", Brand = "test",Name = "test", Price = 123, Category = "test", Url = "test", ImageUrl = "test"});
+            productRepoMock.Setup(repo => repo.Create(product)).Returns(Task.CompletedTask);
             var controller = new ProductController(productRepoMock.Object);
+            
             // act
-            var result = controller.Post(product);
+            var result = await controller.Post(product) as CreatedAtActionResult; // приведение результата выполнения метода Post к ожидаемым типам CreatedAtActionResult
 
             //assert
-            result.Should().BeOfType<ActionResult<Product>>()
-                .Which.Result.Should().BeOfType<CreatedAtActionResult>()
-                .Which.Value.Should().BeEquivalentTo(product);
+            result.Should().NotBeNull();
+            result.ActionName.Should().Be(nameof(ProductController.Get)); //  проверяем имя действия
+            result.Value.Should().BeEquivalentTo(product);
+  
+        }
 
+        [Fact]
+        public async Task Post_CreateNewProduct_Extencion()
+        {
+            //arrange
+            var product = new Product();
+            var productRepoMock = new Mock<IProductRepository>();
+            productRepoMock.Setup(repo => repo.Create(product)).ThrowsAsync(new Exception("Test failed to create user"));
+            var controller = new ProductController(productRepoMock.Object);
+            //act
+            var result = await controller.Post(product);
 
-            //  var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(actionResult.Result);
-            // var returnValue = Assert.IsType<Product>(createdAtActionResult.Value);
-            // Assert.Equal(product, returnValue);
-
-
-
+            //assert
+            result.Should().BeOfType<ObjectResult>()
+                .Which.StatusCode.Should().Be(500);
 
         }
+
+        [Fact]
+        public async Task Put_UpdateProduct_Successfully()
+        {
+            //arrange
+
+            //act
+
+            //assert
+        }
+
     }
 
 
