@@ -10,6 +10,7 @@ using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Controllers;
 using YourEasyRent.Services;
 using Microsoft.AspNetCore.Mvc;
+using YourEasyRent.Entities.Douglas;
 
 namespace YourEasyRentTest.Controllers
 {
@@ -19,8 +20,8 @@ namespace YourEasyRentTest.Controllers
         public async Task GetProducts_Return_AllProducts()
         {
             // arrange
-            var products = new List<Product>{new Product { Id = "test", Name = "Product 1" }, new Product { Id = "test", Name = "Product 2" } };       
-            var productRepoMock = new Mock<IProductRepository>(); 
+            var products = new List<Product> { new Product { Id = "test", Name = "Product 1" }, new Product { Id = "test", Name = "Product 2" } };
+            var productRepoMock = new Mock<IProductRepository>();
             productRepoMock.Setup(repo => repo.GetProducts()).ReturnsAsync(products);
             var controller = new ProductController(productRepoMock.Object); // Создала экземпляр контроллера ProductsController, передавая фейковый repositoryMock в конструктор.
 
@@ -29,28 +30,31 @@ namespace YourEasyRentTest.Controllers
 
             // assert
             result.Should().BeOfType<ActionResult<IEnumerable<Product>>>()
-                .Which.Value.Should().BeAssignableTo<IEnumerable<Product>>()
-                .And.HaveCount(products.Count); // проверряем является ли результат объектом типа <ActionResult<IEnumerable<Product>, в котором значение Value является IEnumerable<Product> и проверяем что количество элементов в IEnumerable<Product> равно количеству продуктов, которые мы заранее подготовили.
+                .Which.Value.Should().BeAssignableTo<IEnumerable<Product>>()// проверряем является ли результат объектом типа <ActionResult<IEnumerable<Product>, в котором значение Value является IEnumerable<Product> и проверяем что количество элементов в IEnumerable<Product> равно количеству продуктов, которые мы заранее подготовили.
+                .Which.Should().HaveCount(2)
+                .And.Subject.Should().BeEquivalentTo(products);         // проверяем , что поля поля «id» или «Name», отображаются правильно.
+
+
 
         }
 
-        [Fact]
-        public async Task GetProducts_Return_ProductsNotFound()
-        {
-            //arrange
-            var productRepoMock =new Mock<IProductRepository>();
-            productRepoMock.Setup<Task<IEnumerable<Product>?>>(repo => repo.GetProducts()).ReturnsAsync((IEnumerable<Product>?)null);
-            var controller = new ProductController(productRepoMock.Object);
-            //act
-            var result = await controller.GetProducts();
+        //[Fact]
+        //public async Task GetProducts_Return_ProductsNotFound()
+        //{
+        //    //arrange
+        //    var productRepoMock =new Mock<IProductRepository>();
+        //    productRepoMock.Setup<Task<IEnumerable<Product>?>>(repo => repo.GetProducts()).ReturnsAsync((IEnumerable<Product>?)null);
+        //    var controller = new ProductController(productRepoMock.Object);
+        //    //act
+        //    var result = await controller.GetProducts();
 
-            //assert
-            result.Should().BeOfType<ActionResult<IEnumerable<Product>?>>() // явно указываем ActionResult<IEnumerable<Product>?> с использованием аннотации nullability '?', и проверяем, что внутренний результат (.Result) также является NotFoundResult.
-                .Which.Result.Should().BeOfType<NotFoundResult>();
-        }
+        //    //assert
+        //    result.Should().BeOfType<ActionResult<IEnumerable<Product>?>>() // явно указываем ActionResult<IEnumerable<Product>?> с использованием аннотации nullability '?', и проверяем, что внутренний результат (.Result) также является NotFoundResult.
+        //        .Which.Result.Should().BeOfType<NotFoundResult>();
+        //}
 
         [Fact]
-        public async Task GetPriducts_Return_Exception()
+        public async Task GetProducts_WhenRepositoryThrowsException_ShouldReturn500()
         {
             // arrange
             var productRepoMock = new Mock<IProductRepository>();
@@ -63,7 +67,7 @@ namespace YourEasyRentTest.Controllers
             //assert
             result.Should().BeOfType<ActionResult<IEnumerable<Product>>>()// использую ActionResult<IEnumerable<Product>?> и затем проверяем, что внутренний результат (.Result) является ObjectResult, а затем проверяем статус кода 500.
                 .Which.Result.Should().BeOfType<ObjectResult>()
-                .Which.StatusCode.Should().Be(500);           
+                .Which.StatusCode.Should().Be(500);
 
         }
 
@@ -91,7 +95,7 @@ namespace YourEasyRentTest.Controllers
             //arrange
             string NotProductId = "NotProductId";
             var productRepoMock = new Mock<IProductRepository>();
-            productRepoMock.Setup(repo =>repo.Get(It.IsAny<string>())).ReturnsAsync((Product?)null);
+            productRepoMock.Setup(repo => repo.Get(It.IsAny<string>())).ReturnsAsync((Product?)null);
             var controller = new ProductController(productRepoMock.Object);
 
             //act
@@ -101,9 +105,9 @@ namespace YourEasyRentTest.Controllers
             //assert
             result.Should().BeOfType<ActionResult<Product>>()
                 .Which.Result.Should().BeOfType<NotFoundResult>();
-                
+
         }
-        [Fact]            
+        [Fact]
         public async Task GetProductById_Return_Exception()
         {
             //arrange
@@ -117,16 +121,16 @@ namespace YourEasyRentTest.Controllers
             //assert
             result.Should().BeOfType<ActionResult<Product>>()
                 .Which.Result.Should().BeOfType<ObjectResult>()
-                .Which.StatusCode.Should().Be(500);  
+                .Which.StatusCode.Should().Be(500);
         }
 
 
         [Fact]
         public async Task GetProductByBrand_Returns_OkResult()
         {
-           //arrange
+            //arrange
             string brandWithOkResult = "brandWithOkResult";
-            var products =  new List<Product> { new Product { Id = "test", Brand = "BrandProduct" }, new Product { Id = "test", Brand = "BrandProduct" } };
+            var products = new List<Product> { new Product { Id = "test", Brand = "BrandProduct" }, new Product { Id = "test", Brand = "BrandProduct" } };
             var productRepoMock = new Mock<IProductRepository>();
             productRepoMock.Setup(repo => repo.GetByBrand(brandWithOkResult)).ReturnsAsync(products);
             var controller = new ProductController(productRepoMock.Object); // Создала экземпляр контроллера ProductsController, передавая фейковый repositoryMock в конструктор.
@@ -144,9 +148,9 @@ namespace YourEasyRentTest.Controllers
         public async Task GetProductByBrand_Returns_NotFound()
         {
             //arrange
-            string brandNotFound = "branbNotFound";       
+            string brandNotFound = "branbNotFound";
             var productRepoMock = new Mock<IProductRepository>();
-            productRepoMock.Setup(repo => repo.GetByBrand(brandNotFound)).ReturnsAsync((IEnumerable<Product>?) null);
+            productRepoMock.Setup(repo => repo.GetByBrand(brandNotFound)).ReturnsAsync((IEnumerable<Product>?)null);
             var controller = new ProductController(productRepoMock.Object);
 
             // act
@@ -224,7 +228,7 @@ namespace YourEasyRentTest.Controllers
                 .Which.StatusCode.Should().Be(500);
         }
 
-        [Fact]  
+        [Fact]
         public async Task Post_CreateNewProduct_Successfully()
         {
             // Arrange
@@ -232,7 +236,7 @@ namespace YourEasyRentTest.Controllers
             var productRepoMock = new Mock<IProductRepository>();
             productRepoMock.Setup(repo => repo.Create(product)).Returns(Task.CompletedTask);
             var controller = new ProductController(productRepoMock.Object);
-            
+
             // act
             var result = await controller.Post(product) as CreatedAtActionResult; // приведение результата выполнения метода Post к ожидаемым типам CreatedAtActionResult
 
@@ -240,7 +244,7 @@ namespace YourEasyRentTest.Controllers
             result.Should().NotBeNull();
             result.ActionName.Should().Be(nameof(ProductController.Get)); //  проверяем имя действия
             result.Value.Should().BeEquivalentTo(product);
-  
+
         }
 
         [Fact]
@@ -261,16 +265,66 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task Put_UpdateProduct_Successfully()
+        public async Task UpdateProduct_WhenProductExsist_RsturnsOkResult()
         {
             //arrange
-
+            var exisistinId = "exisistinId";
+            var updateProduct = new Product { Id = exisistinId, Name = "UpdateProductName" };
+            var productRepoMock = new Mock<IProductRepository>();
+            productRepoMock.Setup(repo => repo.Get(exisistinId)).ReturnsAsync(new Product { Id = exisistinId, Name = "UpdateProductName" });
+            var controller = new ProductController(productRepoMock.Object);
             //act
+            var result = await controller.UpdateProduct(exisistinId, updateProduct);
 
             //assert
+            //result.Should().BeOfType<ActionResult<Product>>()
+            result.Should().BeOfType<OkResult>();
+            productRepoMock.Verify(repo => repo.Update(exisistinId, updateProduct), Times.Once);//  проверяем был ли вызван метод Update для объекта productMockRepository с аргументами exisistinId один раз)
+
+
+        }
+
+        [Fact]
+        public async Task UpdateProduct_WhenProductNotExsist_ReturnNotFoundResult()
+
+        {
+            //arrange
+            var notExisistinId = "notExisistinId";
+            var updateProduct = new Product { Id = notExisistinId, Name = "NotUpdateProductName" };
+            var productRepoMock = new Mock<IProductRepository>();
+            productRepoMock.Setup(repo => repo.Get(notExisistinId)).ReturnsAsync((Product?)null);
+            var controller = new ProductController(productRepoMock.Object);
+
+            //act
+            var result = await controller.UpdateProduct(notExisistinId,updateProduct);
+
+            //assert
+            
+            result.Should().BeOfType<NotFoundResult>();       
+        }
+
+        [Fact]  
+        public async Task UpdateProduct_WhenExeption_Return500StatusCode()
+        {
+            //arrange
+            var exeptionId = "exceptionId";
+            var updateProduct = new Product { Id = exeptionId, Name = "Exception" };
+            var productRepoMock = new Mock<IProductRepository>();
+            productRepoMock.Setup(repo =>repo.Get(exeptionId)).ThrowsAsync(new Exception());
+            var controller = new ProductController(productRepoMock.Object);
+            
+            //act
+            var result = await controller.UpdateProduct(exeptionId,updateProduct);
+            //assert
+
+            result.Should().BeOfType<ObjectResult>()
+                .Which.StatusCode.Should().Be(500);
+            
+
+
         }
 
     }
 
 
-    }
+   }

@@ -2,6 +2,7 @@
 using YourEasyRent.DataBase;
 using YourEasyRent.Entities;
 using YourEasyRent.DataBase.Interfaces;
+using Telegram.Bot.Types;
 
 namespace YourEasyRent.Controllers
 {
@@ -64,9 +65,11 @@ namespace YourEasyRent.Controllers
             {
                 var brandProducts = await _repository.GetByBrand(brand);
                 if (brandProducts == null)
-                { 
-                    return NotFound();  
+                {
+                    var result = Enumerable.Empty<Product>().ToList();
+                    return Ok(result);
                 }
+                    
 
                 return Ok(brandProducts);
             }
@@ -85,10 +88,10 @@ namespace YourEasyRent.Controllers
             try
             {
                 var nameProduct = await _repository.GetByName(name);
-                if (nameProduct == null)
-                {
-                    return NotFound();
-                }
+                //if (nameProduct == null)
+                //{
+                //    return NotFound();
+                //}
                 return Ok(nameProduct);
             }
             catch (Exception ex) 
