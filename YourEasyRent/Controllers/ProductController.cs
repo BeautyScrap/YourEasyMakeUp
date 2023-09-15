@@ -151,14 +151,16 @@ namespace YourEasyRent.Controllers
         {
             try
             {
+                var product = await _repository.Get(id);
 
-                var result = await _repository.Delete(id);
-
-                if (result)
+                if (product is null)
                 {
-                    return Ok("Product deleted successfully.");
+                    return NotFound();
                 }
-                return NotFound("Product not found or delete failed.");
+                await _repository.Delete(id);
+                return Ok();
+                //var product = await _repository.Delete(id);
+                // return Ok("Product deleted successfully.");
             }
             catch(Exception ex)
             {

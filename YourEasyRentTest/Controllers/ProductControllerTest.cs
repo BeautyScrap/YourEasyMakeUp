@@ -11,6 +11,7 @@ using YourEasyRent.Controllers;
 using YourEasyRent.Services;
 using Microsoft.AspNetCore.Mvc;
 using YourEasyRent.Entities.Douglas;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace YourEasyRentTest.Controllers
 {
@@ -296,35 +297,84 @@ namespace YourEasyRentTest.Controllers
             var controller = new ProductController(productRepoMock.Object);
 
             //act
-            var result = await controller.UpdateProduct(notExisistinId,updateProduct);
+            var result = await controller.UpdateProduct(notExisistinId, updateProduct);
 
             //assert
-            
-            result.Should().BeOfType<NotFoundResult>();       
+
+            result.Should().BeOfType<NotFoundResult>();
         }
 
-        [Fact]  
+        [Fact]
         public async Task UpdateProduct_WhenExeption_Return500StatusCode()
         {
             //arrange
             var exeptionId = "exceptionId";
             var updateProduct = new Product { Id = exeptionId, Name = "Exception" };
             var productRepoMock = new Mock<IProductRepository>();
-            productRepoMock.Setup(repo =>repo.Get(exeptionId)).ThrowsAsync(new Exception());
+            productRepoMock.Setup(repo => repo.Get(exeptionId)).ThrowsAsync(new Exception());
             var controller = new ProductController(productRepoMock.Object);
-            
+
             //act
-            var result = await controller.UpdateProduct(exeptionId,updateProduct);
+            var result = await controller.UpdateProduct(exeptionId, updateProduct);
             //assert
 
             result.Should().BeOfType<ObjectResult>()
                 .Which.StatusCode.Should().Be(500);
-            
 
+        }
 
+        [Fact]
+        public async Task DeleteProduct_WhenProductDelete_RsturnsOkResult()
+        {
+            //arrange
+            var deleteId = "deleteId";        
+            var productRepoMock = new Mock<IProductRepository>();
+            productRepoMock.Setup(repo => repo.Get(deleteId)).ReturnsAsync(new Product { Id = deleteId });
+            var controller = new ProductController(productRepoMock.Object);
+
+            //act 
+            var result = await controller.DeleteProduct(deleteId);
+
+            //assert
+            result.Should().BeOfType<OkResult>();
+            productRepoMock.Verify(repo =>repo.Delete(deleteId), Times.Once());
+
+        }
+
+        [Fact]  
+        public async Task DeleteProduct_WhenProductIsNull_ReturnsNotFound()
+        {
+
+            //arrange
+            var deleteId = "deleteId";
+            var productRepoMock = new Mock<IProductRepository>();
+            productRepoMock.Setup(repo => repo.Get(deleteId)).ReturnsAsync((Product?)null);
+            var controller = new ProductController(productRepoMock.Object);
+
+            //act 
+            var result = await controller.DeleteProduct(deleteId);
+
+            //assert
+            result.Should().BeOfType<NotFoundResult>();
+        }
+
+        [Fact]
+        public async Task DeleteProduct_WhenExeption_Return500StatusCode()
+        {
+            //arrange
+            var deleteId = "deleteId";
+            var productRepoMock = new Mock<IProductRepository>();
+            productRepoMock.Setup(repo => repo.Get(deleteId)).ThrowsAsync(new Exception());
+            var controller = new  ProductController(productRepoMock.Object);
+
+            //act
+            var result = await controller.DeleteProduct(deleteId);
+
+            //assert
+            result.Should().BeOfType<ObjectResult>()
+                .Which.StatusCode.Should().Be(500);
         }
 
     }
 
-
-   }
+    }
