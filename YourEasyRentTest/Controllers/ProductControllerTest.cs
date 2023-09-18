@@ -18,7 +18,7 @@ namespace YourEasyRentTest.Controllers
     public class ProductControllerTest
     {
         [Fact]
-        public async Task GetProducts_Return_AllProducts()
+        public async Task GetProducts_WhenAllProductsFound_ReturnOkResult()
         {
             // arrange
             var products = new List<Product> { new Product { Id = "test", Name = "Product 1" }, new Product { Id = "test", Name = "Product 2" } };
@@ -73,7 +73,7 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task GetProductById_Return_OkResult()
+        public async Task GetProductById_WhenProductByIdFound_ReturnOkResult()
         {
             //arrange
             string OkProductId = "OkProductId";
@@ -91,7 +91,7 @@ namespace YourEasyRentTest.Controllers
 
         }
         [Fact]
-        public async Task GetProductById_Return_NotFound()
+        public async Task GetProductById_WhenProductByIdNull_ReturnNotFound()
         {
             //arrange
             string NotProductId = "NotProductId";
@@ -109,7 +109,7 @@ namespace YourEasyRentTest.Controllers
 
         }
         [Fact]
-        public async Task GetProductById_Return_Exception()
+        public async Task GetProductById_WhenExeption_Return500StatusCode()
         {
             //arrange
             string ExceptionId = "ExceptionId";
@@ -127,7 +127,7 @@ namespace YourEasyRentTest.Controllers
 
 
         [Fact]
-        public async Task GetProductByBrand_Returns_OkResult()
+        public async Task GetProductByBrand_ProductByBrandFound_ReturnsOkResult()
         {
             //arrange
             string brandWithOkResult = "brandWithOkResult";
@@ -146,24 +146,29 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task GetProductByBrand_Returns_NotFound()
+        public async Task GetProductByBrand_WhenBrandNull_ReturnEmptyList()
         {
             //arrange
-            string brandNotFound = "branbNotFound";
+            string brandProductsNull = "brandProductsNull";
             var productRepoMock = new Mock<IProductRepository>();
-            productRepoMock.Setup(repo => repo.GetByBrand(brandNotFound)).ReturnsAsync((IEnumerable<Product>?)null);
+            productRepoMock.Setup(repo => repo.GetByBrand(brandProductsNull)).ReturnsAsync((IEnumerable<Product>?)null);
             var controller = new ProductController(productRepoMock.Object);
 
             // act
-            var result = await controller.GetProductByBrand(brandNotFound);
+            var result = await controller.GetProductByBrand(brandProductsNull);
 
             //assert
-            result.Should().BeOfType<ActionResult<IEnumerable<Product>>>()
-                .Which.Result.Should().BeOfType<NotFoundResult>();
+
+            result.Should().BeOfType<ActionResult<IEnumerable<Product>>>() // Проверяем, что контроллер возвращает ActionResult<IEnumerable<Product>>
+              .Which.Result.Should().BeOfType<OkObjectResult>() // Проверяем, что внутренний результат - это OkObjectResult
+              .Which.Value.Should().BeAssignableTo<IEnumerable<Product>>(); // Проверяем, что значение является коллекцией продуктов с ожидаемым типом значения
+            result.Value.Should().BeNull();
+            
+
         }
 
         [Fact]
-        public async Task GetProductByBrand_Return_Exception()
+        public async Task GetProductByBrand_WhenExeption_Return500StatusCode()
         {
             //arrange
             string ExceptionBrand = "ExceptionBrand";
@@ -180,7 +185,7 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task GetProductByName_Return_OkResult()
+        public async Task GetProductByName_WhenProductNameFound_ReturnOkResult()
         {
             //arrange
             string okProductName = "OkProductName";
@@ -197,7 +202,7 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task GetProductByName_Return_NotFound()
+        public async Task GetProductByName_WhenProductByNameNull_ReturnNotFound()
         {
             //arrange
             string productNameNotFound = "ProductNameNotFound";
@@ -213,7 +218,7 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task GetProductByName_Return_Exception()
+        public async Task GetProductByName_WhenExeption_Return500StatusCode()
         {
             //arrange
             string ExceptionName = "ExceptionName";
@@ -230,7 +235,7 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task Post_CreateNewProduct_Successfully()
+        public async Task Post_CreateNewProductSuccessfully_ReturnProduct()
         {
             // Arrange
             var product = new Product();
@@ -249,7 +254,7 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task Post_CreateNewProduct_Extencion()
+        public async Task Post_CreateNewProduct_Return500StatusCode()
         {
             //arrange
             var product = new Product();
@@ -266,7 +271,7 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task UpdateProduct_WhenProductExsist_RsturnsOkResult()
+        public async Task UpdateProduct_WhenProductExsist_ReturnsOkResult()
         {
             //arrange
             var exisistinId = "exisistinId";
@@ -324,7 +329,7 @@ namespace YourEasyRentTest.Controllers
         }
 
         [Fact]
-        public async Task DeleteProduct_WhenProductDelete_RsturnsOkResult()
+        public async Task DeleteProduct_WhenProductDelete_ReturnsOkResult()
         {
             //arrange
             var deleteId = "deleteId";        
