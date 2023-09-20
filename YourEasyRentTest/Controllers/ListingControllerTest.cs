@@ -14,10 +14,6 @@ namespace YourEasyRentTest.Controllers
 {
     public class ListingControllerTest
     {
-        public ListingControllerTest()
-        {
-                
-        }
 
         [Fact]
         public async Task GetProducts_WhenAllClientsReturnProucts_ReturnsCombinedProuctsLiist()
@@ -41,7 +37,7 @@ namespace YourEasyRentTest.Controllers
 
             var sephoraClient = new Mock<ISephoraProductSiteClient>();
             sephoraClient.Setup(
-            x => x.FetchFromSection(It.IsAny<Section>(), It.IsAny<int>()))
+            x => x.FetchFromSephoraSection(It.IsAny<Section>(), It.IsAny<int>()))
             .ReturnsAsync(new List<Product>(){
 
                 new Product()
@@ -50,10 +46,10 @@ namespace YourEasyRentTest.Controllers
                 }
             });
 
-            var subject = new ListingController(productRepoMock.Object, douglasClient.Object, sephoraClient.Object);
+            var controller = new ListingController(productRepoMock.Object, douglasClient.Object, sephoraClient.Object);
             
             // act
-            var result = await subject.GetProducts();
+            var result = await controller.GetProducts();
 
             // assert
             var expected = new List<Product>()

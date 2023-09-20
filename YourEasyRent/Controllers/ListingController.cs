@@ -19,11 +19,11 @@ namespace YourEasyRent.Controllers
     [Route("[controller]")] // было [Route("api/v1/[controller]")] - Этот атрибут указывает, что маршруты к действиям контроллера будут начинаться с имени контроллера в URL. 
     public class ListingController : ControllerBase
     {
-        private readonly IProductRepository _repository;
+        private readonly IProductRepository _repository; // объявляет приватное поле _repository в текущем классе ListingController, которое будет использоваться для внедрения зависимости  IProductRepository. Это поле будет доступно для использования в методах и конструкторах класса
         private readonly IDouglasProductSiteClient _dclient;
         private readonly ISephoraProductSiteClient _sclient;
 
-        public ListingController(IProductRepository repository, IDouglasProductSiteClient dclient, ISephoraProductSiteClient sclient)
+        public ListingController(IProductRepository repository, IDouglasProductSiteClient dclient, ISephoraProductSiteClient sclient)//  конструктор
         {
             _repository = repository;
             _dclient = dclient; 
@@ -40,7 +40,7 @@ namespace YourEasyRent.Controllers
             var section = Section.Makeup;
 
             var pagenumber = 1;
-            var sephoralistings = await _sclient.FetchFromSection(section, pagenumber); //  сделать 2 listinga для сефоры и для дугласа, смерджить и результаты(list или join  погуглить как) и вернуть общий результат для обоих сайтов 
+            var sephoralistings = await _sclient.FetchFromSephoraSection(section, pagenumber); //  сделать 2 listinga для сефоры и для дугласа, смерджить и результаты(list или join  погуглить как) и вернуть общий результат для обоих сайтов 
 
              // сделать цикл с перебором страниц, чтобы "перелистывать страницы" и брать новые ответы
 

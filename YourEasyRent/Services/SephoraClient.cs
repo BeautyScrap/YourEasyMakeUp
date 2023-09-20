@@ -26,7 +26,7 @@ namespace YourEasyRent.Services
             //_httpClient.BaseAddress = new Uri(_baseUrl);
 
         }
-        public async Task<IEnumerable<Product>> FetchFromSection(Section section, int pageNumber)
+        public async Task<IEnumerable<Product>> FetchFromSephoraSection(Section section, int pageNumber)
 
         {
             var url = GetSectionUrl(sectionMapping[section]);
@@ -37,7 +37,6 @@ namespace YourEasyRent.Services
 
             var products = MapNodesToProduct(productCardNodes);
 
-            pageNumber = 10;
             return products;
 
 

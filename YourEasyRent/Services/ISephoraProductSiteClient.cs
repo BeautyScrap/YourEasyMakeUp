@@ -18,7 +18,7 @@ namespace YourEasyRent.Services
         /// <param name="pageNumber"></param>
         /// <returns>List of products of a page, empty list of there is no products</returns>
         /// 
-        Task<IEnumerable<Product>> FetchFromSection(Section section, int pageNumber);
+        Task<IEnumerable<Product>> FetchFromSephoraSection(Section section, int pageNumber);
     }
 
 

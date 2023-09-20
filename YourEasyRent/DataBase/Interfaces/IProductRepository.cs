@@ -7,7 +7,7 @@ namespace YourEasyRent.DataBase.Interfaces
     {
         // сделать сигнатуры как было в iproductrepositor
 
-        Task<IEnumerable<Product>> GetProducts();//добавила операторы для CRUD  к IMongoCollection, метод GET
+        Task<IEnumerable<Product?>> GetProducts();//добавила операторы для CRUD  к IMongoCollection, метод GET
         Task<Product> Get(string id);
         Task<IEnumerable<Product>> GetByBrand(string brand);
         Task<Product> GetByName(string name);

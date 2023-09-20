@@ -19,7 +19,6 @@ namespace YourEasyRent.Entities
 
         public string Brand { get; set; }
 
-        public string _name;
         public string Name { get;  set; }
         public decimal Price { get; set; }
 

@@ -2,6 +2,7 @@
 using YourEasyRent.DataBase;
 using YourEasyRent.Entities;
 using YourEasyRent.DataBase.Interfaces;
+using Telegram.Bot.Types;
 
 namespace YourEasyRent.Controllers
 {
@@ -63,6 +64,12 @@ namespace YourEasyRent.Controllers
             try
             {
                 var brandProducts = await _repository.GetByBrand(brand);
+                if (brandProducts == null)
+                {
+                    var result = Enumerable.Empty<Product>().ToList();
+                    return Ok(result);
+                }
+                    
 
                 return Ok(brandProducts);
             }
@@ -81,10 +88,6 @@ namespace YourEasyRent.Controllers
             try
             {
                 var nameProduct = await _repository.GetByName(name);
-                if (nameProduct == null)
-                {
-                    return NotFound();
-                }
                 return Ok(nameProduct);
             }
             catch (Exception ex) 
@@ -129,13 +132,7 @@ namespace YourEasyRent.Controllers
                 await _repository.Update(id, updateProduct);    
 
                 return Ok();
-                //var result = await _repository.Update(id, updateProduct);
-
-                //if (result)
-                //{
-                //    return Ok();
-                //}
-                //return NotFound("Product not found or update failed.");
+                
             }
             catch(Exception ex) 
             {
@@ -150,14 +147,16 @@ namespace YourEasyRent.Controllers
         {
             try
             {
+                var product = await _repository.Get(id);
 
-                var result = await _repository.Delete(id);
-
-                if (result)
+                if (product is null)
                 {
-                    return Ok("Product deleted successfully.");
+                    return NotFound();
                 }
-                return NotFound("Product not found or delete failed.");
+                await _repository.Delete(id);
+                return Ok();
+                //var product = await _repository.Delete(id);
+                // return Ok("Product deleted successfully.");
             }
             catch(Exception ex)
             {
