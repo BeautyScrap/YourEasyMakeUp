@@ -88,10 +88,6 @@ namespace YourEasyRent.Controllers
             try
             {
                 var nameProduct = await _repository.GetByName(name);
-                //if (nameProduct == null)
-                //{
-                //    return NotFound();
-                //}
                 return Ok(nameProduct);
             }
             catch (Exception ex) 
