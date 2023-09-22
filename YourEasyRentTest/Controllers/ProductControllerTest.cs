@@ -223,6 +223,7 @@ namespace YourEasyRentTest.Controllers
         [Fact]
         public async Task Post_CreateNewProductSuccessfully_ReturnProduct()
         {
+
             // Arrange
             var product = new Product();
             var productRepoMock = new Mock<IProductRepository>();

@@ -6,20 +6,24 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services;
-using Telegram.Bot;
+using System;
 using YourEasyRent.Entities;
-
-
+using Telegram.Bot;
+using Telegram.Bot.Exceptions;
+using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using YourEasyRent.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));//  настройка сервиса DataBaseConfig, который представл€ет собой класс, содержащий конфигурационные параметры дл€ базы данных.  онфигурационные настройки дл€ DataBaseConfig будут считыватьс€ из секции "DataBaseSettings"
 
 builder.Services.AddSingleton<ProductRepository>(); // ¬ этой строке регистрируетс€ сервис MongoCollection в контейнере зависимостей.
 
-//var botClient = new TelegramBotClient("{6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw}");
+var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
+var botController = new TelegramBotController(botToken);
+botController.Start();
 
-//var me = await botClient.GetMeAsync();
-//Console.WriteLine($"Hello, World! I am user {me.Id} and my name is {me.FirstName}.");
 
 // This is the same as it used to be
 var databaseConfig = new DataBaseConfig();
