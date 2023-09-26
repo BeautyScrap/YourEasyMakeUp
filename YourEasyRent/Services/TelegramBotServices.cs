@@ -40,37 +40,74 @@ namespace YourEasyRent.Services
             Console.WriteLine($"Start listening for @{me.Username}"); // получаем информация о боте с использованием _botClient.GetMeAsync() и выводится его имя пользователя в консоль для отображения информации о начале прослушивания обновлений.
 
         }
+
         private async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
         {
-            var message = update.Message;
-            var chatId = message.Chat.Id;
-           
+            #region [Main menu]
+            InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]{new[] {InlineKeyboardButton.WithCallbackData(text:"Оставить заявку", callbackData: "SentOrder")}});
 
-            if (message.Text != null)
+            #endregion
+            InlineKeyboardMarkup backMenu = new(new[] { InlineKeyboardButton.WithCallbackData(text:"К главному меню", callbackData: "toBack") });
+
+            if(update.Type == UpdateType.Message &&  update.Message!.Type == MessageType.Text)
             {
-                Console.WriteLine($"Received a '{message.Text}' message in chat {chatId} and user name {message.Chat.Username}.");
-
-                if (message.Text.ToLower().Contains("Привет"))
+                var chatId = update.Message.Chat.Id;
+                var messageText = update.Message.Text;
+                var firstName = update.Message.From.FirstName;
+                Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
+                #region [First Message]
+                if (messageText.Contains("/start"))
                 {
-                    await _botClient.SendTextMessageAsync(message.Chat.Id, "Приветики!", cancellationToken: cancellationToken );
-                    return;
+                     await _botClient.SendTextMessageAsync(chatId, "Приветики! Давай я найду для тебя косметос!", cancellationToken: cancellationToken );
+                        return;
                 }
-                //Console.WriteLine(
-                //        $"{message.From.FirstName} sent message {message.MessageId} " +
-                //        $"to chat {message.Chat.Id} at {message.Date.ToLocalTime()}. " +
-                //        $"It is a reply to message {message.ReplyToMessage.MessageId} " +
-                //        $"and has {message.Entities.First().Type == MessageEntityType.Bold} message entities.");
+                #endregion
 
+                if(update.CallbackQuery != null)
+                {
+                    if(update.CallbackQuery.Data == "SentOrder")
+                    {
+
+                    }
+
+                }
             }
-            //// Only process Message updates:
-            //if (update.Message is not { } message.)
-            //    return; 
-            //// Only process text messages
-            //if (message.Text is not { } messageText)
-            //    return;
-            // Echo received message text
-            //Message sentMessage =  _botClient.SendTextMessageAsync(chatId: chatId,text: "You said:\n" + messageText,cancellationToken: cancellationToken);
+
+
+
+
+
+            //var message = update.Message;
+            //var chatId = message.Chat.Id;
+
+
+            //if (message.Text != null)
+            //{
+            //    Console.WriteLine($"Received a '{message.Text}' message in chat {chatId} and user name {message.Chat.Username}.");
+
+            //    if (message.Text.ToLower().Contains("Привет"))
+            //    {
+            //        await _botClient.SendTextMessageAsync(message.Chat.Id, "Приветики!", cancellationToken: cancellationToken );
+            //        return;
+            //    }
+            //Console.WriteLine(
+            //        $"{message.From.FirstName} sent message {message.MessageId} " +
+            //        $"to chat {message.Chat.Id} at {message.Date.ToLocalTime()}. " +
+            //        $"It is a reply to message {message.ReplyToMessage.MessageId} " +
+            //        $"and has {message.Entities.First().Type == MessageEntityType.Bold} message entities.");
+
         }
+        //// Only process Message updates:
+        //if (update.Message is not { } message.)
+        //    return; 
+        //// Only process text messages
+        //if (message.Text is not { } messageText)
+        //    return;
+        // Echo received message text
+        //Message sentMessage =  _botClient.SendTextMessageAsync(chatId: chatId,text: "You said:\n" + messageText,cancellationToken: cancellationToken);
+    
+       
+
 
         private Task HandlePollingErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
         {
