@@ -43,8 +43,14 @@ namespace YourEasyRent.Services
 
         private async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
         {
+
+            
             #region [Main menu]
-            InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]{new[] {InlineKeyboardButton.WithCallbackData(text:"Оставить заявку", callbackData: "SentOrder")}});
+            InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]{new[]
+
+            {InlineKeyboardButton.WithCallbackData(text:"Оставить заявку", callbackData: "SentOrder"),
+            InlineKeyboardButton.WithCallbackData(text:"Выбрать продукцию", callbackData: "Product"),
+            InlineKeyboardButton.WithCallbackData(text:"К главному меню", callbackData: "toBack") } });
 
             #endregion
             InlineKeyboardMarkup backMenu = new(new[] { InlineKeyboardButton.WithCallbackData(text:"К главному меню", callbackData: "toBack") });
@@ -58,57 +64,35 @@ namespace YourEasyRent.Services
                 #region [First Message]
                 if (messageText.Contains("/start"))
                 {
-                     await _botClient.SendTextMessageAsync(chatId, "Приветики! Давай я найду для тебя косметос!", cancellationToken: cancellationToken );
-                        return;
+                   
+
+                    await _botClient.SendTextMessageAsync(chatId, "Приветики! Давай я найду для тебя косметос!", replyMarkup: mainMenu, cancellationToken: cancellationToken );
+                    //await _botClient.SendTextMessageAsync(chatId,text: null, replyMarkup: replyKeyboard);
+                    return;
                 }
                 #endregion
 
-                if(update.CallbackQuery != null)
+                if (update.CallbackQuery != null)
                 {
-                    if(update.CallbackQuery.Data == "SentOrder")
+                    if (update.CallbackQuery.Data == "SentOrder")
                     {
+                        await _botClient.EditMessageTextAsync(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, "Оставить заявку", replyMarkup: mainMenu, cancellationToken: cancellationToken);
 
                     }
+                    if (update.CallbackQuery.Data == "toBack")
+                    {
+                        await _botClient.EditMessageTextAsync(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, "Вернуться назад", replyMarkup: backMenu, cancellationToken: cancellationToken);
+
+                    }
+                }
 
                 }
             }
 
 
-
-
-
-            //var message = update.Message;
-            //var chatId = message.Chat.Id;
-
-
-            //if (message.Text != null)
-            //{
-            //    Console.WriteLine($"Received a '{message.Text}' message in chat {chatId} and user name {message.Chat.Username}.");
-
-            //    if (message.Text.ToLower().Contains("Привет"))
-            //    {
-            //        await _botClient.SendTextMessageAsync(message.Chat.Id, "Приветики!", cancellationToken: cancellationToken );
-            //        return;
-            //    }
-            //Console.WriteLine(
-            //        $"{message.From.FirstName} sent message {message.MessageId} " +
-            //        $"to chat {message.Chat.Id} at {message.Date.ToLocalTime()}. " +
-            //        $"It is a reply to message {message.ReplyToMessage.MessageId} " +
-            //        $"and has {message.Entities.First().Type == MessageEntityType.Bold} message entities.");
-
-        }
-        //// Only process Message updates:
-        //if (update.Message is not { } message.)
-        //    return; 
-        //// Only process text messages
-        //if (message.Text is not { } messageText)
-        //    return;
-        // Echo received message text
-        //Message sentMessage =  _botClient.SendTextMessageAsync(chatId: chatId,text: "You said:\n" + messageText,cancellationToken: cancellationToken);
-    
-       
-
-
+ 
+           
+ 
         private Task HandlePollingErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
         {
             var ErrorMessage = exception switch
