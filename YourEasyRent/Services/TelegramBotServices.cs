@@ -6,6 +6,7 @@ using Telegram.Bot.Types.Enums;
 using System;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
+using Microsoft.VisualBasic;
 
 namespace YourEasyRent.Services
 {
@@ -28,9 +29,9 @@ namespace YourEasyRent.Services
 
             _botClient.StartReceiving // вызываем метод StartReceiving, чтобы начать процесс получения обновлений от Telegram.  В методе StartReceiving определены обработчики обновлений (updateHandler и pollingErrorHandler), опции получения (receiverOptions) и токен отмены (cancellationToken),
                 (
-                updateHandler: async (bot, update, cancellationToken) => {await HandleUpdateAsync(bot, update, cancellationToken);},
+                updateHandler: async (bot, update, cancellationToken) => { await HandleUpdateAsync(bot, update, cancellationToken); },
 
-                pollingErrorHandler: async (bot, exception, cancellationToken) => {await HandlePollingErrorAsync(bot, exception, cancellationToken);},
+                pollingErrorHandler: async (bot, exception, cancellationToken) => { await HandlePollingErrorAsync(bot, exception, cancellationToken); },
 
                 receiverOptions: receiverOptions,
                 cancellationToken: _cts.Token
@@ -41,59 +42,114 @@ namespace YourEasyRent.Services
 
         }
 
-        private async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-
-            
-            #region [Main menu]
-            InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]{new[]
-
-            {InlineKeyboardButton.WithCallbackData(text:"Оставить заявку", callbackData: "SentOrder"),
-            InlineKeyboardButton.WithCallbackData(text:"Выбрать продукцию", callbackData: "Product"),
-            InlineKeyboardButton.WithCallbackData(text:"К главному меню", callbackData: "toBack") } });
-
-            #endregion
-            InlineKeyboardMarkup backMenu = new(new[] { InlineKeyboardButton.WithCallbackData(text:"К главному меню", callbackData: "toBack") });
-
-            if(update.Type == UpdateType.Message &&  update.Message!.Type == MessageType.Text)
+            if (update.Type == UpdateType.Message && update.Message!.Type == MessageType.Text)
             {
                 var chatId = update.Message.Chat.Id;
                 var messageText = update.Message.Text;
                 var firstName = update.Message.From.FirstName;
                 Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
                 #region [First Message]
+
                 if (messageText.Contains("/start"))
                 {
-                   
-
-                    await _botClient.SendTextMessageAsync(chatId, "Приветики! Давай я найду для тебя косметос!", replyMarkup: mainMenu, cancellationToken: cancellationToken );
-                    //await _botClient.SendTextMessageAsync(chatId,text: null, replyMarkup: replyKeyboard);
+                    await _botClient.SendTextMessageAsync(chatId, "Приветики! Давай я найду для тебя косметос!", cancellationToken: cancellationToken);
+                    await SendMainMenu(chatId);
+                    Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
                     return;
                 }
-                #endregion
+            }
+            #endregion
+            if (update.Type == UpdateType.CallbackQuery)
+            {
+                //var chatId = update.Message.Chat.Id;
+                //var messageText = update.Message.Text;
+                //var firstName = update.Message.From.FirstName;
+                //Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
 
-                if (update.CallbackQuery != null)
+                var callbackQuery = update.CallbackQuery;
+
+                if (callbackQuery.Data == "back")
                 {
-                    if (update.CallbackQuery.Data == "SentOrder")
-                    {
-                        await _botClient.EditMessageTextAsync(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, "Оставить заявку", replyMarkup: mainMenu, cancellationToken: cancellationToken);
-
-                    }
-                    if (update.CallbackQuery.Data == "toBack")
-                    {
-                        await _botClient.EditMessageTextAsync(update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, "Вернуться назад", replyMarkup: backMenu, cancellationToken: cancellationToken);
-
-                    }
+                    await SendMainMenu(callbackQuery.Message.Chat.Id);
+                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                    return;
+                    
                 }
 
+                if (callbackQuery.Data == "Brand")
+                {
+                    await SendBrandMenu(callbackQuery.Message.Chat.Id);
+                    return;
                 }
             }
+        }
+        //async Task HandleCallbackQuery(ITelegramBotClient botClient,CallbackQuery callbackQuery )
+        //{
+        //    if (callbackQuery.Data == "back")
+        //    {
+        //        await SendMainMenu(callbackQuery.Message.Chat.Id);
+        //        await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+        //        return;
+
+        //    }
+        //    if (callbackQuery.Data == "Brand")
+        //    {
+        //        await SendBrandMenu(callbackQuery.Message.Chat.Id);
+        //        return;
+        //    }
+
+        //}
+
+        async Task SendBrandMenu(long chatId)
+        {
+            InlineKeyboardMarkup brandMenu = new InlineKeyboardMarkup(new[]
+            {new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Loreal",callbackData:"Loreal"),
+            InlineKeyboardButton.WithCallbackData(text:"MAC",callbackData:"Mac") },
+
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Maybelline",callbackData:"Maybelline"),
+            InlineKeyboardButton.WithCallbackData(text:"Fenty Beauty",callbackData:"Fenty_Beauty")},
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Назад",callbackData: "back")}});
 
 
- 
+            await _botClient.SendTextMessageAsync(chatId, "Выбери бренд", replyMarkup: brandMenu);
+
+        }
+
+
+
+        async Task SendMainMenu(long chatId)
+        {
            
- 
-        private Task HandlePollingErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
+            InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]
+            {new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Бренд", callbackData: "Brand"),
+            InlineKeyboardButton.WithCallbackData(text:"Категория", callbackData: "Category") },
+           
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Назад",callbackData: "back")}});
+
+            await _botClient.SendTextMessageAsync(chatId, "Главное меню", replyMarkup: mainMenu);
+
+        }
+
+        //private static async Task HandleCallbackQuery(ITelegramBotClient botClient, Update update, CallbackQuery callbackQuery)
+        //{
+        //    if(update.Type == UpdateType.CallbackQuery)
+
+        //    {
+        //        var callbackQuery = update.CallbackQuery;
+
+        //    }
+        //}
+
+
+
+        Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             var ErrorMessage = exception switch
             {
@@ -109,5 +165,4 @@ namespace YourEasyRent.Services
 
 
     }
-
 }
