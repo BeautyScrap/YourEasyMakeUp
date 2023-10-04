@@ -6,6 +6,7 @@ using Telegram.Bot.Types.Enums;
 using System;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
+using Microsoft.VisualBasic;
 
 namespace YourEasyRent.Services
 {
@@ -28,9 +29,9 @@ namespace YourEasyRent.Services
 
             _botClient.StartReceiving // вызываем метод StartReceiving, чтобы начать процесс получения обновлений от Telegram.  В методе StartReceiving определены обработчики обновлений (updateHandler и pollingErrorHandler), опции получения (receiverOptions) и токен отмены (cancellationToken),
                 (
-                updateHandler: async (bot, update, cancellationToken) => {await HandleUpdateAsync(bot, update, cancellationToken);},
+                updateHandler: async (bot, update, cancellationToken) => { await HandleUpdateAsync(bot, update, cancellationToken); },
 
-                pollingErrorHandler: async (bot, exception, cancellationToken) => {await HandlePollingErrorAsync(bot, exception, cancellationToken);},
+                pollingErrorHandler: async (bot, exception, cancellationToken) => { await HandlePollingErrorAsync(bot, exception, cancellationToken); },
 
                 receiverOptions: receiverOptions,
                 cancellationToken: _cts.Token
@@ -40,39 +41,115 @@ namespace YourEasyRent.Services
             Console.WriteLine($"Start listening for @{me.Username}"); // получаем информация о боте с использованием _botClient.GetMeAsync() и выводится его имя пользователя в консоль для отображения информации о начале прослушивания обновлений.
 
         }
-        private async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
+
+        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            var message = update.Message;
-            var chatId = message.Chat.Id;
-           
-
-            if (message.Text != null)
+            if (update.Type == UpdateType.Message && update.Message!.Type == MessageType.Text)
             {
-                Console.WriteLine($"Received a '{message.Text}' message in chat {chatId} and user name {message.Chat.Username}.");
+                var chatId = update.Message.Chat.Id;
+                var messageText = update.Message.Text;
+                var firstName = update.Message.From.FirstName;
+                Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
+                #region [First Message]
 
-                if (message.Text.ToLower().Contains("Привет"))
+                if (messageText.Contains("/start"))
                 {
-                    await _botClient.SendTextMessageAsync(message.Chat.Id, "Приветики!", cancellationToken: cancellationToken );
+                    await _botClient.SendTextMessageAsync(chatId, "Приветики! Давай я найду для тебя косметос!", cancellationToken: cancellationToken);
+                    await SendMainMenu(chatId);
+                    Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
                     return;
                 }
-                //Console.WriteLine(
-                //        $"{message.From.FirstName} sent message {message.MessageId} " +
-                //        $"to chat {message.Chat.Id} at {message.Date.ToLocalTime()}. " +
-                //        $"It is a reply to message {message.ReplyToMessage.MessageId} " +
-                //        $"and has {message.Entities.First().Type == MessageEntityType.Bold} message entities.");
-
             }
-            //// Only process Message updates:
-            //if (update.Message is not { } message.)
-            //    return; 
-            //// Only process text messages
-            //if (message.Text is not { } messageText)
-            //    return;
-            // Echo received message text
-            //Message sentMessage =  _botClient.SendTextMessageAsync(chatId: chatId,text: "You said:\n" + messageText,cancellationToken: cancellationToken);
+            #endregion
+            if (update.Type == UpdateType.CallbackQuery)
+            {
+                //var chatId = update.Message.Chat.Id;
+                //var messageText = update.Message.Text;
+                //var firstName = update.Message.From.FirstName;
+                //Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
+
+                var callbackQuery = update.CallbackQuery;
+
+                if (callbackQuery.Data == "back")
+                {
+                    await SendMainMenu(callbackQuery.Message.Chat.Id);
+                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                    return;
+                    
+                }
+
+                if (callbackQuery.Data == "Brand")
+                {
+                    await SendBrandMenu(callbackQuery.Message.Chat.Id);
+                    return;
+                }
+            }
+        }
+        //async Task HandleCallbackQuery(ITelegramBotClient botClient,CallbackQuery callbackQuery )
+        //{
+        //    if (callbackQuery.Data == "back")
+        //    {
+        //        await SendMainMenu(callbackQuery.Message.Chat.Id);
+        //        await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+        //        return;
+
+        //    }
+        //    if (callbackQuery.Data == "Brand")
+        //    {
+        //        await SendBrandMenu(callbackQuery.Message.Chat.Id);
+        //        return;
+        //    }
+
+        //}
+
+        async Task SendBrandMenu(long chatId)
+        {
+            InlineKeyboardMarkup brandMenu = new InlineKeyboardMarkup(new[]
+            {new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Loreal",callbackData:"Loreal"),
+            InlineKeyboardButton.WithCallbackData(text:"MAC",callbackData:"Mac") },
+
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Maybelline",callbackData:"Maybelline"),
+            InlineKeyboardButton.WithCallbackData(text:"Fenty Beauty",callbackData:"Fenty_Beauty")},
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Назад",callbackData: "back")}});
+
+
+            await _botClient.SendTextMessageAsync(chatId, "Выбери бренд", replyMarkup: brandMenu);
+
         }
 
-        private Task HandlePollingErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
+
+
+        async Task SendMainMenu(long chatId)
+        {
+           
+            InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]
+            {new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Бренд", callbackData: "Brand"),
+            InlineKeyboardButton.WithCallbackData(text:"Категория", callbackData: "Category") },
+           
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Назад",callbackData: "back")}});
+
+            await _botClient.SendTextMessageAsync(chatId, "Главное меню", replyMarkup: mainMenu);
+
+        }
+
+        //private static async Task HandleCallbackQuery(ITelegramBotClient botClient, Update update, CallbackQuery callbackQuery)
+        //{
+        //    if(update.Type == UpdateType.CallbackQuery)
+
+        //    {
+        //        var callbackQuery = update.CallbackQuery;
+
+        //    }
+        //}
+
+
+
+        Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             var ErrorMessage = exception switch
             {
@@ -88,5 +165,4 @@ namespace YourEasyRent.Services
 
 
     }
-
 }
