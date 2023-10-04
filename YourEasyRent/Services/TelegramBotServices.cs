@@ -6,7 +6,7 @@ using Telegram.Bot.Types.Enums;
 using System;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
-using Microsoft.VisualBasic;
+
 
 namespace YourEasyRent.Services
 {
@@ -44,11 +44,14 @@ namespace YourEasyRent.Services
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
+            
+
             if (update.Type == UpdateType.Message && update.Message!.Type == MessageType.Text)
             {
                 var chatId = update.Message.Chat.Id;
                 var messageText = update.Message.Text;
                 var firstName = update.Message.From.FirstName;
+                //var callbackQuery = update.CallbackQuery;
                 Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
                 #region [First Message]
 
@@ -63,44 +66,69 @@ namespace YourEasyRent.Services
             #endregion
             if (update.Type == UpdateType.CallbackQuery)
             {
-                //var chatId = update.Message.Chat.Id;
-                //var messageText = update.Message.Text;
-                //var firstName = update.Message.From.FirstName;
-                //Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
-
+                
                 var callbackQuery = update.CallbackQuery;
+                var user = callbackQuery.From;
+                var chatId = update.Message?.Chat.Id;
 
                 if (callbackQuery.Data == "back")
                 {
                     await SendMainMenu(callbackQuery.Message.Chat.Id);
                     await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                    return;
                     
+                    return;  
                 }
 
                 if (callbackQuery.Data == "Brand")
                 {
                     await SendBrandMenu(callbackQuery.Message.Chat.Id);
+                    
+                    return; 
+                }
+
+                if(callbackQuery.Data == "Category")
+                {
+                    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
+                    
+                    return;
+                }
+
+                if (callbackQuery.Data == "Loreal")
+                {
+                    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
+                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                    await _botClient.SendTextMessageAsync(chatId,"Теперь выберите категорию продукта");
                     return;
                 }
             }
         }
-        //async Task HandleCallbackQuery(ITelegramBotClient botClient,CallbackQuery callbackQuery )
-        //{
-        //    if (callbackQuery.Data == "back")
-        //    {
-        //        await SendMainMenu(callbackQuery.Message.Chat.Id);
-        //        await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-        //        return;
 
-        //    }
-        //    if (callbackQuery.Data == "Brand")
-        //    {
-        //        await SendBrandMenu(callbackQuery.Message.Chat.Id);
-        //        return;
-        //    }
+        async Task SendCategoryMenu(long chatId)
+        {
+            InlineKeyboardMarkup categoryMenu = new InlineKeyboardMarkup(new[]
+            {new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Foundation",callbackData:"Foundation"),
+            InlineKeyboardButton.WithCallbackData(text:"Consealer",callbackData:"Consealer"),},
 
-        //}
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Blush",callbackData:"Blush"),
+            InlineKeyboardButton.WithCallbackData(text:"Highlighter",callbackData:"Highlighter")},
+
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Mascara",callbackData:"Mascara"),
+            InlineKeyboardButton.WithCallbackData(text:"Eyeshadow",callbackData:"Eyeshadow")},
+
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Brow pencils",callbackData:"Brow pencils"),
+            InlineKeyboardButton.WithCallbackData(text:"Lipstick",callbackData:"Lipstick")},
+
+            new[]
+            {InlineKeyboardButton.WithCallbackData(text:"back",callbackData: "back")}});
+
+
+            await _botClient.SendTextMessageAsync(chatId, "Выбери категорию продукта", replyMarkup: categoryMenu);
+
+        }
 
         async Task SendBrandMenu(long chatId)
         {
@@ -121,7 +149,6 @@ namespace YourEasyRent.Services
         }
 
 
-
         async Task SendMainMenu(long chatId)
         {
            
@@ -136,18 +163,7 @@ namespace YourEasyRent.Services
             await _botClient.SendTextMessageAsync(chatId, "Главное меню", replyMarkup: mainMenu);
 
         }
-
-        //private static async Task HandleCallbackQuery(ITelegramBotClient botClient, Update update, CallbackQuery callbackQuery)
-        //{
-        //    if(update.Type == UpdateType.CallbackQuery)
-
-        //    {
-        //        var callbackQuery = update.CallbackQuery;
-
-        //    }
-        //}
-
-
+     
 
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
@@ -162,7 +178,5 @@ namespace YourEasyRent.Services
             return Task.CompletedTask;
 
         }
-
-
     }
 }
