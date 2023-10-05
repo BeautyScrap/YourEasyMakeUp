@@ -16,13 +16,15 @@ using Telegram.Bot.Types.Enums;
 using YourEasyRent.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));//  настройка сервиса DataBaseConfig, который представляет собой класс, содержащий конфигурационные параметры для базы данных. Конфигурационные настройки для DataBaseConfig будут считываться из секции "DataBaseSettings"
+builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));//  пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ DataBaseConfig, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ DataBaseConfig пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ "DataBaseSettings"
 
-builder.Services.AddSingleton<ProductRepository>(); // В этой строке регистрируется сервис MongoCollection в контейнере зависимостей.
+builder.Services.AddSingleton<ProductRepository>(); // пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ MongoCollection пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
-var botController = new TelegramBotController(botToken);
-botController.Start();
+
+// ok as of now, but should be changed to a background task later
+var botController = new TelegramPoller(botToken);
+botController.StartReceivingMessages();
 
 
 // This is the same as it used to be
@@ -36,7 +38,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));
-builder.Services.AddHttpClient<ISephoraProductSiteClient, SephoraClient>();// добавить 2 лиентов 
+builder.Services.AddHttpClient<ISephoraProductSiteClient, SephoraClient>();// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 2 пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 builder.Services.AddHttpClient<IDouglasProductSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 
