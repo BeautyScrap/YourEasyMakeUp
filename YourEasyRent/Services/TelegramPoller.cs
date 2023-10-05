@@ -12,10 +12,12 @@ namespace YourEasyRent.Services
     {
         private readonly ITelegramBotClient _botClient;
         private readonly CancellationTokenSource _cts = new();
+        private ITelegramActionsHandler _botActionsHandler;
 
-        public TelegramPoller(ITelegramBotClient telegramClient) // создаем конструктор для инициализации объектов класса TelegramBotSerices
+        public TelegramPoller(ITelegramBotClient telegramClient, ITelegramActionsHandler botActionsHandler) // создаем конструктор для инициализации объектов класса TelegramBotSerices
         {
             _botClient = telegramClient;
+            _botActionsHandler = botActionsHandler;
         }
 
         public void StartReceivingMessages()
