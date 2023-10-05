@@ -29,6 +29,7 @@ builder.Services.AddHttpClient<ISephoraProductSiteClient, SephoraClient>(); // ï
 builder.Services.AddHttpClient<IDouglasProductSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 builder.Services.AddSingleton<ITelegramActionsHandler, TelegramActionsHandler>();
+builder.Services.AddSingleton<ITelegramMenu, TelegramMenu>();
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 // I register ITelegramBotClient as a singleton, so that I can inject it into my TelegramPoller

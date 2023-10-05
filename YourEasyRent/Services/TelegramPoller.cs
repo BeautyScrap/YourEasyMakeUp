@@ -13,11 +13,19 @@ namespace YourEasyRent.Services
         private readonly ITelegramBotClient _botClient;
         private readonly CancellationTokenSource _cts = new();
         private ITelegramActionsHandler _botActionsHandler;
+        private ITelegramMenu _telegramMenu;
 
-        public TelegramPoller(ITelegramBotClient telegramClient, ITelegramActionsHandler botActionsHandler) // создаем конструктор для инициализации объектов класса TelegramBotSerices
+        // this is a show case of idea
+        private string _currentCategory = "";
+        private string _currentBrand = "";
+
+        public TelegramPoller(ITelegramBotClient telegramClient,
+            ITelegramActionsHandler botActionsHandler,
+            ITelegramMenu telegramMenu) // создаем конструктор для инициализации объектов класса TelegramBotSerices
         {
             _botClient = telegramClient;
             _botActionsHandler = botActionsHandler;
+            _telegramMenu = telegramMenu;
         }
 
         public void StartReceivingMessages()
@@ -30,7 +38,7 @@ namespace YourEasyRent.Services
 
             _botClient.StartReceiving // вызываем метод StartReceiving, чтобы начать процесс получения обновлений от Telegram.  В методе StartReceiving определены обработчики обновлений (updateHandler и pollingErrorHandler), опции получения (receiverOptions) и токен отмены (cancellationToken),
             (
-                updateHandler: async (bot, update, cancellationToken) => { await HandleUpdateAsync(bot, update, cancellationToken); },
+                updateHandler: async (_, update, cancellationToken) => { await HandleUpdateAsync(update, cancellationToken); },
                 pollingErrorHandler: async (bot, exception, cancellationToken) =>
                 {
                     await HandlePollingErrorAsync(bot, exception, cancellationToken);
@@ -45,7 +53,7 @@ namespace YourEasyRent.Services
         }
 
         // this is your equivalent of a controller action
-        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
         {
             if (update.Type == UpdateType.Message && update.Message!.Type == MessageType.Text)
             {
@@ -61,7 +69,7 @@ namespace YourEasyRent.Services
                 {
                     await _botClient.SendTextMessageAsync(chatId, "Приветики! Давай я найду для тебя косметос!",
                         cancellationToken: cancellationToken);
-                    await SendMainMenu(chatId);
+                    await _botClient.SendTextMessageAsync(chatId, "Главное меню", replyMarkup: _telegramMenu.MainMenu);
                     Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
                     return;
                 }
@@ -72,116 +80,46 @@ namespace YourEasyRent.Services
             if (update.Type == UpdateType.CallbackQuery)
             {
                 var callbackQuery = update.CallbackQuery;
-                var user = callbackQuery.From;
                 var chatId = update.Message?.Chat.Id;
+                // whats the difference by the way? I think they should be the same
+                var callbackChatId = callbackQuery.Message.Chat.Id;
 
-                if (callbackQuery.Data == "back")
+                switch (callbackQuery!.Data)
                 {
-                    await SendMainMenu(callbackQuery.Message.Chat.Id);
-                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                    case "back":
+                        await _botClient.SendTextMessageAsync(callbackChatId, "Главное меню", replyMarkup: _telegramMenu.MainMenu);
+                        await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
 
-                    return;
-                }
+                        return;
+                    case "Brand":
+                        await _botClient.SendTextMessageAsync(chatId, "Выбери бренд", replyMarkup: _telegramMenu.BrandMenu);
 
-                if (callbackQuery.Data == "Brand")
-                {
-                    await SendBrandMenu(callbackQuery.Message.Chat.Id);
+                        return;
+                    case "Category":
+                        await _botClient.SendTextMessageAsync(callbackChatId, "Выбери категорию продукта",
+                            replyMarkup: _telegramMenu.CategoryMenu);
+                        return;
+                    case "Blush":
+                        // I'm pretty sure there is a better way to handle buttons
+                        _currentCategory = "Blush";
+                        await _botClient.SendTextMessageAsync(callbackChatId, "Выбери категорию продукта",
+                            replyMarkup: _telegramMenu.CategoryMenu);
 
-                    return;
-                }
+                        // the idea is kind of - we choose a Brand, than a Category
+                        await _botActionsHandler.ShowFilteredProducts(callbackChatId, _currentCategory, _currentBrand);
+                        return;
+                    case "Loreal":
+                        // we store category in a class so this shit will work only for one person at a time
+                        _currentBrand = "Loreal";
 
-                if (callbackQuery.Data == "Category")
-                {
-                    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
+                        var menu = _telegramMenu.CategoryMenu;
 
-                    return;
-                }
 
-                if (callbackQuery.Data == "Loreal")
-                {
-                    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
-                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                    await _botClient.SendTextMessageAsync(chatId, "Теперь выберите категорию продукта");
-                    return;
+                        await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                        await _botClient.SendTextMessageAsync(chatId, "Теперь выберите категорию продукта");
+                        return;
                 }
             }
-        }
-
-        async Task SendCategoryMenu(long chatId)
-        {
-            InlineKeyboardMarkup categoryMenu = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "Foundation", callbackData: "Foundation"),
-                    InlineKeyboardButton.WithCallbackData(text: "Consealer", callbackData: "Consealer"),
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "Blush", callbackData: "Blush"),
-                    InlineKeyboardButton.WithCallbackData(text: "Highlighter", callbackData: "Highlighter")
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "Mascara", callbackData: "Mascara"),
-                    InlineKeyboardButton.WithCallbackData(text: "Eyeshadow", callbackData: "Eyeshadow")
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "Brow pencils", callbackData: "Brow pencils"),
-                    InlineKeyboardButton.WithCallbackData(text: "Lipstick", callbackData: "Lipstick")
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "back", callbackData: "back")
-                }
-            });
-
-
-            await _botClient.SendTextMessageAsync(chatId, "Выбери категорию продукта", replyMarkup: categoryMenu);
-        }
-
-        async Task SendBrandMenu(long chatId)
-        {
-            InlineKeyboardMarkup brandMenu = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "Loreal", callbackData: "Loreal"),
-                    InlineKeyboardButton.WithCallbackData(text: "MAC", callbackData: "Mac")
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "Maybelline", callbackData: "Maybelline"),
-                    InlineKeyboardButton.WithCallbackData(text: "Fenty Beauty", callbackData: "Fenty_Beauty")
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "back")
-                }
-            });
-
-
-            await _botClient.SendTextMessageAsync(chatId, "Выбери бренд", replyMarkup: brandMenu);
-        }
-
-
-        async Task SendMainMenu(long chatId)
-        {
-            InlineKeyboardMarkup mainMenu = new InlineKeyboardMarkup(new[]
-            {
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "Бренд", callbackData: "Brand"),
-                    InlineKeyboardButton.WithCallbackData(text: "Категория", callbackData: "Category")
-                },
-                new[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "back")
-                }
-            });
-
-            await _botClient.SendTextMessageAsync(chatId, "Главное меню", replyMarkup: mainMenu);
         }
 
 
