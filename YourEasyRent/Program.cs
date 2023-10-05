@@ -1,29 +1,21 @@
-using Microsoft.Extensions.Configuration;
 using YourEasyRent.DataBase;
 using MongoDB.Driver;
-using DnsClient;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+
+using Telegram.Bot;
+
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services;
-using System;
-using YourEasyRent.Entities;
-using Telegram.Bot;
-using Telegram.Bot.Exceptions;
-using Telegram.Bot.Polling;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using YourEasyRent.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));//  ��������� ������� DataBaseConfig, ������� ������������ ����� �����, ���������� ���������������� ��������� ��� ���� ������. ���������������� ��������� ��� DataBaseConfig ����� ����������� �� ������ "DataBaseSettings"
 
+// No russian allowed! Practice only english comments
 builder.Services.AddSingleton<ProductRepository>(); // � ���� ������ �������������� ������ MongoCollection � ���������� ������������.
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 
 // ok as of now, but should be changed to a background task later
-var botController = new TelegramPoller(botToken);
+var botController = new TelegramPoller(new TelegramBotClient(botToken));
 botController.StartReceivingMessages();
 
 

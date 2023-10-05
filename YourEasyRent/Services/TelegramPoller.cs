@@ -10,12 +10,12 @@ namespace YourEasyRent.Services
 {
     public class TelegramPoller
     {
-        private readonly TelegramBotClient _botClient;
+        private readonly ITelegramBotClient _botClient;
         private readonly CancellationTokenSource _cts = new();
 
-        public TelegramPoller(string token) // создаем конструктор для инициализации объектов класса TelegramBotSerices
+        public TelegramPoller(ITelegramBotClient telegramClient) // создаем конструктор для инициализации объектов класса TelegramBotSerices
         {
-            _botClient = new TelegramBotClient(token);
+            _botClient = telegramClient;
         }
 
         public void StartReceivingMessages()
@@ -42,6 +42,7 @@ namespace YourEasyRent.Services
                 $"Start listening for @{me.Username}"); // получаем информация о боте с использованием _botClient.GetMeAsync() и выводится его имя пользователя в консоль для отображения информации о начале прослушивания обновлений.
         }
 
+        // this is your equivalent of a controller action
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             if (update.Type == UpdateType.Message && update.Message!.Type == MessageType.Text)
@@ -113,27 +114,25 @@ namespace YourEasyRent.Services
                     InlineKeyboardButton.WithCallbackData(text: "Foundation", callbackData: "Foundation"),
                     InlineKeyboardButton.WithCallbackData(text: "Consealer", callbackData: "Consealer"),
                 },
-
                 new[]
                 {
                     InlineKeyboardButton.WithCallbackData(text: "Blush", callbackData: "Blush"),
                     InlineKeyboardButton.WithCallbackData(text: "Highlighter", callbackData: "Highlighter")
                 },
-
                 new[]
                 {
                     InlineKeyboardButton.WithCallbackData(text: "Mascara", callbackData: "Mascara"),
                     InlineKeyboardButton.WithCallbackData(text: "Eyeshadow", callbackData: "Eyeshadow")
                 },
-
                 new[]
                 {
                     InlineKeyboardButton.WithCallbackData(text: "Brow pencils", callbackData: "Brow pencils"),
                     InlineKeyboardButton.WithCallbackData(text: "Lipstick", callbackData: "Lipstick")
                 },
-
                 new[]
-                    { InlineKeyboardButton.WithCallbackData(text: "back", callbackData: "back") }
+                {
+                    InlineKeyboardButton.WithCallbackData(text: "back", callbackData: "back")
+                }
             });
 
 
@@ -149,14 +148,15 @@ namespace YourEasyRent.Services
                     InlineKeyboardButton.WithCallbackData(text: "Loreal", callbackData: "Loreal"),
                     InlineKeyboardButton.WithCallbackData(text: "MAC", callbackData: "Mac")
                 },
-
                 new[]
                 {
                     InlineKeyboardButton.WithCallbackData(text: "Maybelline", callbackData: "Maybelline"),
                     InlineKeyboardButton.WithCallbackData(text: "Fenty Beauty", callbackData: "Fenty_Beauty")
                 },
                 new[]
-                    { InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "back") }
+                {
+                    InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "back")
+                }
             });
 
 
@@ -173,9 +173,10 @@ namespace YourEasyRent.Services
                     InlineKeyboardButton.WithCallbackData(text: "Бренд", callbackData: "Brand"),
                     InlineKeyboardButton.WithCallbackData(text: "Категория", callbackData: "Category")
                 },
-
                 new[]
-                    { InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "back") }
+                {
+                    InlineKeyboardButton.WithCallbackData(text: "Назад", callbackData: "back")
+                }
             });
 
             await _botClient.SendTextMessageAsync(chatId, "Главное меню", replyMarkup: mainMenu);
