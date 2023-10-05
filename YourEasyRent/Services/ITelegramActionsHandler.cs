@@ -2,5 +2,5 @@ namespace YourEasyRent.Services;
 
 public interface ITelegramActionsHandler
 {
-    Task ShowFilteredProducts(long chatId, string category, string brand);
+    Task<string> GetFilteredProductsMessage(string brand, string category);
 }

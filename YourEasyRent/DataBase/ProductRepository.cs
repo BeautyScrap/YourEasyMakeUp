@@ -36,14 +36,18 @@ namespace YourEasyRent.DataBase
         {
             return await _product.Find(_ => _.Brand == brand).ToListAsync(); // обращеемся к объекту _ и используем его своейство Brand, где свойство нашего объекта Brand будет равно параметру Brand
         }
-       
+
+        public async Task<IEnumerable<Product>> GetByBrandAndCategory(string brand, string category)
+        {
+            return await _product.Find(_ => _.Brand == brand && _.Category == category).ToListAsync();
+        }
 
         public async Task<Product> GetByName(string name)
         {
             return await _product.Find(_ => _.Name == name).FirstOrDefaultAsync();
         }
 
-        //метод POST
+        //метод POST it's not a Post Method
         public async Task Create(Product newproduct)
         {
             await _product.InsertOneAsync(newproduct);  

@@ -106,7 +106,8 @@ namespace YourEasyRent.Services
                             replyMarkup: _telegramMenu.CategoryMenu);
 
                         // the idea is kind of - we choose a Brand, than a Category
-                        await _botActionsHandler.ShowFilteredProducts(callbackChatId, _currentCategory, _currentBrand);
+                        var productsMessage = await _botActionsHandler.GetFilteredProductsMessage(_currentCategory, _currentBrand);
+                        await _botClient.SendTextMessageAsync(callbackChatId, "Check this shit:\n" + productsMessage);
                         return;
                     case "Loreal":
                         // we store category in a class so this shit will work only for one person at a time

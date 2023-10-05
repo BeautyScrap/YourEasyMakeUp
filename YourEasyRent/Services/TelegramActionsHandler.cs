@@ -7,16 +7,17 @@ namespace YourEasyRent.Services;
 
 public class TelegramActionsHandler : ITelegramActionsHandler
 {
-    private readonly ITelegramBotClient _botClient;
     private readonly IProductRepository _productRepository;
 
-    public TelegramActionsHandler(ITelegramBotClient telegramClient, IProductRepository productRepository)
+    public TelegramActionsHandler(IProductRepository productRepository)
     {
         _productRepository = productRepository;
     }
 
-    public Task ShowFilteredProducts(long chatId, string category, string brand)
+    public async Task<string> GetFilteredProductsMessage(string brand, string category)
     {
-        throw new NotImplementedException();
+       var products =  await _productRepository.GetByBrandAndCategory(brand, category);
+       
+         return products.Select(p=> $"{p.Brand} {p.Name} {p.Price}").Aggregate((a,b)=> $"{a}\n{b}");
     }
 }
