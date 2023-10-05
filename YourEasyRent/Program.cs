@@ -31,7 +31,11 @@ builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 builder.Services.AddSingleton<ITelegramActionsHandler, TelegramActionsHandler>();
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
+// I register ITelegramBotClient as a singleton, so that I can inject it into my TelegramPoller
 builder.Services.AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(botToken));
+
+// Noone depends on TelegramPoller, so I register it as a class
+//builder.Services.AddSingleton<ITelegramPoller,TelegramPoller>(); - is kind of the same
 builder.Services.AddSingleton<TelegramPoller>();
 
 var app = builder.Build();
@@ -50,6 +54,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// I pull service from a dependency container and start it
 var poller = app.Services.GetService<TelegramPoller>();
 poller.StartReceivingMessages();
 
