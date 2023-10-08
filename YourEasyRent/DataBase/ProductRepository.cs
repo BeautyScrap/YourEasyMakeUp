@@ -11,7 +11,7 @@ namespace YourEasyRent.DataBase
 
     {
 
-        private readonly IMongoCollection<Product> _productCollection;
+        private readonly IMongoCollection<Product> _productCollection;//  вводим экземпляр  _productCollection класса IMongoCollection дла работы с базой данных
 
 
         public ProductRepository(DataBaseConfig configuration, IMongoClient client) //вводим конструктор класса CatalogContext. Конструктор принимает два аргумента: DataBaseConfig configuration и IMongoClient client. Класс DataBaseConfig используется для передачи конфигурационных данных, а IMongoClient представляет клиент MongoDB, который используется для установления соединения с базой данных.
