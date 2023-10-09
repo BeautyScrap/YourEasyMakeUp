@@ -15,6 +15,9 @@ namespace YourEasyRent.Services
         private ITelegramMenu _telegramMenu;
 
 
+        private string _currentBrand = "";
+
+
         public TelegramPoller(TelegramBotClient botClient, CancellationTokenSource cts, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
         {
             _botClient = botClient;
@@ -71,40 +74,70 @@ namespace YourEasyRent.Services
             {
                 
                 var callbackQuery = update.CallbackQuery;              
-                var chatId = update.Message?.Chat.Id;
+                //var chatId = update.Message?.Chat.Id;
                 var callbackQueryChatId = callbackQuery.Message.Chat.Id;
 
-                if (callbackQuery.Data == "back")
+                switch (callbackQuery!.Data)
                 {
-                    await SendMainMenu(callbackQuery.Message.Chat.Id);
-                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                    
-                    return;  
+                    case "Back":
+                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.meinMenu);
+                        await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                        return;
+
+                    case "Brand":
+                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Brand", replyMarkup: _telegramMenu.brandMenu);
+                        return;
+
+                    case "Category":
+                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Category", replyMarkup: _telegramMenu.categoryMenu);
+                        return;
+                    case "Price":
+                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Price", replyMarkup: _telegramMenu.priceMenu);
+                        return;
+                    case "Loreal":
+                        _currentBrand = "Loreal";
+
+
+                        return;
+
+
+
+
+
+
                 }
 
-                if (callbackQuery.Data == "Brand")
-                {
-                    await SendBrandMenu(callbackQuery.Message.Chat.Id);
-                    
-                    return; 
-                }
+                //if (callbackQuery.Data == "back")
+                //{
+                //    await SendMainMenu(callbackQuery.Message.Chat.Id);
+                //    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
 
-                if(callbackQuery.Data == "Category")
-                {
-                    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
-                    
-                    return;
-                }
+                //    return;  
+                //}
 
-                if (callbackQuery.Data == "Loreal")
-                {
-                    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
-                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                    await _botClient.SendTextMessageAsync(chatId,"Теперь выберите категорию продукта");
-                    return;
-                }
+                //if (callbackQuery.Data == "Brand")
+                //{
+                //    await SendBrandMenu(callbackQuery.Message.Chat.Id);
+
+                //    return; 
+                //}
+
+                //if(callbackQuery.Data == "Category")
+                //{
+                //    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
+
+                //    return;
+                //}
+
+                //if (callbackQuery.Data == "Loreal")
+                //{
+                //    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
+                //    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                //    await _botClient.SendTextMessageAsync(chatId,"Теперь выберите категорию продукта");
+                //    return;
+                //}
             }
-        
+
         }
 
 

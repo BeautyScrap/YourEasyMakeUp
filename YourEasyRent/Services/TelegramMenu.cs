@@ -15,7 +15,7 @@ namespace YourEasyRent.Services
             InlineKeyboardButton.WithCallbackData(text:"Product Category", callbackData: "Category") },
             new[]
             {InlineKeyboardButton.WithCallbackData(text:"Price", callbackData:"Price"),
-            InlineKeyboardButton.WithCallbackData(text:"Back ",callbackData: "back")}});
+            InlineKeyboardButton.WithCallbackData(text:"Back ",callbackData: "Back")}});
 
         
 
@@ -29,7 +29,7 @@ namespace YourEasyRent.Services
             {InlineKeyboardButton.WithCallbackData(text:"Maybelline",callbackData:"Maybelline"),
             InlineKeyboardButton.WithCallbackData(text:"Fenty Beauty",callbackData:"Fenty_Beauty")},
             new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "back")}});
+            {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
 
         public InlineKeyboardMarkup categoryMenu =>
             new (new[]
@@ -50,7 +50,7 @@ namespace YourEasyRent.Services
             InlineKeyboardButton.WithCallbackData(text:"Lipstick",callbackData:"Lipstick")},
 
             new[]
-            {InlineKeyboardButton.WithCallbackData(text:"back",callbackData: "back")}});
+            {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
 
         public InlineKeyboardMarkup priceMenu =>
             new (new[]
@@ -62,6 +62,6 @@ namespace YourEasyRent.Services
             {InlineKeyboardButton.WithCallbackData(text:"from 11 to 25",callbackData:"from_11_to_25"),
             InlineKeyboardButton.WithCallbackData(text:"from 26 to 50",callbackData:"from_26_to_50")},
             new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "back")}});
+            {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
     }
 }
