@@ -16,6 +16,8 @@ namespace YourEasyRent.Services
 
 
         private string _currentBrand = "";
+        private string _currentPrice = "";
+
 
 
         public TelegramPoller(TelegramBotClient botClient, CancellationTokenSource cts, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
@@ -91,14 +93,22 @@ namespace YourEasyRent.Services
                     case "Category":
                         await _botClient.SendTextMessageAsync(callbackQueryChatId, "Category", replyMarkup: _telegramMenu.categoryMenu);
                         return;
+
                     case "Price":
                         await _botClient.SendTextMessageAsync(callbackQueryChatId, "Price", replyMarkup: _telegramMenu.priceMenu);
                         return;
+
                     case "Loreal":
                         _currentBrand = "Loreal";
-
+                        await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the price of the product", replyMarkup: _telegramMenu.priceMenu);
+                        return;
+                    case "from 1 to 5":
+                        _currentPrice = "from 1 to 5";
+                        //var productsMessage = await _actionsHandler.GetFilteredProductsMessage( );
 
                         return;
+
 
 
 
