@@ -74,7 +74,7 @@ namespace YourEasyRent.Services
             var idNode = node.SelectSingleNode("//li[@class='grid-tile']/div[@class='product-tile product-tile-with-legal clickable omnibus-tile']/@data-itemid").GetAttributeValue("data-itemid", "");
             var brandNode = node.SelectSingleNode("//li[@class='grid-tile']//span[@class='product-brand']").InnerText;
             var nameNode = node.SelectSingleNode("//li[@class='grid-tile']//h3[@class='product-title bidirectional']/span[@class='summarize-description title-line title-line-bold']").InnerText;
-
+            var categoryNode = node.SelectSingleNode("//li[@class='grid-tile']//div[contains(@class, 'product-breadcrumb-label') and contains(., 'make up/')]").InnerText;
 
             var url = node.SelectSingleNode("//li[@class='grid-tile']//a[@class='product-tile-link']/@href").GetAttributeValue("href", "");
 
@@ -90,6 +90,7 @@ namespace YourEasyRent.Services
                 SiteId = idNode,
                 Brand = brandNode,
                 Name = nameNode,
+                Category = categoryNode,
                 Price = decimal.Parse(priceString),
                 Url = url,
                 ImageUrl = imageUrlNode
