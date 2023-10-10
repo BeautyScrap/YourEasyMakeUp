@@ -13,12 +13,17 @@ namespace YourEasyRent.Services
             _productRepository = productRepository;
         }   
 
-        public async Task<string> GetFilteredProductsMessage(string brand, decimal price)
+        //public async Task<string> GetFilteredProductsMessage(string brand, decimal price)
+        //{
+        //    var products = await _productRepository.GetProductsByBrandAndPrice(brand, price);
+        //    return products.Select(p=> $"{p.Brand}{p.Name}{p.Price}").Aggregate((a, b) => $"{a}\n{b}");
+        //}
+
+        public async Task<string> GetFilteredProductsMessage(string brand, string category)
         {
-            var products = await _productRepository.GetProductsByBrandAndPrice(brand, price);
-            return products.Select(p=> $"{p.Brand}{p.Name}{p.Price}").Aggregate((a, b) => $"{a}\n{b}");
+            var products = await _productRepository.GetProductsByBrandAndCategory(brand, category); 
+            return products.Select(p => $"{p.Brand}{p.Name}{p.Category}").Aggregate((a, b) => $"{a}\n{b}");
         }
 
-        
     }
 }

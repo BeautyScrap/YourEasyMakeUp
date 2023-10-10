@@ -1,9 +1,5 @@
-using Microsoft.Extensions.Configuration;
 using YourEasyRent.DataBase;
 using MongoDB.Driver;
-using DnsClient;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services;
 using Telegram.Bot;
@@ -13,19 +9,10 @@ builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("Dat
 
 builder.Services.AddSingleton<ProductRepository>(); // В этой строке регистрируется сервис MongoCollection в контейнере зависимостей.
 
-builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();    
-builder.Services.AddSingleton<ITelegramMenu, TelegramMenu>();   
-var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
-builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
-builder.Services.AddSingleton<TelegramPoller>();
-
-
-
 // This is the same as it used to be
 var databaseConfig = new DataBaseConfig();
 builder.Configuration.Bind("DatabaseSettings", databaseConfig);
 builder.Services.AddSingleton(databaseConfig);
-//
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -36,6 +23,12 @@ builder.Services.AddHttpClient<ISephoraProductSiteClient, SephoraClient>();
 builder.Services.AddHttpClient<IDouglasProductSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 
+
+builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();    
+builder.Services.AddSingleton<ITelegramMenu, TelegramMenu>();   
+var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
+builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
+builder.Services.AddSingleton<TelegramPoller>();
 
 var app = builder.Build();
 

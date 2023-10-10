@@ -14,7 +14,9 @@ namespace YourEasyRent.DataBase.Interfaces
         Task<IEnumerable<string>> CreateMany(IEnumerable<Product> products); 
         Task<bool> Update(string id, Product updateproduct); 
         Task<bool> Delete(string id);
-        Task<IEnumerable<Product>> GetProductsByBrandAndPrice(string brand, decimal price);
+        //Task<IEnumerable<Product>> GetProductsByBrandAndPrice(string brand, decimal price);
+
+        Task<IEnumerable<Product>> GetProductsByBrandAndCategory(string brand, string category);
 
     }
 }

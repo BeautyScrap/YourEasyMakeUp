@@ -9,7 +9,7 @@ namespace YourEasyRent.Services
 {
     public class TelegramPoller
     {
-        private readonly TelegramBotClient _botClient;
+        private readonly ITelegramBotClient _botClient;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private ITelegramActionsHandler _actionsHandler;
         private ITelegramMenu _telegramMenu;
@@ -17,10 +17,11 @@ namespace YourEasyRent.Services
 
         private string _currentBrand = "";
         private string _currentPrice = "";
+        private string _currentCategory = "";
 
 
 
-        public TelegramPoller(TelegramBotClient botClient, CancellationTokenSource cts, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
+        public TelegramPoller(ITelegramBotClient botClient, CancellationTokenSource cts, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
         {
             _botClient = botClient;
             _cts = cts;
@@ -37,7 +38,7 @@ namespace YourEasyRent.Services
 
             _botClient.StartReceiving // вызываем метод StartReceiving, чтобы начать процесс получения обновлений от Telegram.  В методе StartReceiving определены обработчики обновлений (updateHandler и pollingErrorHandler), опции получения (receiverOptions) и токен отмены (cancellationToken),
                 (
-                updateHandler: async (bot, update, cancellationToken) => { await HandleUpdateAsync(bot, update, cancellationToken); },
+                updateHandler: async (_, update, cancellationToken) => { await HandleUpdateAsync( update, cancellationToken); },
 
                 pollingErrorHandler: async (bot, exception, cancellationToken) => { await HandlePollingErrorAsync(bot, exception, cancellationToken); },
 
@@ -50,9 +51,8 @@ namespace YourEasyRent.Services
 
         }
 
-
         
-         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+         public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
          { 
             if (update.Type == UpdateType.Message && update.Message!.Type == MessageType.Text)
             {
@@ -101,51 +101,23 @@ namespace YourEasyRent.Services
                     case "Loreal":
                         _currentBrand = "Loreal";
                         await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the price of the product", replyMarkup: _telegramMenu.priceMenu);
-                        return;
-                    case "from 1 to 5":
-                        _currentPrice = "from 1 to 5";
-                        //var productsMessage = await _actionsHandler.GetFilteredProductsMessage( );
-
+                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.priceMenu);
                         return;
 
+                    case "Blush":
+                        _currentCategory = "Blush";
+                        var productMessage = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
+                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request \n" + productMessage);
+                        return;
 
-
-
-
+                    //case "from 1 to 5":
+                    //    _currentPrice = "from 1 to 5";
+                    //    //var productsMessage = await _actionsHandler.GetFilteredProductsMessage( );
+                    //    return;
 
 
                 }
-
-                //if (callbackQuery.Data == "back")
-                //{
-                //    await SendMainMenu(callbackQuery.Message.Chat.Id);
-                //    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-
-                //    return;  
-                //}
-
-                //if (callbackQuery.Data == "Brand")
-                //{
-                //    await SendBrandMenu(callbackQuery.Message.Chat.Id);
-
-                //    return; 
-                //}
-
-                //if(callbackQuery.Data == "Category")
-                //{
-                //    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
-
-                //    return;
-                //}
-
-                //if (callbackQuery.Data == "Loreal")
-                //{
-                //    await SendCategoryMenu(callbackQuery.Message.Chat.Id);
-                //    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                //    await _botClient.SendTextMessageAsync(chatId,"Теперь выберите категорию продукта");
-                //    return;
-                //}
+              
             }
 
         }
@@ -156,7 +128,15 @@ namespace YourEasyRent.Services
 
         private Task HandlePollingErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var ErrorMessage = exception switch
+            {
+                ApiRequestException apiRequestException
+                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
+                _ => exception.ToString()
+            };
+
+            Console.WriteLine(ErrorMessage);
+            return Task.CompletedTask;
         }
     }
 }
