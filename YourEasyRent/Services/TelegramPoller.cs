@@ -10,7 +10,7 @@ namespace YourEasyRent.Services
     public class TelegramPoller
     {
         private readonly ITelegramBotClient _botClient;
-        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        //private readonly CancellationTokenSource _cts = new();
         private ITelegramActionsHandler _actionsHandler;
         private ITelegramMenu _telegramMenu;
 
@@ -21,10 +21,10 @@ namespace YourEasyRent.Services
 
 
 
-        public TelegramPoller(ITelegramBotClient botClient, CancellationTokenSource cts, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
+        public TelegramPoller(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
         {
             _botClient = botClient;
-            _cts = cts;
+            //_cts = cts;
             _actionsHandler = actionsHandler;
             _telegramMenu = telegramMenu;
         }
@@ -42,8 +42,8 @@ namespace YourEasyRent.Services
 
                 pollingErrorHandler: async (bot, exception, cancellationToken) => { await HandlePollingErrorAsync(bot, exception, cancellationToken); },
 
-                receiverOptions: receiverOptions,
-                cancellationToken: _cts.Token
+                receiverOptions: receiverOptions
+                //cancellationToken: _cts.Token
                 );
 
             var me = _botClient.GetMeAsync().Result;
@@ -101,7 +101,7 @@ namespace YourEasyRent.Services
                     case "Loreal":
                         _currentBrand = "Loreal";
                         await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.priceMenu);
+                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
                         return;
 
                     case "Blush":

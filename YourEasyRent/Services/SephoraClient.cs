@@ -17,13 +17,13 @@ namespace YourEasyRent.Services
 
         private readonly Dictionary<Section, string> sectionMapping = new()
         {
-            [Section.Makeup] = "shop"
+            [Section.Makeup] = "make-up"
         };
         public Site Site => Site.Sephora;
-        public SephoraClient()
+        public SephoraClient(HttpClient httpClient)
         {
-            _httpClient =  new HttpClient();
-            //_httpClient.BaseAddress = new Uri(_baseUrl);
+            _httpClient =  httpClient; //  было new HttpClient();
+            _httpClient.BaseAddress = new Uri(_baseUrl);
 
         }
         public async Task<IEnumerable<Product>> FetchFromSephoraSection(Section section, int pageNumber)
@@ -79,8 +79,6 @@ namespace YourEasyRent.Services
             var url = node.SelectSingleNode("//li[@class='grid-tile']//a[@class='product-tile-link']/@href").GetAttributeValue("href", "");
 
             var priceString = node.SelectSingleNode("//li[@class='grid-tile']//span[@class='price-sales-standard']").InnerText.Trim().Replace(" &#8364;", ""); // Replace(",", "."); Replace(" €", "").Replace(",", ".")
-
-
 
             var imageUrlNode = node.SelectSingleNode("//li[@class='grid-tile']//img[@class='product-first-img']/@src").GetAttributeValue("src", "");
 
