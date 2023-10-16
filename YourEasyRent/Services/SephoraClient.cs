@@ -16,7 +16,6 @@ namespace YourEasyRent.Services
 
     {
         private readonly string _baseUrl = $"https://www.sephora.de/";//  baseUrl стандартный адрес сайта
-        private string _innerProductUrl = "";
         private readonly HttpClient _httpClient;  // HttpClient - это класс, который предоставляет удобные методы для выполнения HTTP-запросов к веб-серверам и получения ответов от них. Он представляет собой клиент для работы с HTTP-ресурсами. HttpClient использует HttpClientHandler в качестве обработчика для обработки и выполнения запросов.      
 
         private readonly Dictionary<Section, string> sectionMapping = new()
@@ -37,11 +36,11 @@ namespace YourEasyRent.Services
 
             var htmlDocument = await GetHtmlPage(url);
 
-            var productCardNodes = GetProductNode(htmlDocument);
+            var productCardNodes = GetProductNodes(htmlDocument);
 
-            var products = MapNodesToProduct(productCardNodes);
+            var products =  await MapNodesToProduct(productCardNodes);
 
-            return products;
+            return  products;
 
 
         }
@@ -58,41 +57,49 @@ namespace YourEasyRent.Services
             var htmlDocument = new HtmlDocument();// Создаем объект HtmlDocument и загружаем в него HTML-код страницы товара
             htmlDocument.LoadHtml(sephoraProductString); //  загружаем в него HTML-страницу с помощью метода LoadHtml()
             return htmlDocument;
-
         }
-        private static List<HtmlNode> GetProductNode(HtmlDocument htmlDocument)
+
+        private static List<HtmlNode> GetProductNodes(HtmlDocument htmlDocument)
         {
             return htmlDocument.DocumentNode.SelectNodes("//li[@class='grid-tile']").ToList(); // было "//li[@class = 'grid-tile']", проверить еще раз , может проблема в слишком долгом пути  / было ("//li[@class='grid-tile']/div[@class='product-tile product-tile-with-legal clickable omnibus-tile']")
         }
 
-        private IEnumerable<Product> MapNodesToProduct(List<HtmlNode> productCardNodes)
+        private  async Task<IEnumerable<Product>> MapNodesToProduct(List<HtmlNode> productCardNodes)
         {
-            return productCardNodes.Select(HtmlToProduct);
+            var products = new List<Product>();
+            foreach (var node in productCardNodes)
+            {
+                var product = await HtmlToProduct(node);
+                if (product != null)
+                {
+                    products.Add(product);
+                }
+            }
+            return products;
         }
 
-
-
-
-        private  Product HtmlToProduct(HtmlNode node) // педставляет определение метода с именем HtmlToProduct и  возвращает объект типа Product.
+        private async Task<Product> HtmlToProduct(HtmlNode node) // педставляет определение метода с именем HtmlToProduct и  возвращает объект типа Product.
         {
-            var idNode = node.SelectSingleNode("//li[@class='grid-tile']/div[@class='product-tile product-tile-with-legal clickable omnibus-tile']/@data-itemid").GetAttributeValue("data-itemid", "");
-            var brandNode = node.SelectSingleNode("//li[@class='grid-tile']//span[@class='product-brand']").InnerText;
-            var nameNode = node.SelectSingleNode("//li[@class='grid-tile']//h3[@class='product-title bidirectional']/span[@class='summarize-description title-line title-line-bold']").InnerText;
+            var idNode = node.SelectSingleNode(".//div[@class='product-tile product-tile-with-legal clickable omnibus-tile']/@data-itemid").GetAttributeValue("data-itemid", "");
+            var brandNode = node.SelectSingleNode(".//span[@class='product-brand']").InnerText;
+            
+            var nameNode = node.SelectSingleNode(".//h3[@class='product-title bidirectional']/span[@class='summarize-description title-line title-line-bold']").InnerText;
             //var breadcrumbLabelForCategoryNode = node.SelectSingleNode("//li[@class='grid-tile']/div[@class='product-tile product-tile-with-legal clickable omnibus-tile']/@data-tcproduct").GetAttributeValue("data-tcproduct", "");                     
             //var categoryNode = Regex.Match(breadcrumbLabelForCategoryNode, @"product_breadcrumb_label&quot;:&quot;([^&]+)&quot;").Groups[1].Value.Split('/')[2];
 
-            var priceString = node.SelectSingleNode("//li[@class='grid-tile']//span[@class='price-sales-standard']").InnerText.Trim().Replace(" &#8364;", ""); // Replace(",", "."); Replace(" €", "").Replace(",", ".")
-
-            var imageUrlNode = node.SelectSingleNode("//li[@class='grid-tile']//img[@class='product-first-img']/@src").GetAttributeValue("src", "");
+            var priceString = node.SelectSingleNode(".//span[@class='price-sales-standard' or @class='product-min-price']").InnerText.Trim().Replace(" &#8364;", "").Replace(" Ab:", ""); // Replace(",", "."); Replace(" €", "").Replace(",", ".")
+           // var priceString = node.SelectSingleNode(".//span[@class='price-sales-standard']").InnerText.Trim().Replace(" &#8364;", "");
+            var imageUrlNode = node.SelectSingleNode(".//img[@class='product-first-img']/@src").GetAttributeValue("src", "");
             
-            var url = node.SelectSingleNode("//li[@class='grid-tile']//a[@class='product-tile-link']/@href").GetAttributeValue("href", "");
+            var url = node.SelectSingleNode(".//a[@class='product-tile-link']/@href").GetAttributeValue("href", "");
 
-            var innerProductResponse = _httpClient.GetAsync(url);
-            var innerProductResponseString = innerProductResponse.ToString();  
+            var innerProductResponse = await _httpClient.GetAsync(url);
+            var innerProductResponseString = await innerProductResponse.Content.ReadAsStringAsync();
             var productHtmlDocument = new HtmlDocument();
             productHtmlDocument.LoadHtml(innerProductResponseString);
 
-            var categoryNode = node.SelectSingleNode("(//div[@class='breadcrumb-element'][4]/a[@title])[1]").InnerText;
+            var categoryNode =  productHtmlDocument.DocumentNode.SelectSingleNode(".//div[@class='breadcrumb pdp-breadcrumb']//div[@class='breadcrumb-element'][4]/a/@title").GetAttributeValue("title", "");
+            //node.SelectSingleNode("(//div[@class='breadcrumb pdp-breadcrumb']//div[@class='breadcrumb-element'][4]/a/@title)").GetAttributeValue("title", "");
 
 
 
