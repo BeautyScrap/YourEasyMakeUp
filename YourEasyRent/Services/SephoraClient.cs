@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Net.Http;
+using System.Reflection.Metadata.Ecma335;
 
 namespace YourEasyRent.Services
 {
@@ -70,37 +71,38 @@ namespace YourEasyRent.Services
             foreach (var node in productCardNodes)
             {
                 var product = await HtmlToProduct(node);
-                if (product != null)
+                if (product == null)
                 {
-                    products.Add(product);
+                    continue;
                 }
+                products.Add(product);
             }
             return products;
         }
 
         private async Task<Product> HtmlToProduct(HtmlNode node) // педставляет определение метода с именем HtmlToProduct и  возвращает объект типа Product.
         {
-            var idNode = node.SelectSingleNode(".//div[@class='product-tile product-tile-with-legal clickable omnibus-tile']/@data-itemid").GetAttributeValue("data-itemid", "");
-            var brandNode = node.SelectSingleNode(".//span[@class='product-brand']").InnerText;
+           
+            var idNode = node.SelectSingleNode(".//div[@class='product-tile product-tile-with-legal clickable omnibus-tile']/@data-itemid")?.GetAttributeValue("data-itemid", "");
+            var brandNode = node.SelectSingleNode(".//span[@class='product-brand']")?.InnerText;
+            var nameNode = node.SelectSingleNode(".//h3[@class='product-title bidirectional']/span[@class='summarize-description title-line title-line-bold']")?.InnerText;
+            var priceString = node.SelectSingleNode(".//span[@class='price-sales-standard' or @class='product-min-price']")?.InnerText.Trim().Replace(" &#8364;", "").Replace(" Ab:", ""); // Replace(",", "."); Replace(" €", "").Replace(",", ".")
+            var imageUrlNode = node.SelectSingleNode(".//img[@class='product-first-img']/@src")?.GetAttributeValue("src", "");
             
-            var nameNode = node.SelectSingleNode(".//h3[@class='product-title bidirectional']/span[@class='summarize-description title-line title-line-bold']").InnerText;
-            //var breadcrumbLabelForCategoryNode = node.SelectSingleNode("//li[@class='grid-tile']/div[@class='product-tile product-tile-with-legal clickable omnibus-tile']/@data-tcproduct").GetAttributeValue("data-tcproduct", "");                     
-            //var categoryNode = Regex.Match(breadcrumbLabelForCategoryNode, @"product_breadcrumb_label&quot;:&quot;([^&]+)&quot;").Groups[1].Value.Split('/')[2];
-
-            var priceString = node.SelectSingleNode(".//span[@class='price-sales-standard' or @class='product-min-price']").InnerText.Trim().Replace(" &#8364;", "").Replace(" Ab:", ""); // Replace(",", "."); Replace(" €", "").Replace(",", ".")
-           // var priceString = node.SelectSingleNode(".//span[@class='price-sales-standard']").InnerText.Trim().Replace(" &#8364;", "");
-            var imageUrlNode = node.SelectSingleNode(".//img[@class='product-first-img']/@src").GetAttributeValue("src", "");
-            
-            var url = node.SelectSingleNode(".//a[@class='product-tile-link']/@href").GetAttributeValue("href", "");
+            var url = node.SelectSingleNode(".//a[@class='product-tile-link']/@href")?.GetAttributeValue("href", "");
 
             var innerProductResponse = await _httpClient.GetAsync(url);
             var innerProductResponseString = await innerProductResponse.Content.ReadAsStringAsync();
             var productHtmlDocument = new HtmlDocument();
             productHtmlDocument.LoadHtml(innerProductResponseString);
 
-            var categoryNode =  productHtmlDocument.DocumentNode.SelectSingleNode(".//div[@class='breadcrumb pdp-breadcrumb']//div[@class='breadcrumb-element'][4]/a/@title").GetAttributeValue("title", "");
+            var categoryNode =  productHtmlDocument.DocumentNode.SelectSingleNode(".//div[@class='breadcrumb pdp-breadcrumb']//div[@class='breadcrumb-element'][4]/a/@title")?.GetAttributeValue("title", "");
             //node.SelectSingleNode("(//div[@class='breadcrumb pdp-breadcrumb']//div[@class='breadcrumb-element'][4]/a/@title)").GetAttributeValue("title", "");
 
+            if (idNode == null || brandNode == null || nameNode == null || priceString == null || imageUrlNode == null || url == null || categoryNode == null)
+            {
+                return null; // Пропускаем node и возвращаем null
+            }
 
 
             var product = new Product
