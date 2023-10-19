@@ -4,6 +4,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
+using System.Diagnostics;
 
 namespace YourEasyRent.Services
 {
@@ -66,7 +67,7 @@ namespace YourEasyRent.Services
                 if (messageText.Contains("/start"))
                 {
                     await _botClient.SendTextMessageAsync(chatId, "Приветики! Давай я найду для тебя косметос!", cancellationToken: cancellationToken);
-                    await _botClient.SendTextMessageAsync(chatId, "Главное меню", replyMarkup: _telegramMenu.meinMenu);
+                    await _botClient.SendTextMessageAsync(chatId, "Mein menu", replyMarkup: _telegramMenu.meinMenu);
                     Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
                     return;
                 }
@@ -87,37 +88,64 @@ namespace YourEasyRent.Services
                         return;
 
                     case "Brand":
-                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Brand", replyMarkup: _telegramMenu.brandMenu);
-                        return;
+                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the brand:", replyMarkup: _telegramMenu.brandMenu);
+
+                        switch (callbackQuery!.Data)
+                        {
+                            case "Maybelline":
+                                _currentBrand = "Maybelline";
+                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                                break;
+
+                            case "Loreal":
+                                _currentBrand = "Loreal";
+                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                                break;
+                            case "MAC":
+                                _currentBrand = "MAC";
+                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                                break;
+                            case "Fenty_Beauty":
+                                _currentBrand = "Fenty Beauty";
+                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                                break;
+
+                        }
+
+                        break;
 
                     case "Category":
                         await _botClient.SendTextMessageAsync(callbackQueryChatId, "Category", replyMarkup: _telegramMenu.categoryMenu);
                         return;
 
-                    case "Price":
-                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Price", replyMarkup: _telegramMenu.priceMenu);
-                        return;
-
-                    case "Loreal":
-                        _currentBrand = "Loreal";
-                        await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
-                        return;
-
-                    case "Blush":
-                        _currentCategory = "Blush";
-                        var productMessage = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request \n" + productMessage);
-                        return;
-
-                    //case "from 1 to 5":
-                    //    _currentPrice = "from 1 to 5";
-                    //    //var productsMessage = await _actionsHandler.GetFilteredProductsMessage( );
+                    //case "Price":
+                    //    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Price", replyMarkup: _telegramMenu.priceMenu);
                     //    return;
+
+                    //case "Maybelline":
+                    //    _currentBrand = "Maybelline";
+                    //    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                    //    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                    //    return;
+
+                        //case "Mascara":
+                        //    _currentCategory = "Mascara";
+                        //    var productMessage = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
+                        //    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request \n" + productMessage);
+                        //    return;
+
+                        //case "from 1 to 5":
+                        //    _currentPrice = "from 1 to 5";
+                        //    //var productsMessage = await _actionsHandler.GetFilteredProductsMessage( );
+                        //    return;
 
 
                 }
-              
+
             }
 
         }

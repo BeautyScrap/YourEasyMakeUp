@@ -1,4 +1,5 @@
-﻿using Telegram.Bot;
+﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
+using Telegram.Bot;
 using YourEasyRent.DataBase.Interfaces;
 
 namespace YourEasyRent.Services
@@ -13,16 +14,19 @@ namespace YourEasyRent.Services
             _productRepository = productRepository;
         }   
 
-        //public async Task<string> GetFilteredProductsMessage(string brand, decimal price)
-        //{
-        //    var products = await _productRepository.GetProductsByBrandAndPrice(brand, price);
-        //    return products.Select(p=> $"{p.Brand}{p.Name}{p.Price}").Aggregate((a, b) => $"{a}\n{b}");
-        //}
+        
 
         public async Task<string> GetFilteredProductsMessage(string brand, string category)
         {
             var products = await _productRepository.GetProductsByBrandAndCategory(brand, category); 
-            return products.Select(p => $"{p.Brand}{p.Name}{p.Category}").Aggregate((a, b) => $"{a}\n{b}");
+            return products.Select(p => 
+            $"{p.Brand}\n" +
+            $"{p.Name}\n" +
+            $"{p.Category}\n" +
+            $"{p.Price}\n" +
+            $"{p.ImageUrl}\n" +
+            $"{p.Url}")
+                .Aggregate((a, b) => $"{a}\n{b}");
         }
 
     }
