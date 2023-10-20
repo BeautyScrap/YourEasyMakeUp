@@ -4,7 +4,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
-using System.Diagnostics;
+using YourEasyRent.Entities;
 
 namespace YourEasyRent.Services
 {
@@ -14,18 +14,16 @@ namespace YourEasyRent.Services
         //private readonly CancellationTokenSource _cts = new();
         private ITelegramActionsHandler _actionsHandler;
         private ITelegramMenu _telegramMenu;
-
+        private BotState _currentBotState = BotState.Initial; //  инициализация  переменной _currentState для отслеживания текущего состояния  бота.
 
         private string _currentBrand = "";
-        private string _currentPrice = "";
         private string _currentCategory = "";
 
 
 
         public TelegramPoller(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
         {
-            _botClient = botClient;
-            //_cts = cts;
+            _botClient = botClient;         
             _actionsHandler = actionsHandler;
             _telegramMenu = telegramMenu;
         }
@@ -39,7 +37,7 @@ namespace YourEasyRent.Services
 
             _botClient.StartReceiving // вызываем метод StartReceiving, чтобы начать процесс получения обновлений от Telegram.  В методе StartReceiving определены обработчики обновлений (updateHandler и pollingErrorHandler), опции получения (receiverOptions) и токен отмены (cancellationToken),
                 (
-                updateHandler: async (_, update, cancellationToken) => { await HandleUpdateAsync( update, cancellationToken); },
+                updateHandler: async (_, update, cancellationToken) => { await HandleUpdateAsync(update, cancellationToken); },
 
                 pollingErrorHandler: async (bot, exception, cancellationToken) => { await HandlePollingErrorAsync(bot, exception, cancellationToken); },
 
@@ -52,15 +50,15 @@ namespace YourEasyRent.Services
 
         }
 
-        
-         public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
-         { 
+
+        public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
+        {
             if (update.Type == UpdateType.Message && update.Message!.Type == MessageType.Text)
             {
                 var chatId = update.Message.Chat.Id;
                 var messageText = update.Message.Text;
                 var firstName = update.Message.From.FirstName;
-                
+
                 Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
                 #region [First Message]
 
@@ -68,90 +66,108 @@ namespace YourEasyRent.Services
                 {
                     await _botClient.SendTextMessageAsync(chatId, "Приветики! Давай я найду для тебя косметос!", cancellationToken: cancellationToken);
                     await _botClient.SendTextMessageAsync(chatId, "Mein menu", replyMarkup: _telegramMenu.meinMenu);
+                    _currentBotState = BotState.Initial;
                     Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
                     return;
                 }
             }
             #endregion
-            if (update.Type == UpdateType.CallbackQuery)
+            else if (update.Type == UpdateType.CallbackQuery)
             {
-                
-                var callbackQuery = update.CallbackQuery;              
-                //var chatId = update.Message?.Chat.Id;
+
+                var callbackQuery = update.CallbackQuery;
+
                 var callbackQueryChatId = callbackQuery.Message.Chat.Id;
 
-                switch (callbackQuery!.Data)
+                switch (_currentBotState)
                 {
-                    case "Back":
-                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.meinMenu);
-                        await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                        return;
-
-                    case "Brand":
-                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the brand:", replyMarkup: _telegramMenu.brandMenu);
-
-                        switch (callbackQuery!.Data)
+                    case BotState.Initial:
+                        if (callbackQuery?.Data == "Brand")
                         {
-                            case "Maybelline":
-                                _currentBrand = "Maybelline";
-                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
-                                break;
+                            _currentBotState = BotState.BrandSelected;
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the brand:", replyMarkup: _telegramMenu.brandMenu);
+                        }
+                        else if (callbackQuery!.Data == "Category")
+                        {
+                            _currentBotState = BotState.CategorySelected;
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the category:", replyMarkup: _telegramMenu.categoryMenu);
+                        }
+                        else if (callbackQuery!.Data == "Back")
+                        {
+                            _currentBotState = BotState.Initial;
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.meinMenu);
+                        }
+                        break;
 
-                            case "Loreal":
-                                _currentBrand = "Loreal";
-                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
-                                break;
-                            case "MAC":
-                                _currentBrand = "MAC";
-                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
-                                break;
-                            case "Fenty_Beauty":
-                                _currentBrand = "Fenty Beauty";
-                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
-                                break;
+                    case BotState.BrandSelected:
+
+                        if (callbackQuery!.Data == "Maybelline")
+                        {
+                            _currentBrand = "Maybelline";
+                            _currentBotState = BotState.CategorySelected;
+                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                        }
+
+                        else if (callbackQuery!.Data == "Loreal")
+                        {
+                            _currentBrand = "Loreal";
+                            _currentBotState = BotState.CategorySelected;
+                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
 
                         }
 
+                        else if (callbackQuery!.Data == "MAC")
+                        {
+                            _currentBrand = "MAC";
+                            _currentBotState = BotState.CategorySelected;
+                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+
+                        }
+
+                        else if (callbackQuery!.Data == "Fenty_Beauty")
+                        {
+                            _currentBrand = "FENTY BEAUTY";
+                            _currentBotState = BotState.CategorySelected;
+                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                        }
+
+                        else if (callbackQuery!.Data == "Back")
+                        {
+                            _currentBotState = BotState.Initial;
+                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.meinMenu);
+                        }
                         break;
 
-                    case "Category":
-                        await _botClient.SendTextMessageAsync(callbackQueryChatId, "Category", replyMarkup: _telegramMenu.categoryMenu);
-                        return;
+                    case BotState.CategorySelected:
 
-                    //case "Price":
-                    //    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Price", replyMarkup: _telegramMenu.priceMenu);
-                    //    return;
-
-                    //case "Maybelline":
-                    //    _currentBrand = "Maybelline";
-                    //    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                    //    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
-                    //    return;
-
-                        //case "Mascara":
-                        //    _currentCategory = "Mascara";
-                        //    var productMessage = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                        //    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request \n" + productMessage);
-                        //    return;
-
-                        //case "from 1 to 5":
-                        //    _currentPrice = "from 1 to 5";
-                        //    //var productsMessage = await _actionsHandler.GetFilteredProductsMessage( );
-                        //    return;
-
+                        if (callbackQuery!.Data == "Mascara")
+                        {
+                            _currentCategory = "Mascara";
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request \n" + (string?)await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory));
+                        }
+                        else if (callbackQuery!.Data == "Foundation")
+                        {
+                            _currentCategory = "Foundation";
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request \n" + (string?)await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory));
+                        }
+                        else if (callbackQuery!.Data == "Back")
+                        {
+                            _currentBotState = BotState.Initial;
+                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.meinMenu);
+                        }
+                        break;
 
                 }
 
             }
 
         }
-
-
-
 
 
         private Task HandlePollingErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)

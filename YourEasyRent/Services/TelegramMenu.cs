@@ -23,11 +23,11 @@ namespace YourEasyRent.Services
             new (new[]
             {new[]
             {InlineKeyboardButton.WithCallbackData(text:"Loreal",callbackData:"Loreal"),
-            InlineKeyboardButton.WithCallbackData(text:"MAC",callbackData:"Mac") },
+            InlineKeyboardButton.WithCallbackData(text:"MAC",callbackData:"MAC") },
 
             new[]
             {InlineKeyboardButton.WithCallbackData(text:"Maybelline",callbackData:"Maybelline"),
-            InlineKeyboardButton.WithCallbackData(text:"Fenty Beauty",callbackData:"Fenty_Beauty")},
+            InlineKeyboardButton.WithCallbackData(text:"FENTY BEAUTY",callbackData:"FENTY_BEAUTY")},
             new[]
             {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
 
