@@ -127,7 +127,7 @@ namespace YourEasyRent.Services
 
                         }
 
-                        else if (callbackQuery!.Data == "Fenty_Beauty")
+                        else if (callbackQuery!.Data == "FENTY_BEAUTY")
                         {
                             _currentBrand = "FENTY BEAUTY";
                             _currentBotState = BotState.CategorySelected;
@@ -148,12 +148,30 @@ namespace YourEasyRent.Services
                         if (callbackQuery!.Data == "Mascara")
                         {
                             _currentCategory = "Mascara";
-                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request \n" + (string?)await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory));
+                            //await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request: \n");
+                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                            var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
+                            foreach (var productMessage in productMessages)
+                            {
+                                await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
+                            }
+                            _currentBotState = BotState.ReturnToMeinMenu;
+
+                            //await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
+                            
                         }
+
                         else if (callbackQuery!.Data == "Foundation")
                         {
                             _currentCategory = "Foundation";
-                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request \n" + (string?)await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory));
+                            _currentBotState = BotState.ReturnToMeinMenu;
+                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Check your request: \n");
+                            var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
+                            foreach (var productMessage in productMessages)
+                            {
+                                await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
+                            }
                         }
                         else if (callbackQuery!.Data == "Back")
                         {
@@ -162,6 +180,17 @@ namespace YourEasyRent.Services
                             await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.meinMenu);
                         }
                         break;
+
+                    case BotState.ReturnToMeinMenu: 
+                        if (callbackQuery!.Data == "Return_To_MeinMenu")
+                        {
+                            _currentBotState = BotState.Initial;
+                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
+                        }
+
+                        break;
+                        
 
                 }
 

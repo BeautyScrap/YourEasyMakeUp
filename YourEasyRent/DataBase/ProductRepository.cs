@@ -78,23 +78,14 @@ namespace YourEasyRent.DataBase
 
         }
 
-        //public async Task<IEnumerable<Product>> GetProductsByBrandAndPrice(string brand, decimal price)
-        //{
-        //    var filter = Builders<Product>.Filter.And
-        //        (Builders<Product>.Filter.Eq(_ => _.Brand, brand),
-        //         Builders<Product>.Filter.Gte(_ => _.Price, price),
-        //         Builders<Product>.Filter.Lte(_ => _.Price, price));
-        //    var products = await _productCollection.Find(filter).ToListAsync();
-        //    return products;
-
-        //}
+        
 
         public async Task<IEnumerable<Product>> GetProductsByBrandAndCategory(string brand, string category)
         {
             var filter = Builders<Product>.Filter.And
                 (Builders<Product>.Filter.Eq(_ => _.Brand, brand),
                  Builders<Product>.Filter.Eq(_ => _.Category, category));
-                 
+
             var products = await _productCollection.Find(filter).ToListAsync();
             return products;
 

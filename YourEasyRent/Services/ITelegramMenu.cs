@@ -8,7 +8,7 @@ namespace YourEasyRent.Services
         InlineKeyboardMarkup meinMenu { get; }
         InlineKeyboardMarkup brandMenu { get; }
         InlineKeyboardMarkup categoryMenu { get; }
-        InlineKeyboardMarkup priceMenu {  get; }
+        InlineKeyboardMarkup ReturnToMeinMenu {  get; }
 
     }
 }

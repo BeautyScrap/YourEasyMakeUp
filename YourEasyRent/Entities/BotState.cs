@@ -7,6 +7,8 @@ namespace YourEasyRent.Entities
     {
         Initial,
         BrandSelected,
-        CategorySelected
+        CategorySelected,
+        ReturnToMeinMenu
+
     }
 }
