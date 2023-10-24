@@ -60,9 +60,11 @@ namespace YourEasyRent.DataBase
 
 
 
-        public async Task<bool> Update(string id, Product updateProduct) // метод Update возвращает значение типа bool, указывающее на успешность операции обновления. Если операция обновления прошла успешно, метод вернет true
+        public async Task<bool> Update(string brand, string name, Product updateProduct) // метод Update возвращает значение типа bool, указывающее на успешность операции обновления. Если операция обновления прошла успешно, метод вернет true
         {
-            var filter = Builders<Product>.Filter.Eq(_ => _.Id, id); // создаю фильтр для поиска продукта по его идентификатору.
+            var filter = Builders<Product>.Filter.And
+                (Builders<Product>.Filter.Eq(_ => _.Brand, brand),
+                 Builders<Product>.Filter.Eq(_ => _.Name, name)); // создаю фильтр для поиска продукта по его идентификатору.
             var updateResult = await _productCollection.ReplaceOneAsync(filter, updateProduct);// выполняет замену документа с учетом заданного фильтра.
             return updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;//возвращает true, если и операция была успешно подтверждена сервером (acknowledged), и хотя бы один документ был изменен в результате операции обновления.
 
