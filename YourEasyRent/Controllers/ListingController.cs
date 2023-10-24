@@ -47,7 +47,7 @@ namespace YourEasyRent.Controllers
             var douglaslistings = await _dclient.FetchFromDouglasSection(section, pagenumber);
             var allListings = sephoralistings.Concat(douglaslistings); 
             // Объединяет две последовательности, сохраняя все элементы исходных последовательностей, включая дубликаты.
-            await _repository.CreateMany(allListings);
+            await _repository.CreateMany(allListings);// можно заменить на метод upsert, который будет обновлять данные  продуктах, которые дублировуются
             return allListings;
 
 

@@ -9,12 +9,12 @@ namespace YourEasyRent.Services
         public TelegramMenu() { }
 
         public InlineKeyboardMarkup meinMenu =>
-            new (new[]
+            new(new[]
             {new[]
             {InlineKeyboardButton.WithCallbackData(text:"Brand", callbackData: "Brand"),
-            InlineKeyboardButton.WithCallbackData(text:"Product Category", callbackData: "Category") },
-            new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Back ",callbackData: "Back")}});
+            InlineKeyboardButton.WithCallbackData(text:"Product Category", callbackData: "Category") } });
+            //new[]
+            //{InlineKeyboardButton.WithCallbackData(text:"Back ",callbackData: "Back")}});
 
         
 
