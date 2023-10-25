@@ -80,7 +80,7 @@ namespace YourEasyRent.DataBase
 
         }
 
-        
+
 
         public async Task<IEnumerable<Product>> GetProductsByBrandAndCategory(string brand, string category)
         {
@@ -93,6 +93,22 @@ namespace YourEasyRent.DataBase
 
         }
 
+        public async Task UpsertProduct(Product product)
+        {
+            var filter = Builders<Product>.Filter.And
+                (Builders<Product>.Filter.Eq(_ => _.Brand, product.Brand),
+                Builders<Product>.Filter.Eq(_ => _.Name, product.Name));
 
+            var update = Builders<Product>.Update
+                .Set(_ => _.Price, product.Price)
+                .Set(_ => _.Url, product.Url);
+
+            var options = new UpdateOptions
+            {
+                IsUpsert = true 
+            };
+            await _productCollection.UpdateOneAsync(filter, update, options);
+
+        }
     }
 }

@@ -13,11 +13,11 @@ namespace YourEasyRent.Services
         public TelegramActionsHandler(IProductRepository productRepository) // вводим пользовательский контсруктор для инициализации переменной  _productRepository
         {
             _productRepository = productRepository;
-        }   
+        }
 
-        
 
-        public async Task<IEnumerable<string>> GetFilteredProductsMessage(string brand, string category) 
+
+        public async Task<IEnumerable<string>> GetFilteredProductsMessage(string brand, string category)
         {
             var products = await _productRepository.GetProductsByBrandAndCategory(brand, category);
             IEnumerable<string> productStrings = products.Select(p =>
@@ -27,8 +27,8 @@ namespace YourEasyRent.Services
             $"{p.Price}\n" +
             $"[.]({p.ImageUrl})\n" +
             $"[Ссылка на продукт]({p.Url})");
-            return productStrings;  
-                
+            return productStrings;
+
         }
 
     }

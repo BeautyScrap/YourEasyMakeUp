@@ -82,7 +82,7 @@ namespace YourEasyRent.Services
 
                 var callbackQueryChatId = callbackQuery.Message.Chat.Id;
                 var callbackQueryNameOfButton = callbackQuery.Data;
-                var firstName = callbackQuery.Message.From.FirstName;
+                var firstName = callbackQuery.Message.Chat.Username;
 
                 switch (_currentBotState)
                 {
@@ -110,12 +110,7 @@ namespace YourEasyRent.Services
                                     Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
                                     _currentBotState = BotState.CategorySelected;
                                     await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the category:", replyMarkup: _telegramMenu.categoryMenu);
-                                }
-                                //else if (callbackQuery!.Data == "Back")
-                                //{
-                                //    _currentBotState = BotState.Initial;
-                                //    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.meinMenu);
-                                //}
+                                }  
                             }
                         }
                         break;
