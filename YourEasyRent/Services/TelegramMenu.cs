@@ -21,7 +21,7 @@ namespace YourEasyRent.Services
         public InlineKeyboardMarkup brandMenu =>
             new (new[]
             {new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Loreal",callbackData:"Loreal"),
+            {InlineKeyboardButton.WithCallbackData(text:"TARTE",callbackData:"TARTE"),
             InlineKeyboardButton.WithCallbackData(text:"MAC",callbackData:"MAC") },
 
             new[]
@@ -34,7 +34,7 @@ namespace YourEasyRent.Services
             new (new[]
             {new[]
             {InlineKeyboardButton.WithCallbackData(text:"Foundation",callbackData:"Foundation"),
-            InlineKeyboardButton.WithCallbackData(text:"Consealer",callbackData:"Consealer"),},
+            InlineKeyboardButton.WithCallbackData(text:"Concealer",callbackData:"Concealer"),},
 
             new[]
             {InlineKeyboardButton.WithCallbackData(text:"Blush",callbackData:"Blush"),
