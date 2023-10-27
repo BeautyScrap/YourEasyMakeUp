@@ -54,21 +54,21 @@ namespace YourEasyRent.Controllers
 
         }
 
-        [HttpPost("upsert")]
-        public async Task<IActionResult> UpsertProduct([FromBody] Product product)
-        {
-            try
-            {
-                await _repository.UpsertProduct(product);
-                return Ok("Product upserted successfully.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Create] : {ex.Message}");
-                return StatusCode(500, "Failed to upsert user.");
-            }
+        //[HttpPost("upsert")]
+        //public async Task<IActionResult> UpsertProduct([FromBody] Product product)
+        //{
+        //    try
+        //    {
+        //        await _repository.UpsertProduct(product);
+        //        return Ok("Product upserted successfully.");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"[Create] : {ex.Message}");
+        //        return StatusCode(500, "Failed to upsert user.");
+        //    }
 
-        }
+        //}
     }
 }
 

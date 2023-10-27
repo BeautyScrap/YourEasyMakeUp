@@ -68,7 +68,7 @@ namespace YourEasyRent.Services
                     _currentBotState = BotState.Initial;
                     Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
                     await _botClient.SendTextMessageAsync(chatId, "Hello! Let me find some cosmetics for you!", cancellationToken: cancellationToken);
-                    await _botClient.SendTextMessageAsync(chatId, "Mein menu", replyMarkup: _telegramMenu.meinMenu);
+                    await _botClient.SendTextMessageAsync(chatId, "Mein menu", replyMarkup: _telegramMenu.Mein);
                     return;
                 }
             }
@@ -101,13 +101,13 @@ namespace YourEasyRent.Services
                                 {
                                     _currentBotState = BotState.BrandSelected;
                                     Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the brand:", replyMarkup: _telegramMenu.brandMenu);
+                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the brand:", replyMarkup: _telegramMenu.Brand);
                                 }
                                 else if (callbackQuery!.Data == "Category")
                                 {
                                     _currentBotState = BotState.CategorySelected;
                                     Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the category:", replyMarkup: _telegramMenu.categoryMenu);
+                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the category:", replyMarkup: _telegramMenu.Category);
                                 }  
                             }
                         }
@@ -133,7 +133,7 @@ namespace YourEasyRent.Services
                                     _currentBotState = BotState.CategorySelected;
                                     Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
                                     await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.Category);
                                 }
 
                                 else if (callbackQuery!.Data == "TARTE")
@@ -142,7 +142,7 @@ namespace YourEasyRent.Services
                                     _currentBotState = BotState.CategorySelected;
                                     Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
                                     await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.Category);
 
                                 }
 
@@ -152,7 +152,7 @@ namespace YourEasyRent.Services
                                     _currentBotState = BotState.CategorySelected;
                                     Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
                                     await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.Category);
 
                                 }
 
@@ -162,7 +162,7 @@ namespace YourEasyRent.Services
                                     _currentBotState = BotState.CategorySelected;
                                     Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
                                     await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.categoryMenu);
+                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.Category);
                                 }
 
                                 else if (callbackQuery!.Data == "Back")
@@ -170,7 +170,7 @@ namespace YourEasyRent.Services
                                     _currentBotState = BotState.Initial;
                                     Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
                                     await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.meinMenu);
+                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.Mein);
                                 }
                             }
                         }
@@ -310,7 +310,7 @@ namespace YourEasyRent.Services
                                     _currentBotState = BotState.Initial;
                                     Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
                                     await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.meinMenu);
+                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.Mein);
                                 }
                             }
                         }
@@ -321,7 +321,7 @@ namespace YourEasyRent.Services
                         {
                             _currentBotState = BotState.Initial;
                             await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Welcome back to the main menu.", replyMarkup: _telegramMenu.meinMenu);
+                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Welcome back to the main menu.", replyMarkup: _telegramMenu.Mein);
                             Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
                         }
                         break;

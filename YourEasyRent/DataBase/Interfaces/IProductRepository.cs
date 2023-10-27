@@ -12,10 +12,11 @@ namespace YourEasyRent.DataBase.Interfaces
         Task<Product> GetByName(string name);
         Task Create(Product newProduct); 
         Task<IEnumerable<string>> CreateMany(IEnumerable<Product> products); 
-        Task<bool> Update(string brand, string name, Product updateproduct); 
+        Task<bool> Update(Product updateproduct); 
         Task<bool> Delete(string id);
         Task<IEnumerable<Product>> GetProductsByBrandAndCategory(string brand, string category);
         Task UpsertProduct(Product product);
+        Task UpsertManyProducts(IEnumerable<Product> products);
 
     }
 }

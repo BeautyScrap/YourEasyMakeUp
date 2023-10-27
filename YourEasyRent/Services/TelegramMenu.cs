@@ -8,7 +8,7 @@ namespace YourEasyRent.Services
 
         public TelegramMenu() { }
 
-        public InlineKeyboardMarkup meinMenu =>
+        public InlineKeyboardMarkup Mein =>
             new(new[]
             {new[]
             {InlineKeyboardButton.WithCallbackData(text:"Brand", callbackData: "Brand"),
@@ -18,7 +18,7 @@ namespace YourEasyRent.Services
 
         
 
-        public InlineKeyboardMarkup brandMenu =>
+        public InlineKeyboardMarkup Brand =>
             new (new[]
             {new[]
             {InlineKeyboardButton.WithCallbackData(text:"TARTE",callbackData:"TARTE"),
@@ -30,7 +30,7 @@ namespace YourEasyRent.Services
             new[]
             {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
 
-        public InlineKeyboardMarkup categoryMenu =>
+        public InlineKeyboardMarkup Category =>
             new (new[]
             {new[]
             {InlineKeyboardButton.WithCallbackData(text:"Foundation",callbackData:"Foundation"),
