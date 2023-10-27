@@ -11,6 +11,10 @@ namespace YourEasyRent.Entities.Douglas
         [JsonProperty("images")]
         public List<DouglasImages> Images { get; set; }
 
+
+        [JsonProperty("classifications")]
+        public List<Classification> Classifications { get; set; }
+
         [JsonProperty("priceData")]
         public DouglasPrice Price { get; set; }
 

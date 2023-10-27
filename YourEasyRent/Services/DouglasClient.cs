@@ -47,11 +47,12 @@ namespace YourEasyRent.Services
             var product = new Product  // а тут уже поставить сопоставление со своими названиями с названиями, которые выдает дуглас( как в золотом яблоке)
             {
                 SiteId = p.Code,
-                Url =  p.Url,
-                Price = p.Price.Value,               //_baseProductPageUrl*/
+                Url = $"https://www.douglas.de{p.Url}",
+                Price = p.Price.Value,               
                 ImageUrl = p.Images.First().Url,
                 Brand = p.Brand.Name,
-                Name = p.BaseProductName
+                Name = p.BaseProductName,
+                Category = p.Classifications.First().Name,
 
             };
             return product; 

@@ -10,6 +10,7 @@ using YourEasyRent.DataBase.Interfaces;
 using Section = YourEasyRent.Entities.Section;
 using Microsoft.AspNetCore.SignalR.Protocol;
 using YourEasyRent.DataBase;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
 
 namespace YourEasyRent.Controllers
 
@@ -26,7 +27,7 @@ namespace YourEasyRent.Controllers
         public ListingController(IProductRepository repository, IDouglasProductSiteClient dclient, ISephoraProductSiteClient sclient)//  конструктор
         {
             _repository = repository;
-            _dclient = dclient; 
+            _dclient = dclient;
             _sclient = sclient;
         }
 
@@ -38,25 +39,37 @@ namespace YourEasyRent.Controllers
         public async Task<IEnumerable<Product>> GetProducts()// публичный метод  GetProducts с аргументами(Section- тип аргумента, section- название аргумента)  тип  возвращаеммого значение Task<IEnumerable<Product>> 
         {
             var section = Section.Makeup;
-
-            var pagenumber = 1;
-            var sephoralistings = await _sclient.FetchFromSephoraSection(section, pagenumber); //  сделать 2 listinga для сефоры и для дугласа, смерджить и результаты(list или join  погуглить как) и вернуть общий результат для обоих сайтов 
-
-             // сделать цикл с перебором страниц, чтобы "перелистывать страницы" и брать новые ответы
-
-            var douglaslistings = await _dclient.FetchFromDouglasSection(section, pagenumber);
-            var allListings = sephoralistings.Concat(douglaslistings); 
-            // Объединяет две последовательности, сохраняя все элементы исходных последовательностей, включая дубликаты.
-            await _repository.CreateMany(allListings);
-            return allListings;
-
+            var allListings = new List<Product>();
+            for (var pagenumber = 1; pagenumber < 4; pagenumber++)
+            {
+                var sephoralistings = await _sclient.FetchFromSephoraSection(section, pagenumber); //  сделать 2 listinga для сефоры и для дугласа, смерджить и результаты(list или join  погуглить как) и вернуть общий результат для обоих сайтов 
+                var douglaslistings = await _dclient.FetchFromDouglasSection(section, pagenumber);
+                foreach (var product in sephoralistings.Concat(douglaslistings))
+                {
+                    await UpsertProduct(product);
+                    allListings.Add(product);
+                }
+            }
+            return allListings; // Объединяет две последовательности, сохраняя все элементы исходных последовательностей, включая дубликаты.
 
         }
 
+        [HttpPost("upsert")]
+        public async Task<IActionResult> UpsertProduct([FromBody] Product product)
+        {
+            try
+            {
+                await _repository.UpsertProduct(product);
+                return Ok("Product upserted successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Create] : {ex.Message}");
+                return StatusCode(500, "Failed to upsert user.");
+            }
 
-
-
-    }   
+        }
+    }
 }
 
 

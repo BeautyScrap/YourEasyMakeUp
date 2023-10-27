@@ -5,16 +5,17 @@ namespace YourEasyRent.DataBase.Interfaces
 {
     public interface IProductRepository
     {
-        // сделать сигнатуры как было в iproductrepositor
-
-        Task<IEnumerable<Product?>> GetProducts();//добавила операторы для CRUD  к IMongoCollection, метод GET
+        
+        Task<IEnumerable<Product?>> GetProducts();
         Task<Product> Get(string id);
         Task<IEnumerable<Product>> GetByBrand(string brand);
         Task<Product> GetByName(string name);
-        Task Create(Product newProduct); // метод POST
-        Task<IEnumerable<string>> CreateMany(IEnumerable<Product> products); // метод  POST
-        Task<bool> Update(string id, Product updateproduct); // метод PUT
-        Task<bool> Delete(string id); // метод DELETE
-       
+        Task Create(Product newProduct); 
+        Task<IEnumerable<string>> CreateMany(IEnumerable<Product> products); 
+        Task<bool> Update(string brand, string name, Product updateproduct); 
+        Task<bool> Delete(string id);
+        Task<IEnumerable<Product>> GetProductsByBrandAndCategory(string brand, string category);
+        Task UpsertProduct(Product product);
+
     }
 }
