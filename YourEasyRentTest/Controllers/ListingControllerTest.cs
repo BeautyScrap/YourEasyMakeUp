@@ -16,62 +16,44 @@ namespace YourEasyRentTest.Controllers
     {
 
         [Fact]
-        public async Task GetProducts_WhenAllClientsReturnProucts_ReturnsCombinedProuctsLiist()
+        public async Task GetProducts_WhenAllClientsReturnProucts_ReturnsAllListings()
         {
             // arrange
             var productRepoMock = new Mock<IProductRepository>();
-            var douglasClient = new Mock<IDouglasProductSiteClient>();
-            douglasClient.Setup(
-                x => x.FetchFromDouglasSection(It.IsAny<Section>(), It.IsAny<int>()))
+            var mockClients = new List<Mock<IProductsSiteClient>>();
+            for (int i = 0; i < 3; i++)
+            {
+                var mockClient = new Mock<IProductsSiteClient>();
+                mockClients.Add(mockClient);
+            }
+            var controller = new ListingController(productRepoMock.Object, mockClients.Select(c => c.Object));
+            foreach (var mockClient in mockClients)
+            {
+                mockClient.Setup(x => x.FetchFromSectionAndPage(It.IsAny<Section>(), It.IsAny<int>()))
                 .ReturnsAsync(new List<Product>()
-            {
-                new Product()
                 {
-                    Name = "Test1",
-                },
-                new Product()
-                {
-                    Name = "Test2",
-                }
-            });
+                    new Product {  Name = "Product 1" },
+                    new Product { Id = 2, Name = "Product 2" },
+                });
+                var expectedProducts = new List<Product>()
+                 {
+                    new Product { Id = 1, Name = "Product 1" },
+                    new Product { Id = 2, Name = "Product 2" },
+                    new Product { Id = 1, Name = "Product 1" },
+                    new Product { Id = 2, Name = "Product 2" },
+                    new Product { Id = 1, Name = "Product 1" },
+                    new Product { Id = 2, Name = "Product 2" }
+                };
+                productRepoMock.Setup(repository => repository.UpsertManyProducts(It.IsAny<IEnumerable<Product>>()));
 
-            var sephoraClient = new Mock<ISephoraProductSiteClient>();
-            sephoraClient.Setup(
-            x => x.FetchFromSephoraSection(It.IsAny<Section>(), It.IsAny<int>()))
-            .ReturnsAsync(new List<Product>(){
+                //Act
+                var result = await controller.GetProducts();
 
-                new Product()
-                {
-                    Name = "Test3",
-                }
-            });
-
-            var controller = new ListingController(productRepoMock.Object, douglasClient.Object, sephoraClient.Object);
-            
-            // act
-            var result = await controller.GetProducts();
-
-            // assert
-            var expected = new List<Product>()
-            {
-                new Product()
-                {
-                    Name = "Test3",
-                },
-                new Product()
-                {
-                    Name = "Test1",
-                },
-                new Product()
-                {
-                    Name = "Test2",
-                },
-
-            };
-
-            result.Should().BeEquivalentTo(expected);
-
-            productRepoMock.Verify(x=> x.CreateMany(It.IsAny<IEnumerable<Product>>()));
+                // Assert
+                result.Should().NotBeNull();
+                result.Should().HaveCount(expectedProducts.Count);
+                result.Should().BeEquivalentTo(expectedProducts);
+            }
         }
     }
 }

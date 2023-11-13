@@ -13,7 +13,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace YourEasyRent.Services
 {
-    public class SephoraClient:ISephoraProductSiteClient
+    public class SephoraClient:IProductsSiteClient
 
     {
         private readonly string _baseUrl = $"https://www.sephora.de/";//  baseUrl стандартный адрес сайта
@@ -30,7 +30,7 @@ namespace YourEasyRent.Services
             _httpClient.BaseAddress = new Uri(_baseUrl);
 
         }
-        public async Task<IEnumerable<Product>> FetchFromSephoraSection(Section section, int pageNumber)
+        public async Task<IEnumerable<Product>> FetchFromSectionAndPage(Section section, int pageNumber)
 
         {
             var url = GetSectionUrl(sectionMapping[section]);

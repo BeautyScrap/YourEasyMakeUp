@@ -20,7 +20,7 @@ namespace YourEasyRent.Services
         public async Task<IEnumerable<string>> GetFilteredProductsMessage(string brand, string category)
         {
             var products = await _productRepository.GetProductsByBrandAndCategory(brand, category);
-            IEnumerable<string> productStrings = products.Select(p =>
+            var productStrings = products.Select(p =>
             $"*{p.Brand}*\n" +
             $"{p.Name}\n" +
             $"{p.Category}\n" +

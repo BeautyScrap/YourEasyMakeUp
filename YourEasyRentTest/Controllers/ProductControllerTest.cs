@@ -272,7 +272,7 @@ namespace YourEasyRentTest.Controllers
             //assert
             //result.Should().BeOfType<ActionResult<Product>>()
             result.Should().BeOfType<OkResult>();
-            productRepoMock.Verify(repo => repo.Update(exisistinId, updateProduct), Times.Once);//  проверяем был ли вызван метод Update для объекта productMockRepository с аргументами exisistinId один раз)
+            productRepoMock.Verify(repo => repo.Update(updateProduct), Times.Once);//  проверяем был ли вызван метод Update для объекта productMockRepository с аргументами exisistinId один раз)
 
 
         }
