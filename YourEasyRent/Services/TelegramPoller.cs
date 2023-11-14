@@ -14,7 +14,8 @@ namespace YourEasyRent.Services
         private readonly ITelegramBotClient _botClient;
         private ITelegramActionsHandler _actionsHandler;
         private ITelegramMenu _telegramMenu;
-        private BotState _currentBotState = BotState.Initial; //  инициализация  переменной _currentState для отслеживания текущего состояния  бота.
+        private BotState _currentBotState = BotState.Initial;
+        //private BotState _currentBotState;//  инициализация  переменной _currentState для отслеживания текущего состояния  бота.
         private string _currentBrand = "";
         private string _currentCategory = "";
         private readonly BrandCallbackQueryHandler _queryBrandHandler;
@@ -24,7 +25,8 @@ namespace YourEasyRent.Services
             _botClient = botClient;
             _actionsHandler = actionsHandler;
             _telegramMenu = telegramMenu;
-            _queryBrandHandler = new BrandCallbackQueryHandler(telegramMenu, botClient);
+            _queryBrandHandler = new BrandCallbackQueryHandler(botClient, telegramMenu);
+            
         }
 
         public void StartReceivingMessages()
@@ -124,9 +126,9 @@ namespace YourEasyRent.Services
                                 {
                                     await _queryBrandHandler.AnswerBrandCallbackQuery(callbackQuery, "Maybelline",callbackQueryChatId, firstName);
                                     //_currentBrand = "Maybelline";
-                                    //_currentBotState = BotState.CategorySelected;
+                                    _currentBotState = BotState.CategorySelected;
                                     //Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    //await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
+                                   // await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
                                     //await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.Category);
                                 }
                                 else if (callbackQuery!.Data == "TARTE")
@@ -163,6 +165,7 @@ namespace YourEasyRent.Services
                                     await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.Mein);
                                 }
                             }
+                            break;
                         }
                         break;
 
@@ -301,6 +304,7 @@ namespace YourEasyRent.Services
                                     await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.Mein);
                                 }
                             }
+
                         }
                         break;
 
