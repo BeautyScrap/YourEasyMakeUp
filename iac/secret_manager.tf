@@ -16,7 +16,7 @@ resource "google_secret_manager_secret_version" "bot_token" {
   secret      = google_secret_manager_secret.bot_token.id
   secret_data = "dummy"
 
-    lifecycle {
+  lifecycle {
     ignore_changes = [
       secret_data
     ]
