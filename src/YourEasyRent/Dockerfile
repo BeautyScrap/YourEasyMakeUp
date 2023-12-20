@@ -3,7 +3,7 @@
 # ===================================================================================
 # === Stage 1:Builder container =====================================================
 # ===================================================================================
-FROM  mcr.microsoft.com/dotnet/sdk:6.0 AS builder
+FROM  mcr.microsoft.com/dotnet/sdk:7.0 AS builder
 
 WORKDIR /build
 
@@ -18,7 +18,7 @@ RUN dotnet publish -c Release -o out
 # === Stage 2: Create a lightweight container =======================================
 # ===================================================================================
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /App
 COPY --from=builder /build/out .
 ENTRYPOINT ["dotnet", "YourEasyRent.dll"]
