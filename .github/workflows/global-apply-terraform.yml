@@ -40,7 +40,7 @@ jobs:
           create_credentials_file: true
 
       - id: secrets-manager
-        uses: google-github-actions/get-secretmanager-secrets@v0
+        uses: google-github-actions/get-secretmanager-secrets@v2
         with:
           secrets: |-
             telegram-bot-token:${{ steps.auth.outputs.project_id }}/telegram_bot_token
