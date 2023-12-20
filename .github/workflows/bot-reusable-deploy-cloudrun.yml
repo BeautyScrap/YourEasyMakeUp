@@ -58,7 +58,8 @@ jobs:
 
       - name: Build Docker image
         shell: bash
-        run: docker build -f src/YourEasyRent/Dockerfile . -t ${{ steps.service-meta.outputs.image }}
+        run: docker build . -t ${{ steps.service-meta.outputs.image }}
+        working-directory: ./src/YourEasyRent/
 
       - name: Push Docker image
         shell: bash
