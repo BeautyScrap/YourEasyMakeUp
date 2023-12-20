@@ -8,4 +8,17 @@ resource "google_secret_manager_secret" "bot_token" {
   replication {
     automatic = true
   }
+
+  depends_on = [google_project_service.secretmanager_googleapis_com]
+}
+
+resource "google_secret_manager_secret_version" "bot_token" {
+  secret      = google_secret_manager_secret.bot_token.id
+  secret_data = "dummy"
+
+    lifecycle {
+    ignore_changes = [
+      secret_data
+    ]
+  }
 }

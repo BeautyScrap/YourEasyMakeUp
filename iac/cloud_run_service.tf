@@ -29,7 +29,7 @@ resource "google_cloud_run_service" "bot" {
 
         env {
           name  = "TELEGRAM_BOT_TOKEN"
-          value = var.bot_token
+          value = google_secret_manager_secret_version.bot_token
         }
       }
     }

@@ -21,8 +21,3 @@ variable "bot_name" {
   type    = string
   default = "bot"
 }
-
-variable "bot_token" {
-  type      = string
-  sensitive = true
-}
