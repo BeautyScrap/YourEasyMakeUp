@@ -2,9 +2,12 @@ name: Global Apply terraform
 
 on:
   push:
-    #branches: [main]
+    branches: [main]
     paths:
       - iac/**
+# AK TODO test
+  pull_request:
+    types: [opened, edited, synchronize]
 
   workflow_dispatch:
     inputs:

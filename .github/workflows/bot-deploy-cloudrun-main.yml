@@ -2,10 +2,13 @@ name: Bot deploy main
 
 on:
   push:
-    # branches:
-    #  - main
+    branches:
+      - main
     paths:
       - src/**
+# AK TODO test
+  pull_request:
+    types: [opened, edited, synchronize]
 
 jobs:
   deploy-to-cloudrun:
