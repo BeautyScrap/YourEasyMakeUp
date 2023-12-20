@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "304373b586ff10b7-bucket-tfstate"
+    bucket = "beauty-scrp-bucket-tfstate"
     prefix = "terraform/state"
   }
 
@@ -13,4 +13,5 @@ terraform {
 
 provider "google" {
   project = var.project_id
+  region = var.region
 }
