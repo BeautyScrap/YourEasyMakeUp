@@ -6,7 +6,7 @@ resource "google_secret_manager_secret" "bot_token" {
   }
 
   replication {
-    automatic = true
+    auto {}
   }
 
   depends_on = [google_project_service.secretmanager_googleapis_com]
