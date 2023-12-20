@@ -2,7 +2,7 @@ name: Global Apply terraform
 
 on:
   push:
-    branches: [main]
+    #branches: [main]
     paths:
       - iac/**
 
