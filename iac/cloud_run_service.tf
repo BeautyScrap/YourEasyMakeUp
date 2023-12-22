@@ -6,9 +6,7 @@ resource "google_cloud_run_service" "bot" {
   autogenerate_revision_name = true
 
   lifecycle {
-    ignore_changes = [
-      template[0].spec[5],
-    ]
+    ignore_changes =[template[0].spec[0].containers[0].image]
   }
 
   template {
@@ -30,6 +28,11 @@ resource "google_cloud_run_service" "bot" {
         env {
           name  = "TELEGRAM_BOT_TOKEN"
           value = google_secret_manager_secret_version.bot_token.secret_data
+        }
+
+        env {
+          name  = "ATLAS_URI"
+          value = local.atlas_uri
         }
       }
     }
