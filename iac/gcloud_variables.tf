@@ -15,7 +15,7 @@ variable "registry_id" {
 
 variable "port" {
   type    = number
-  default = 5000
+  default = 80
 }
 
 variable "bot_name" {

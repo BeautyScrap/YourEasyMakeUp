@@ -20,7 +20,7 @@ var databaseConfig = new DataBaseConfig();
 builder.Configuration.Bind("DatabaseSettings", databaseConfig);
 
 // Should be changed to be based on evironment value
-if(databaseConfig.ConnectionString is null)
+if( Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
 {
     databaseConfig.ConnectionString = Environment.GetEnvironmentVariable("ATLAS_URI")!;
 }

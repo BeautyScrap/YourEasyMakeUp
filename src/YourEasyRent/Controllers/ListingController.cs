@@ -1,17 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Telegram.Bot.Types.Payments;
-using HtmlAgilityPack;
+﻿using Microsoft.AspNetCore.Mvc;
 using YourEasyRent.Entities;
 using YourEasyRent.Services;
-using static System.Collections.Specialized.BitVector32;
-using System.Collections.Generic;
 using YourEasyRent.DataBase.Interfaces;
 using Section = YourEasyRent.Entities.Section;
-using Microsoft.AspNetCore.SignalR.Protocol;
-using YourEasyRent.DataBase;
-using Microsoft.AspNetCore.Mvc.ActionConstraints;
-using System.Net.Sockets;
 
 namespace YourEasyRent.Controllers
 
