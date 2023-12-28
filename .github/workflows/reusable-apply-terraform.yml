@@ -1,20 +1,14 @@
-name: Global Apply terraform
- # AK TODO convert to reusable
-# run before deployment
+name: Reusable Apply terraform
 on:
-  push:
-    branches: [main]
-    paths:
-      - iac/**
-# AK TODO test
-  pull_request:
-    types: [opened, edited, synchronize]
-
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      env:
-        description: Environment
-        default: prod
+      set-webhook:
+        type: boolean
+        required: false
+        default: false
+
+    secrets:
+      GCP_CREDENTIALS:
         required: true
 jobs:
   deploy-infra:
