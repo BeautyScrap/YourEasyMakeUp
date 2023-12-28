@@ -4,7 +4,7 @@ provider "mongodbatlas" {
 }
 
 resource "mongodbatlas_project" "yourEasyRent" {
-  name   = local.project_id
+  name   = var.project_id
   org_id = var.atlas_org_id
 }
 
@@ -16,7 +16,7 @@ resource "mongodbatlas_project_ip_access_list" "acl" {
 # currently free tier is used, can be migrated to a serverless instance
 resource "mongodbatlas_cluster" "cluster" {
   project_id = mongodbatlas_project.yourEasyRent.id
-  name       = local.project_id
+  name       = var.project_id
 
   provider_name               = "TENANT"
   backing_provider_name       = "GCP"

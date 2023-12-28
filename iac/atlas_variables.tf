@@ -24,6 +24,12 @@ variable "atlas_priv_key" {
   description = "private key for MongoDB Atlas"
 }
 
+variable "atlas_cluster_region" {
+  type        = string
+  description = "the Atlas region in which to create the database cluster"
+  default     = "EU_CENTRAL_1"
+}
+
 ###-----------------------------------------------------------------------------
 ### MongoDB database optional
 ###-----------------------------------------------------------------------------
