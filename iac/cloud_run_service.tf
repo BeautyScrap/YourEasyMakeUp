@@ -6,7 +6,7 @@ resource "google_cloud_run_service" "bot" {
   autogenerate_revision_name = true
 
   lifecycle {
-    ignore_changes =[template[0].spec[0].containers[0].image]
+    ignore_changes = [template[0].spec[0].containers[0].image]
   }
 
   template {
