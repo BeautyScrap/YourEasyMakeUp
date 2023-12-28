@@ -44,9 +44,9 @@ jobs:
       - name: Populate TF cli args
         run: |
           echo "TF_VAR_project_id=${{ steps.auth.outputs.project_id }}" >> $GITHUB_ENV
-          echo "TF_VAR_atlas_pub_key=${{ steps.auth.secrets-manager.atlas_pub_key }}" >> $GITHUB_ENV
-          echo "TF_VAR_atlas_priv_key=${{ steps.auth.secrets-manager.atlas_priv_key }}" >> $GITHUB_ENV
-          echo "TF_VAR_atlas_org_id=${{ steps.auth.secrets-manager.atlas_org_id }}" >> $GITHUB_ENV
+          echo "TF_VAR_atlas_pub_key=${{ steps.secrets-manager.outputs.atlas_pub_key }}" >> $GITHUB_ENV
+          echo "TF_VAR_atlas_priv_key=${{ steps.secrets-manager.outputs.atlas_priv_key }}" >> $GITHUB_ENV
+          echo "TF_VAR_atlas_org_id=${{ steps.secrets-manager.outputs.atlas_org_id }}" >> $GITHUB_ENV
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
