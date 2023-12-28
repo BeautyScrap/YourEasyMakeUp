@@ -37,6 +37,12 @@ resource "mongodbatlas_database_user" "user" {
   }
 }
 
+resource "random_string" "mongodb_password" {
+  length  = 32
+  special = false
+  upper   = true
+}
+
 locals {
   # the demo app only takes URIs with the credentials embedded and the atlas
   # provider doesn't give us a good way to get the hostname without the protocol
