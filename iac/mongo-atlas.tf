@@ -1,8 +1,3 @@
-provider "mongodbatlas" {
-  public_key  = var.atlas_pub_key
-  private_key = var.atlas_priv_key
-}
-
 resource "mongodbatlas_project" "yourEasyRent" {
   name   = var.project_id
   org_id = var.atlas_org_id
