@@ -30,10 +30,10 @@ resource "google_cloud_run_service" "bot" {
           value = google_secret_manager_secret_version.bot_token.secret_data
         }
 
-        env {
-          name  = "ATLAS_URI"
-          value = local.atlas_uri
-        }
+        # env {
+        #   name  = "ATLAS_URI"
+        #   value = local.atlas_uri
+        # }
       }
     }
   }

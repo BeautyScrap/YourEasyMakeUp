@@ -24,7 +24,7 @@ provider "google" {
   region  = var.region
 }
 
-provider "mongodbatlas" {
-  public_key  = var.atlas_pub_key
-  private_key = var.atlas_priv_key
-}
+# provider "mongodbatlas" {
+#   public_key  = var.atlas_pub_key
+#   private_key = var.atlas_priv_key
+# }

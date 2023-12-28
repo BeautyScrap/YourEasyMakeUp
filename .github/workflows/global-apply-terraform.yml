@@ -1,5 +1,6 @@
 name: Global Apply terraform
-
+ # AK TODO convert to reusable
+# run before deployment
 on:
   push:
     branches: [main]
