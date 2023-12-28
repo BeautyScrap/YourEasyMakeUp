@@ -7,6 +7,12 @@ variable "atlas_cluster_tier" {
   default = "M0" # M0 is the free tier
 }
 
+variable "atlas_project_name" {
+  type    = string
+  default = "yourEasyRent"
+}
+
+
 variable "atlas_org_id" {
   type        = string
   sensitive   = true
@@ -27,7 +33,7 @@ variable "atlas_priv_key" {
 variable "atlas_cluster_region" {
   type        = string
   description = "the Atlas region in which to create the database cluster"
-  default     = "EU_CENTRAL_1"
+  default     = "WESTERN_EUROPE"
 }
 
 ###-----------------------------------------------------------------------------

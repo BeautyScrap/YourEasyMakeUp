@@ -1,17 +1,17 @@
-resource "mongodbatlas_project" "yourEasyRent" {
-  name   = var.project_id
+resource "mongodbatlas_project" "your-easy-rent" {
+  name   = var.atlas_project_name
   org_id = var.atlas_org_id
 }
 
 resource "mongodbatlas_project_ip_access_list" "acl" {
-  project_id = mongodbatlas_project.yourEasyRent.id
+  project_id = mongodbatlas_project.your-easy-rent.id
   cidr_block = "0.0.0.0/0"
 }
 
 # currently free tier is used, can be migrated to a serverless instance
 resource "mongodbatlas_cluster" "cluster" {
-  project_id = mongodbatlas_project.yourEasyRent.id
-  name       = var.project_id
+  project_id = mongodbatlas_project.your-easy-rent.id
+  name       = var.atlas_project_name
 
   provider_name               = "TENANT"
   backing_provider_name       = "GCP"
@@ -20,7 +20,7 @@ resource "mongodbatlas_cluster" "cluster" {
 }
 
 resource "mongodbatlas_database_user" "user" {
-  project_id         = mongodbatlas_project.yourEasyRent.id
+  project_id         = mongodbatlas_project.your-easy-rent.id
   auth_database_name = "admin"
 
   username = var.db_user
