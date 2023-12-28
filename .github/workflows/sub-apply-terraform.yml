@@ -18,7 +18,7 @@ jobs:
 
     env:
       TF_CLI_ARGS: ""
-      GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }} # Terraform relies on this predefined env
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }} # Terraform relies on this predefined env
 
     defaults:
       run:
@@ -32,7 +32,6 @@ jobs:
         uses: "google-github-actions/auth@v0"
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-          create_credentials_file: true
 
       - id: secrets-manager
         uses: google-github-actions/get-secretmanager-secrets@v2
@@ -45,9 +44,9 @@ jobs:
       - name: Populate TF cli args
         run: |
           echo "TF_VAR_project_id=${{ steps.auth.outputs.project_id }}" >> $GITHUB_ENV
-          echo "TF_VAR_atlas_pub_key=${{ steps.auth.outputs.atlas_pub_key }}" >> $GITHUB_ENV
-          echo "TF_VAR_atlas_priv_key=${{ steps.auth.outputs.atlas_priv_key }}" >> $GITHUB_ENV
-          echo "TF_VAR_atlas_org_id=${{ steps.auth.outputs.atlas_org_id }}" >> $GITHUB_ENV
+          echo "TF_VAR_atlas_pub_key=${{ steps.auth.secrets-manager.atlas_pub_key }}" >> $GITHUB_ENV
+          echo "TF_VAR_atlas_priv_key=${{ steps.auth.secrets-manager.atlas_priv_key }}" >> $GITHUB_ENV
+          echo "TF_VAR_atlas_org_id=${{ steps.auth.secrets-manager.atlas_org_id }}" >> $GITHUB_ENV
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
