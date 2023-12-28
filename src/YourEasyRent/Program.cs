@@ -59,7 +59,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-var poller = app.Services.GetService<TelegramPoller>();
-poller!.StartReceivingMessages();
+// AK TODO should be changed to wehooks
+// var poller = app.Services.GetService<TelegramPoller>();
+// poller!.StartReceivingMessages();
 
 app.Run();
