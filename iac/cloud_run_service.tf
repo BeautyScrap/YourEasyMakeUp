@@ -6,8 +6,14 @@ resource "google_cloud_run_service" "bot" {
   autogenerate_revision_name = true
 
   lifecycle {
-    ignore_changes = [template[0].spec[0].containers[0].image]
+    ignore_changes = [
+      template[0].spec[5],
+    ]
   }
+
+  # lifecycle {
+  #   ignore_changes = [template[0].spec[0].containers[0].image]
+  # }
 
   template {
     spec {
@@ -30,10 +36,10 @@ resource "google_cloud_run_service" "bot" {
           value = google_secret_manager_secret_version.bot_token.secret_data
         }
 
-        # env {
-        #   name  = "ATLAS_URI"
-        #   value = local.atlas_uri
-        # }
+        env {
+          name  = "ATLAS_URI"
+          value = local.atlas_uri
+        }
       }
     }
   }
