@@ -19,6 +19,9 @@ RUN dotnet publish -c Release -o out
 # ===================================================================================
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
-WORKDIR /App
+EXPOSE 80
+
+WORKDIR /app
 COPY --from=builder /build/out .
+
 ENTRYPOINT ["dotnet", "YourEasyRent.dll"]

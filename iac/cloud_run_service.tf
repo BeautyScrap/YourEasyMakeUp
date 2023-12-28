@@ -40,6 +40,11 @@ resource "google_cloud_run_service" "bot" {
           name  = "ATLAS_URI"
           value = local.atlas_uri
         }
+
+        env {
+          name  = "ASPNETCORE_ENVIRONMENT"
+          value = "Production"
+        }
       }
     }
   }
