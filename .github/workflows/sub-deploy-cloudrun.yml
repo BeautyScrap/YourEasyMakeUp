@@ -1,5 +1,4 @@
-name: Bot reusable deploy workflow
-
+name: Deploy service to cloudrun
 on:
   workflow_call:
     inputs:
