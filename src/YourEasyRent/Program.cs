@@ -4,14 +4,27 @@ using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services;
 using Telegram.Bot;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));//  настройка сервиса DataBaseConfig, который представл€ет собой класс, содержащий конфигурационные параметры дл€ базы данных.  онфигурационные настройки дл€ DataBaseConfig будут считыватьс€ из секции "DataBaseSettings"
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    ContentRootPath = AppContext.BaseDirectory,
+    Args = args,
+});
 
-builder.Services.AddSingleton<ProductRepository>(); // ¬ этой строке регистрируетс€ сервис MongoCollection в контейнере зависимостей.
+var test2 = builder.Configuration.GetValue<string>("DataBaseSettings:DataBaseName");
+builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));  
+
+builder.Services.AddSingleton<ProductRepository>(); 
 
 // This is the same as it used to be
 var databaseConfig = new DataBaseConfig();
 builder.Configuration.Bind("DatabaseSettings", databaseConfig);
+
+// Should be changed to be based on evironment value
+if(databaseConfig.ConnectionString is null)
+{
+    databaseConfig.ConnectionString = Environment.GetEnvironmentVariable("ATLAS_URI")!;
+}
+
 builder.Services.AddSingleton(databaseConfig);
 
 builder.Services.AddControllers();
@@ -47,6 +60,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 var poller = app.Services.GetService<TelegramPoller>();
-poller.StartReceivingMessages();
+poller!.StartReceivingMessages();
 
 app.Run();
