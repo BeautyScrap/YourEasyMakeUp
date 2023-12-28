@@ -12,14 +12,14 @@ on:
 
 jobs:
   apply-terraform:
-    name: Deploys new infra to gcloud and atlas
+    name: Deploy new infra to gcloud and atlas
     uses: ./.github/workflows/reusable-apply-terraform.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
 
   deploy-to-cloudrun:
     needs: apply-terraform
-    name: Deploys new version of telegrofler bot to main
+    name: Deploy new version of bot bakcend
     uses: ./.github/workflows/reusable-deploy-cloudrun.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
