@@ -9,7 +9,7 @@ using System.Data;
 
 namespace YourEasyRent.Services
 {
-    public class TelegramPoller
+    public class TelegramCallbackHandler : ITelegramCallbackHandler
     {
         private readonly ITelegramBotClient _botClient;
         private ITelegramActionsHandler _actionsHandler;
@@ -20,36 +20,12 @@ namespace YourEasyRent.Services
         private string _currentCategory = "";
 
 
-
-        public TelegramPoller(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
+        public TelegramCallbackHandler(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
         {
             _botClient = botClient;
             _actionsHandler = actionsHandler;
             _telegramMenu = telegramMenu;
         }
-
-        public void StartReceivingMessages()
-        {
-            var receiverOptions = new ReceiverOptions  //  создаем новый объект  ReceiverOptions для настройки параметров получения обновлений от Telegram API
-            {
-                AllowedUpdates = Array.Empty<UpdateType>() //  все допустимые обновления будут приниматься в массив UpdateType
-            };
-
-            _botClient.StartReceiving // вызываем метод StartReceiving, чтобы начать процесс получения обновлений от Telegram.  В методе StartReceiving определены обработчики обновлений (updateHandler и pollingErrorHandler), опции получения (receiverOptions) и токен отмены (cancellationToken),
-                (
-                updateHandler: async (_, update, cancellationToken) => { await HandleUpdateAsync(update, cancellationToken); },
-
-                pollingErrorHandler: async (bot, exception, cancellationToken) => { await HandlePollingErrorAsync(bot, exception, cancellationToken); },
-
-                receiverOptions: receiverOptions
-                //cancellationToken: _cts.Token
-                );
-
-            var me = _botClient.GetMeAsync().Result;
-            Console.WriteLine($"Start listening for @{me.Username}"); // получаем информация о боте с использованием _botClient.GetMeAsync() и выводится его имя пользователя в консоль для отображения информации о начале прослушивания обновлений.
-
-        }
-
 
         public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
         {
@@ -60,7 +36,6 @@ namespace YourEasyRent.Services
                 var firstName = update.Message.From.FirstName;
 
                 Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
-                #region [First Message]
 
                 if (messageText.Contains("/start"))
                 {
@@ -71,7 +46,7 @@ namespace YourEasyRent.Services
                     return;
                 }
             }
-            #endregion
+
             else if (update.Type == UpdateType.CallbackQuery)
             {
 
@@ -328,20 +303,6 @@ namespace YourEasyRent.Services
 
             }
 
-        }
-
-
-        private Task HandlePollingErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
-        {
-            var ErrorMessage = exception switch
-            {
-                ApiRequestException apiRequestException
-                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
-                _ => exception.ToString()
-            };
-
-            Console.WriteLine(ErrorMessage);
-            return Task.CompletedTask;
         }
     }
 }

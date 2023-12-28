@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using YourEasyRent.Services;
 using YourEasyRent.DataBase.Interfaces;
+using Telegram.Bot.Types;
 
 namespace YourEasyRent.Controllers;
 
@@ -8,17 +9,26 @@ namespace YourEasyRent.Controllers;
 [Route("")] // It should not have any prefix
 public class TelegramCallbackController : ControllerBase
 {
-    private readonly IProductRepository _repository; 
+    private readonly ITelegramCallbackHandler _handler; 
 
-    public TelegramCallbackController(IProductRepository repository)
+    public TelegramCallbackController(ITelegramCallbackHandler handler)
     {
-        _repository = repository;
+        _handler = handler;
     }
 
     [HttpPost] 
     [Route("telegram/callback")]  
-    public async Task<IActionResult> ProcessCallback()
+    public async Task<IActionResult> ProcessCallback(Update update, CancellationToken token)
     {
+        try
+        {
+            await _handler.HandleUpdateAsync(update, token);
+        }
+        catch (Exception e) 
+        {
+            // we swallow all exception so tg recives OK and does not resend an Update
+        }
+
         return Ok();
     } 
 }

@@ -1,8 +1,4 @@
-﻿
-
-
-
-namespace YourEasyRent.Services
+﻿namespace YourEasyRent.Services
 {
     public interface ITelegramActionsHandler
     {
