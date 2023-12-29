@@ -1,0 +1,26 @@
+name: Bot deploy from main
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/**
+      - iac/**
+# AK TODO test
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  apply-terraform:
+    name: Deploy new infra to gcloud and atlas
+    uses: ./.github/workflows/sub-apply-terraform.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+
+  deploy-to-cloudrun:
+    needs: apply-terraform
+    name: Deploy new version of bot bakcend
+    uses: ./.github/workflows/sub-deploy-cloudrun.yml
+    secrets:
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}

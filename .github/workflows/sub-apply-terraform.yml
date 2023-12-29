@@ -1,0 +1,61 @@
+name: Apply terraform
+on:
+  workflow_call:
+    inputs:
+      set-webhook:
+        type: boolean
+        required: false
+        default: false
+
+    secrets:
+      GCP_CREDENTIALS:
+        required: true
+jobs:
+  deploy-infra:
+    name: Terraform
+    environment: prod
+    runs-on: ubuntu-latest
+
+    env:
+      TF_CLI_ARGS: ""
+      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }} # Terraform relies on this predefined env
+
+    defaults:
+      run:
+        working-directory: ./iac
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - id: secrets-manager
+        uses: google-github-actions/get-secretmanager-secrets@v2
+        with:
+          secrets: |-
+            atlas_pub_key:${{ steps.auth.outputs.project_id }}/atlas_pub_key
+            atlas_priv_key:${{ steps.auth.outputs.project_id }}/atlas_priv_key
+            atlas_org_id:${{ steps.auth.outputs.project_id }}/atlas_org_id
+
+      - name: Populate TF cli args
+        run: |
+          echo "TF_VAR_project_id=${{ steps.auth.outputs.project_id }}" >> $GITHUB_ENV
+          echo "TF_VAR_atlas_pub_key=${{ steps.secrets-manager.outputs.atlas_pub_key }}" >> $GITHUB_ENV
+          echo "TF_VAR_atlas_priv_key=${{ steps.secrets-manager.outputs.atlas_priv_key }}" >> $GITHUB_ENV
+          echo "TF_VAR_atlas_org_id=${{ steps.secrets-manager.outputs.atlas_org_id }}" >> $GITHUB_ENV
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform format
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
