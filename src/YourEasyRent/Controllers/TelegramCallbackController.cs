@@ -18,14 +18,15 @@ public class TelegramCallbackController : ControllerBase
 
     [HttpPost] 
     [Route("telegram/callback")]  
-    public async Task<IActionResult> ProcessCallback(Update update, CancellationToken token)
+    public async Task<IActionResult> ProcessCallback([FromBody] Update update)
     {
         try
         {
-            await _handler.HandleUpdateAsync(update, token);
+            await _handler.HandleUpdateAsync(update, default);
         }
         catch (Exception e) 
         {
+            var test = e;
             // we swallow all exception so tg recives OK and does not resend an Update
         }
 

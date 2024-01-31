@@ -7,26 +7,39 @@ namespace YourEasyRent.Services
     {
         public TelegramMenu() { }
 
-        public InlineKeyboardMarkup Mein =>
-            new(new[]
-            {new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Brand", callbackData: "Brand"),
-            InlineKeyboardButton.WithCallbackData(text:"Product Category", callbackData: "Category") } });
+        public InlineKeyboardMarkup CallMeinMenu()
+        {
+            return new InlineKeyboardMarkup(
+                new[]
+                {
+                    new []
+                    {
+                        InlineKeyboardButton.WithCallbackData("Brand",callbackData: "BrandMenu"),
+                        InlineKeyboardButton.WithCallbackData("Product Category",callbackData: "CategoryMenu"),
+                    },
+                });
+        }
 
-        public InlineKeyboardMarkup Brand =>
-            new(new[]
-            {new[]
+        public InlineKeyboardMarkup CallBrandMenu()
+        {
+            return new InlineKeyboardMarkup(
+                new[]
+                {
+                    new[]
             {InlineKeyboardButton.WithCallbackData(text:"TARTE",callbackData:"TARTE"),
             InlineKeyboardButton.WithCallbackData(text:"MAC",callbackData:"MAC") },
-            new[]
+                    new[]
             {InlineKeyboardButton.WithCallbackData(text:"Maybelline",callbackData:"Maybelline"),
             InlineKeyboardButton.WithCallbackData(text:"FENTY BEAUTY",callbackData:"FENTY_BEAUTY")},
-            new[]
+                    new[]
             {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
-
-        public InlineKeyboardMarkup Category =>
-            new(new[]
-            {new[]
+        }
+        public InlineKeyboardMarkup CallCategoryMenu()
+        {
+            return new InlineKeyboardMarkup(
+                new[]
+                {
+                    new[]
             {InlineKeyboardButton.WithCallbackData(text:"Foundation",callbackData:"Foundation"),
             InlineKeyboardButton.WithCallbackData(text:"Concealer",callbackData:"Concealer"),},
             new[]
@@ -40,10 +53,13 @@ namespace YourEasyRent.Services
             InlineKeyboardButton.WithCallbackData(text:"Lipstick",callbackData:"Lipstick")},
             new[]
             {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
-
-        public InlineKeyboardMarkup ReturnToMeinMenu =>
-            new(new[]
+        }
+        public InlineKeyboardMarkup CallReturnToMeinMenu()
+        {
+            return new InlineKeyboardMarkup(
+                new[]
             {new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Return To Mein Menu",callbackData:"Return_To_MeinMenu")}});
+            {InlineKeyboardButton.WithCallbackData(text:"Return To Mein Menu",callbackData:"Return_To_MeinMenu")}});     
+        }
     }
 }

@@ -3,6 +3,8 @@ using MongoDB.Driver;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services;
 using Telegram.Bot;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -10,7 +12,7 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     Args = args,
 });
 
-var test2 = builder.Configuration.GetValue<string>("DataBaseSettings:DataBaseName");
+
 builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));  
 
 builder.Services.AddSingleton<ProductRepository>(); 
@@ -27,7 +29,8 @@ if( Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
 
 builder.Services.AddSingleton(databaseConfig);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

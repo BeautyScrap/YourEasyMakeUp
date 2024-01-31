@@ -401,4 +401,7 @@ FodyWeavers.xsd
 /YourEasyRent/Properties/launchSettings.json
 /src/YourEasyRent/out/*
 
+/YourEasyRent/appsettings.json
+/YourEasyRent/appsettings.Production.json
+
 /.vscode/*

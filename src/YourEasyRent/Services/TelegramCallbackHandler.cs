@@ -6,6 +6,8 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using YourEasyRent.Entities;
 using System.Data;
+using YourEasyRent.Services.Buttons;
+using Microsoft.AspNetCore.Http.Connections;
 
 namespace YourEasyRent.Services
 {
@@ -14,7 +16,10 @@ namespace YourEasyRent.Services
         private readonly ITelegramBotClient _botClient;
         private ITelegramActionsHandler _actionsHandler;
         private ITelegramMenu _telegramMenu;
-        private BotState _currentBotState = BotState.Initial; //  инициализация  переменной _currentState для отслеживания текущего состояния  бота.
+        //private BotState _currentBotState = BotState.Initial; //  инициализация  переменной _currentState для отслеживания текущего состояния  бота.
+        private Dictionary<string, IButtonHandler> _buttonHandlers;
+        //  создать еще один дикшенари для сохранения сессии и ответов пользователей для передачи данных в базу данных
+        //private BotState _currentBotState = BotState.Initial; //  инициализация  переменной _currentState для отслеживания текущего состояния  бота.
 
         private string _currentBrand = "";
         private string _currentCategory = "";
@@ -25,26 +30,74 @@ namespace YourEasyRent.Services
             _botClient = botClient;
             _actionsHandler = actionsHandler;
             _telegramMenu = telegramMenu;
+
+            _buttonHandlers = new Dictionary<string, IButtonHandler>()
+            {
+                { "MainMenu", new MainMenuButtonHandler(_botClient) },
+                { "BrandMenu", new BrandButtonHandler(_botClient) }
+            };
+            //{"CategoryMenu",  new CategoryButtonHandler() },
+            //{"ReturnToMenu", new ReturnButtonHandler() },
+            //{"Back", new BackReturnHandler() }
+
+            // дописать еще CategoryMenu  и общие кнопки типо back and return
+        }
+
+        public async Task HandleUpdateAsync(Update update)
+        {
+            var chatId = update.Message.Chat.Id;
+            var messageText = update.Message.Text;
+            var firstName = update.Message.From.FirstName;
+
+            Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
+
+            Task<Message> action;
+            if (messageText.Contains("/start"))
+            {
+                Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
+
+                var mainMenuHandler = _buttonHandlers["MainMenu"];
+                await mainMenuHandler.Handle(chatId);
+                return; //
+                //await _botClient.SendTextMessageAsync(chatId, "Hello! Let me find some cosmetics for you!", cancellationToken: cancellationToken);
+                //await _botClient.SendTextMessageAsync(chatId, "Mein menu", replyMarkup: _telegramMenu.CallMeinMenu());          
+            }
+            if (update.Type != UpdateType.CallbackQuery)
+            {
+                throw new Exception("The user did not send a message");
+            }
+            if (update.Type == UpdateType.CallbackQuery)
+            {
+                
+            }
+                var buttonName = update.CallbackQuery.Data;
+                var handler = _buttonHandlers[buttonName];
+                await handler.Handle(chatId);
+
+                var brandMenuHandler = _buttonHandlers["BrandMenu"];
+                await brandMenuHandler.Handle(chatId);  
+
+
         }
 
         public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
         {
             if (update.Type == UpdateType.Message && update.Message!.Type == MessageType.Text)
             {
-                var chatId = update.Message.Chat.Id;
-                var messageText = update.Message.Text;
-                var firstName = update.Message.From.FirstName;
+                //var chatId = update.Message.Chat.Id;
+                //var messageText = update.Message.Text;
+                //var firstName = update.Message.From.FirstName;
 
-                Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
+                //Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
 
-                if (messageText.Contains("/start"))
-                {
-                    _currentBotState = BotState.Initial;
-                    Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
-                    await _botClient.SendTextMessageAsync(chatId, "Hello! Let me find some cosmetics for you!", cancellationToken: cancellationToken);
-                    await _botClient.SendTextMessageAsync(chatId, "Mein menu", replyMarkup: _telegramMenu.Mein);
-                    return;
-                }
+                //if (messageText.Contains("/start"))
+                //{
+                //    _currentBotState = BotState.Initial;
+                //    Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
+                //    await _botClient.SendTextMessageAsync(chatId, "Hello! Let me find some cosmetics for you!", cancellationToken: cancellationToken);
+                //    await _botClient.SendTextMessageAsync(chatId, "Mein menu", replyMarkup: _telegramMenu.Mein);
+                //    return;
+                //}
             }
 
             else if (update.Type == UpdateType.CallbackQuery)
@@ -56,41 +109,35 @@ namespace YourEasyRent.Services
                 var callbackQueryNameOfButton = callbackQuery.Data;
                 var firstName = callbackQuery.Message.Chat.Username;
 
+                //if(callbackQuery == null)
+                // ???? maybe throw
                 switch (_currentBotState)
                 {
                     case BotState.Initial:
+                        // HandleInit(...);
                         if (callbackQuery != null)
                         {
-                            DateTime callbackQueryTime = callbackQuery.Message.Date; // Это время создания сообщения, на основе которого будет рассчитываться возраст запроса.
-                            DateTime currentTime = DateTime.UtcNow;  // Это текущее время, которое будет использоваться для сравнения с временем создания запроса.
-                            TimeSpan queryTime = currentTime - callbackQueryTime; // Этот интервал позволяет нам определить, сколько времени прошло с момента создания запроса.
+                            if (callbackQuery?.Data == "Brand")
+                            {
+                                _currentBotState = BotState.BrandSelected;
+                                Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
+                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the brand:", replyMarkup: _telegramMenu.Brand);
+                            }
+                            else if (callbackQuery!.Data == "Category")
+                            {
+                                _currentBotState = BotState.CategorySelected;
+                                Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
+                                await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the category:", replyMarkup: _telegramMenu.Category);
+                            }
 
-                            if (queryTime.TotalSeconds > 70)
-                            {
-                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id, "This action is no longer valid.");
-                            }
-                            else
-                            {
-                                if (callbackQuery?.Data == "Brand")
-                                {
-                                    _currentBotState = BotState.BrandSelected;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the brand:", replyMarkup: _telegramMenu.Brand);
-                                }
-                                else if (callbackQuery!.Data == "Category")
-                                {
-                                    _currentBotState = BotState.CategorySelected;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the category:", replyMarkup: _telegramMenu.Category);
-                                }
-                            }
                         }
                         break;
 
                     case BotState.BrandSelected:
+                        // HandleBrandSelectButton(...)
                         if (callbackQuery != null)
                         {
-                            DateTime callbackQueryTime = callbackQuery.Message.Date; // Это время создания сообщения, на основе которого будет рассчитываться возраст запроса.
+                            var callbackQueryTime = callbackQuery.Message.Date; // Это время создания сообщения, на основе которого будет рассчитываться возраст запроса.
                             DateTime currentTime = DateTime.UtcNow;  // Это текущее время, которое будет использоваться для сравнения с временем создания запроса.
                             TimeSpan queryTime = currentTime - callbackQueryTime; // Этот интервал позволяет нам определить, сколько времени прошло с момента создания запроса.
 
@@ -100,6 +147,13 @@ namespace YourEasyRent.Services
                             }
                             else
                             {
+                                // MongoDB/UserChats -
+                                // /start CreateNewChat(chatid)
+                                // 123123123 : {}
+                                // UpdateCategory(chatid)
+                                // 123123123 : {"Category":"Maybelline"}
+                                // google callbackquey example
+                                // 
 
                                 if (callbackQuery!.Data == "Maybelline")
                                 {
@@ -306,3 +360,4 @@ namespace YourEasyRent.Services
         }
     }
 }
+

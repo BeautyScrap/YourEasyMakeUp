@@ -5,10 +5,10 @@ namespace YourEasyRent.Services
 {
     public interface ITelegramMenu
     {
-        InlineKeyboardMarkup Mein { get; }
-        InlineKeyboardMarkup Brand { get; }
-        InlineKeyboardMarkup Category { get; }
-        InlineKeyboardMarkup ReturnToMeinMenu {  get; }
+        InlineKeyboardMarkup CallMeinMenu();
+        InlineKeyboardMarkup CallBrandMenu();
+        InlineKeyboardMarkup CallCategoryMenu();
+        InlineKeyboardMarkup CallReturnToMeinMenu();
 
     }
 }
