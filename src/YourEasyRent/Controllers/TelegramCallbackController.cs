@@ -22,7 +22,7 @@ public class TelegramCallbackController : ControllerBase
     {
         try
         {
-            await _handler.HandleUpdateAsync(update, default);
+            await _handler.HandleUpdateAsync(update);
         }
         catch (Exception e) 
         {

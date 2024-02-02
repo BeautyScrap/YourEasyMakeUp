@@ -41,7 +41,7 @@ builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 
 
 builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();    
-builder.Services.AddSingleton<ITelegramMenu, TelegramMenu>();   
+//builder.Services.AddSingleton<ITelegramMenu, TelegramMenu>();   
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
 builder.Services.AddSingleton<ITelegramCallbackHandler, TelegramCallbackHandler>();

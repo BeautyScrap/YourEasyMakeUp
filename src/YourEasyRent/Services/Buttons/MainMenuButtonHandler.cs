@@ -1,6 +1,7 @@
 ﻿using Telegram.Bot.Types;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
+using System.Linq.Expressions;
 
 namespace YourEasyRent.Services.Buttons
 {
@@ -13,15 +14,15 @@ namespace YourEasyRent.Services.Buttons
             _botClient = botClient;
         }
 
-        public async Task Handle(long chatId)
+        public async Task SendMenuToTelegramHandle(long chatId)
         {
             var menu = new InlineKeyboardMarkup(
                 new[]
                 {
                     new []
                     {
-                        InlineKeyboardButton.WithCallbackData("Brand",callbackData: "BrandMenu"),
-                        InlineKeyboardButton.WithCallbackData("Product Category",callbackData: "CategoryMenu"),
+                        InlineKeyboardButton.WithCallbackData(text: "Brand",callbackData: "BrandMenu"),
+                        InlineKeyboardButton.WithCallbackData(text: "Product Category",callbackData: "CategoryMenu"),
                     },
                 });
 
@@ -30,11 +31,17 @@ namespace YourEasyRent.Services.Buttons
 
         private async Task<Message> SendMeinMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup telegramMenu)
         {
+            try
+            {
+                var test = await _botClient.SendTextMessageAsync(chatId, "Main menu", replyMarkup: telegramMenu);
+            }
+            catch (Exception e)
+            {
+                var zalupa = e;
+
+            }
             await _botClient.SendTextMessageAsync(chatId, "Hello! Let me find some cosmetics for you!");
-            await _botClient.SendTextMessageAsync(chatId, "Main menu", replyMarkup: telegramMenu);
-
             return await _botClient.SendTextMessageAsync(chatId, text: "Choose");
-
         }
     }
 }

@@ -2,7 +2,6 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace YourEasyRent.Services.Buttons
 {
@@ -15,7 +14,7 @@ namespace YourEasyRent.Services.Buttons
             _botClient = botClient;
         }
 
-        public async Task Handle(long chatId)
+        public async Task SendMenuToTelegramHandle(long chatId)
         {
             var menu =  new InlineKeyboardMarkup(
                 new[]
@@ -32,10 +31,10 @@ namespace YourEasyRent.Services.Buttons
             await SendBrandMenuInlineKeyboardButton(chatId, menu);
         }
 
-        private async Task<Message> SendBrandMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup telegramMenu)
+        private async Task<Message> SendBrandMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup menu)
         {
             //await _botClient.SendTextMessageAsync(chatId, "Сhoose the brand:", replyMarkup: telegramMenu);
-            return await _botClient.SendTextMessageAsync(chatId, "Сhoose the brand:", replyMarkup: telegramMenu);
+            return await _botClient.SendTextMessageAsync(chatId, "Сhoose the brand:", replyMarkup: menu);
 
 
         }

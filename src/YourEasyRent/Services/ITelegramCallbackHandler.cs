@@ -5,6 +5,6 @@ namespace YourEasyRent.Services;
 public interface ITelegramCallbackHandler
 {
     
-    Task HandleUpdateAsync(Update update, CancellationToken cancellationToken);
+    Task HandleUpdateAsync(Update update);
 }
 
