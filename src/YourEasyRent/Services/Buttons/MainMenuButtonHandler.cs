@@ -33,13 +33,15 @@ namespace YourEasyRent.Services.Buttons
         {
             try
             {
-                var test = await _botClient.SendTextMessageAsync(chatId, "Main menu", replyMarkup: telegramMenu);
+                var test = _botClient.SendTextMessageAsync(chatId, $"Hello! Let me find some cosmetics for you! {chatId}");
+                Console.WriteLine($"2. Received a chatID {chatId} .");
             }
             catch (Exception e)
             {
                 var zalupa = e;
 
             }
+            await _botClient.SendTextMessageAsync(chatId, "Main menu", replyMarkup: telegramMenu);
             await _botClient.SendTextMessageAsync(chatId, "Hello! Let me find some cosmetics for you!");
             return await _botClient.SendTextMessageAsync(chatId, text: "Choose");
         }
