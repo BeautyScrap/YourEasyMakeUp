@@ -8,6 +8,7 @@ using YourEasyRent.Entities;
 using System.Data;
 using YourEasyRent.Services.Buttons;
 using Microsoft.AspNetCore.Http.Connections;
+using System.Security.Cryptography.Xml;
 
 namespace YourEasyRent.Services
 {
@@ -32,56 +33,50 @@ namespace YourEasyRent.Services
             _buttonHandlers = new Dictionary<string, IButtonHandler>()
             {
                 { "MainMenu", new MainMenuButtonHandler(_botClient) },
-                { "BrandMenu", new BrandButtonHandler(_botClient) }
+                { "BrandMenu", new BrandButtonHandler(_botClient) },
+                { "CategoryMenu", new CategoryButtonHandler(_botClient)  }
             };
             //{"CategoryMenu",  new CategoryButtonHandler() },
             //{"ReturnToMenu", new ReturnButtonHandler() },
             //{"Back", new BackReturnHandler() }
 
-            // дописать еще CategoryMenu  и общие кнопки типо back and return
         }
 
         public async Task HandleUpdateAsync(Update update)
         {
             var messageText = update.Message?.Text;
-            var firstName = update.Message.From.FirstName;            
-            //var userID = update.Message.From.Id;
-            var chatId = update.Message.Chat.Id;
-            //var callbackId = update.CallbackQuery.Id;
-            //var userIdcb = update.CallbackQuery!.From.Id;
-           // var userchatId = _usersToChats[userIdcb];
-           // var buttonName = update.CallbackQuery.Data;
-            Console.WriteLine($"1. Received a '{messageText}' message userID  and user First Name {firstName} and chatID {chatId} .");
-
-            //Task<Message> action;
+            var firstName = update.Message?.From.FirstName;            
+            //var chatId = update.Message.Chat.Id;// Может быть нам вообще не нужен этот chatID??
+            
             if (messageText != null && messageText.Contains("/start"))
             {
                 var startedForUserId = update.Message.From.Id;
-                _usersToChats[startedForUserId] = update.Message.Chat.Id;//  почему то в chatID  подставляет значение из UserID, возможно поэтому и не может отправить меню в нужный чат
+                _usersToChats[startedForUserId] = update.Message.Chat.Id;
 
                 var mainMenuHandler = _buttonHandlers["MainMenu"];
-                await mainMenuHandler.SendMenuToTelegramHandle(startedForUserId);
-                Console.WriteLine($"3. Received a '{messageText}' message userID  and user First Name {firstName} and chatID {chatId} .");
-                return;
-                
-                //return; //
-                //await _botClient.SendTextMessageAsync(chatId, "Hello! Let me find some cosmetics for you!", cancellationToken: cancellationToken);
-                //await _botClient.SendTextMessageAsync(chatId, "Mein menu", replyMarkup: _telegramMenu.CallMeinMenu());          
+                await mainMenuHandler.SendMenuToTelegramHandle(startedForUserId);       
+                return;         
             }
             if (update.Type != UpdateType.CallbackQuery)
             {
                 throw new Exception("The user did not send a message");
             }
 
-            var userIdcb = update.CallbackQuery!.From.Id;
-            var userchatId = _usersToChats[userIdcb];
+            var callbackId = update.CallbackQuery.Id;
+            var userId = update.CallbackQuery!.From.Id;
+            var chatUserId = userId;
+
+            if (_usersToChats.ContainsKey(userId)) 
+            {
+                chatUserId = _usersToChats[userId];
+            }
+
             var buttonName = update.CallbackQuery.Data;
-            //var userId = update.CallbackQuery!.From.Id;
-            //var chatId = _usersToChats[userId];
-            Console.WriteLine($"4. Received a  button'{buttonName}' userID {userIdcb} and user First Name {firstName} and chatID {userchatId} .");
-            //var buttonName = update.CallbackQuery.Data;
             var handler = _buttonHandlers[buttonName];
-            await handler.SendMenuToTelegramHandle(chatId);
+
+            Console.WriteLine($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatUserId} .");
+            
+            await handler.SendMenuToTelegramHandle(chatUserId);
 
         }
 

@@ -33,7 +33,7 @@ namespace YourEasyRent.Services.Buttons
         {
             try
             {
-                var test = _botClient.SendTextMessageAsync(chatId, $"Hello! Let me find some cosmetics for you! {chatId}");
+                var test = _botClient.SendTextMessageAsync(chatId, $"Hello! Let me find some cosmetics for you!");
                 Console.WriteLine($"2. Received a chatID {chatId} .");
             }
             catch (Exception e)
@@ -41,9 +41,8 @@ namespace YourEasyRent.Services.Buttons
                 var zalupa = e;
 
             }
-            await _botClient.SendTextMessageAsync(chatId, "Main menu", replyMarkup: telegramMenu);
-            await _botClient.SendTextMessageAsync(chatId, "Hello! Let me find some cosmetics for you!");
-            return await _botClient.SendTextMessageAsync(chatId, text: "Choose");
+           return await _botClient.SendTextMessageAsync(chatId, "Main menu. Choose one:", replyMarkup: telegramMenu);
+            
         }
     }
 }

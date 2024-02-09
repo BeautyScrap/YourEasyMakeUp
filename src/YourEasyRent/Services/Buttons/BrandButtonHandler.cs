@@ -10,7 +10,6 @@ namespace YourEasyRent.Services.Buttons
         private readonly ITelegramBotClient _botClient;
         public BrandButtonHandler(ITelegramBotClient botClient)
         {
-
             _botClient = botClient;
         }
 
@@ -33,10 +32,7 @@ namespace YourEasyRent.Services.Buttons
 
         private async Task<Message> SendBrandMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup menu)
         {
-            //await _botClient.SendTextMessageAsync(chatId, "Сhoose the brand:", replyMarkup: telegramMenu);
             return await _botClient.SendTextMessageAsync(chatId, "Сhoose the brand:", replyMarkup: menu);
-
-
         }
     }
 }
