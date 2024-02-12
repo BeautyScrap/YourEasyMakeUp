@@ -19,10 +19,10 @@ namespace YourEasyRent.Services.Buttons
                 new[]
                 {
                     new[]
-            {InlineKeyboardButton.WithCallbackData(text:"TARTE",callbackData:"TARTE"),
+            {InlineKeyboardButton.WithCallbackData(text:"TARTE",callbackData:"TARTE"),// написать префикс brand_Tarte
             InlineKeyboardButton.WithCallbackData(text:"MAC",callbackData:"MAC") },
                     new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Maybelline",callbackData:"Maybelline"),
+            {InlineKeyboardButton.WithCallbackData(text:"Maybelline",callbackData:"Brand_Maybelline"),
             InlineKeyboardButton.WithCallbackData(text:"FENTY BEAUTY",callbackData:"FENTY_BEAUTY")},
                     new[]
             {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
