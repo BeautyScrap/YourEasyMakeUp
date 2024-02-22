@@ -9,11 +9,13 @@ namespace YourEasyRent.Controllers;
 [Route("")] // It should not have any prefix
 public class TelegramCallbackController : ControllerBase
 {
-    private readonly ITelegramCallbackHandler _handler; 
+    private readonly ITelegramCallbackHandler _handler;
+    private readonly ILogger<TelegramCallbackController> _logger;
 
-    public TelegramCallbackController(ITelegramCallbackHandler handler)
+    public TelegramCallbackController(ITelegramCallbackHandler handler, ILogger<TelegramCallbackController> logger)
     {
         _handler = handler;
+        _logger = logger;
     }
 
     [HttpPost] 
@@ -29,7 +31,7 @@ public class TelegramCallbackController : ControllerBase
             var test = e;
             // we swallow all exception so tg recives OK and does not resend an Update
         }
-
+        _logger.LogInformation("CallbackIsDone");
         return Ok();
     } 
 }

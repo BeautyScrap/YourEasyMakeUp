@@ -18,13 +18,10 @@ namespace YourEasyRent.Services
         private ITelegramActionsHandler _actionsHandler;
         private Dictionary<string, IButtonHandler> _buttonHandlers;
         private Dictionary<long, BotState> _userResponsesToChat = new();
+        private readonly ILogger<TelegramCallbackHandler> _logger;
         // сделать еше один словать которыцй будет содержать  userId (long)  и связанный с ним словать  ключ - бренд и категория, значения - Мейбелин и тушь
 
-        private string _currentBrand = "";
-        private string _currentCategory = "";
-
-
-        public TelegramCallbackHandler(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler)
+        public TelegramCallbackHandler(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler,ILogger<TelegramCallbackHandler> logger)
         {
             _botClient = botClient;
             _actionsHandler = actionsHandler;
@@ -33,8 +30,9 @@ namespace YourEasyRent.Services
                 { "MainMenu", new MainMenuButtonHandler(_botClient) },
                 { "BrandMenu", new BrandButtonHandler(_botClient) },
                 { "CategoryMenu", new CategoryButtonHandler(_botClient)  }
-            }; 
-            //{"ReturnToMenu", new ReturnButtonHandler() },
+            };
+               _logger = logger;    
+                        //{"ReturnToMenu", new ReturnButtonHandler() },
             //{"Back", new BackReturnHandler() }
 
         }
@@ -51,6 +49,7 @@ namespace YourEasyRent.Services
 
                 var mainMenuHandler = _buttonHandlers["MainMenu"];
                 await mainMenuHandler.SendMenuToTelegramHandle(startedForUserId);
+                _logger.LogInformation(messageText);
                 return;
             }
             if (update.Type != UpdateType.CallbackQuery)
@@ -73,22 +72,58 @@ namespace YourEasyRent.Services
                 return;
             }
 
-            Console.WriteLine($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+            _logger.LogInformation($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+           // Console.WriteLine($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
 
             var botState = _userResponsesToChat[userId];
+            bool result = false;
+          
+            //var result = botState.PropertiesAreFilled();
+            //if (result == true) 
+            //{
+            //    string brand = botState.Brand;
+            //    string category = botState.Category;
+            //    await _actionsHandler.GetFilteredProductsMessage(brand, category);
+            //    return;
+
+            //}
 
             if (buttonName.StartsWith("Brand_"))
             {
                 botState.ChatId = update.CallbackQuery!.From.Id; // или ChatID?
                 botState.Brand = buttonName.Replace("Brand_", "");
-                botState.Status = MenuStatus.BrandChosen;
                 var categoryMenuHandler = _buttonHandlers["CategoryMenu"];
                 await categoryMenuHandler.SendMenuToTelegramHandle(chatId);
+                botState.Status = BotState.MenuStatus.BrandChosen;
                 return;
+            }
+
+            if (buttonName.StartsWith("Category_"))
+            {
+                botState.ChatId = update.CallbackQuery!.From.Id; // или ChatID?
+                botState.Category =  buttonName.Replace("Category_", "");
+                //var categoryMenuHandler = _buttonHandlers["CategoryMenu"];
+                // await categoryMenuHandler.SendMenuToTelegramHandle(chatId);
+                botState.Status = BotState.MenuStatus.CategoryChosen;
+
+                result = botState.PropertiesAreFilled();
+                if (result == true)
+                {
+                    string brand = botState.Brand;
+                    string category = botState.Category;
+                    var products  = await _actionsHandler.GetFilteredProductsMessage(brand, category);
+                    foreach ( var product in products )
+                    {
+                        await _botClient.SendTextMessageAsync(chatId, product, parseMode: ParseMode.Markdown);
+                    }
+                    _logger.LogInformation($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+                    return;
+                }
 
             }
 
         }
+
         private long GetChatIdOrDefalt(long userId) 
         {
             if(!_userResponsesToChat.ContainsKey(userId))

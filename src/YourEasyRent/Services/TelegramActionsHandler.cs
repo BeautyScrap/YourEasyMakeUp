@@ -19,7 +19,7 @@ namespace YourEasyRent.Services
 
         public async Task<IEnumerable<string>> GetFilteredProductsMessage(string brand, string category)
         {
-            var products = await _productRepository.GetProductsByBrandAndCategory(brand, "Mascara");// захардкодить определенную категорию для тестов в монге
+            var products = await _productRepository.GetProductsByBrandAndCategory(brand, category);// захардкодить определенную категорию для тестов в монге
             {
                 var productStrings = products.Select(p =>
             $"*{p.Brand}*\n" +

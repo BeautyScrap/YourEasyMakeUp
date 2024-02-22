@@ -5,6 +5,7 @@ using YourEasyRent.Services;
 using Telegram.Bot;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -40,11 +41,16 @@ builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 
 
-builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();    
-//builder.Services.AddSingleton<ITelegramMenu, TelegramMenu>();   
+builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();     
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
 builder.Services.AddSingleton<ITelegramCallbackHandler, TelegramCallbackHandler>();
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.File("log.txt",
+        rollingInterval: RollingInterval.Day,
+        rollOnFileSizeLimit: true)
+    .CreateLogger();
 
 var app = builder.Build();
 

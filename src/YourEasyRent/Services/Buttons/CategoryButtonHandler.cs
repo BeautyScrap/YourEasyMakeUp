@@ -20,13 +20,13 @@ namespace YourEasyRent.Services.Buttons
                 new[]
                 {
                     new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Foundation",callbackData:"Foundation"),
-            InlineKeyboardButton.WithCallbackData(text:"Concealer",callbackData:"Concealer")}});
+            {InlineKeyboardButton.WithCallbackData(text:"Mascara",callbackData:"Category_Mascara"),
+            InlineKeyboardButton.WithCallbackData(text:"Concealer",callbackData:"Category_Concealer")}});
             //new[]
             //{InlineKeyboardButton.WithCallbackData(text:"Blush",callbackData:"Blush"),
             //InlineKeyboardButton.WithCallbackData(text:"Highlighter",callbackData:"Highlighter")},
             //new[]
-            //{InlineKeyboardButton.WithCallbackData(text:"Mascara",callbackData:"Mascara"),
+            //{InlineKeyboardButton.WithCallbackData(text:"Foundation",callbackData:"Foundation"),
             //InlineKeyboardButton.WithCallbackData(text:"Eyeshadow",callbackData:"Eyeshadow")},
             //new[]
             //{InlineKeyboardButton.WithCallbackData(text:"Brow pencils",callbackData:"Brow pencils"),

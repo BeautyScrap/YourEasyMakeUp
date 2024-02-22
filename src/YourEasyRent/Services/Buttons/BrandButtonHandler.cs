@@ -23,7 +23,7 @@ namespace YourEasyRent.Services.Buttons
             InlineKeyboardButton.WithCallbackData(text:"MAC",callbackData:"MAC") },
                     new[]
             {InlineKeyboardButton.WithCallbackData(text:"Maybelline",callbackData:"Brand_Maybelline"),
-            InlineKeyboardButton.WithCallbackData(text:"FENTY BEAUTY",callbackData:"FENTY_BEAUTY")},
+            InlineKeyboardButton.WithCallbackData(text:"FENTY BEAUTY",callbackData:"Brand_FENTY BEAUTY")},
                     new[]
             {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
 
