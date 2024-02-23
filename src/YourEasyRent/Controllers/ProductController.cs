@@ -3,6 +3,8 @@ using YourEasyRent.DataBase;
 using YourEasyRent.Entities;
 using YourEasyRent.DataBase.Interfaces;
 using Telegram.Bot.Types;
+using Serilog;
+using System.Xml.Linq;
 
 namespace YourEasyRent.Controllers
 {
@@ -11,12 +13,16 @@ namespace YourEasyRent.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _repository;
+        private readonly ILogger<ProductController> _logger;    
 
-        public ProductController(IProductRepository productRepository) => _repository = productRepository;
-
+        public ProductController(IProductRepository productRepository, ILogger<ProductController> logger)
+        {
+            _repository = productRepository;
+            _logger = logger;
+        }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()//   не надо бобавлять в скобках Id, потому что мы должне получить все продукты, поэтому и в операторах его нет Task<IEnumerable<Product>> GetProducts()
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
         {
             try
             {
@@ -25,15 +31,12 @@ namespace YourEasyRent.Controllers
                 {
                     return NotFound();
                 }
-
                 return allProducts.ToList();
             }
-
             catch (Exception ex)
             {
-                Console.WriteLine($"[GetProducts] : {ex.Message}");
+                _logger.LogError(ex, "[GetProducts] : An error occurred while processing the request");
                 return StatusCode(500, "Internal Server Error.");
-
             }
         }
 
@@ -45,14 +48,15 @@ namespace YourEasyRent.Controllers
                 var product = await _repository.Get(id);
                 if (product == null)
                 {
+                    _logger.LogError($"Product with {id} is not found.");
                     return NotFound();
                 }
+                _logger.LogInformation("ActionResult = {@product}" , product );
                 return Ok(product);
             }
-
             catch (Exception ex)
             {
-                Console.WriteLine($"[Get] : {ex.Message}");
+                _logger.LogError(ex,"[GetProductById]: Product not found in the database");
                 return StatusCode(500, "Internal Server Error. Product not found");
             }
         }
@@ -69,14 +73,12 @@ namespace YourEasyRent.Controllers
                     var result = Enumerable.Empty<Product>().ToList();
                     return Ok(result);
                 }
-
-
+                _logger.LogInformation("ActionResult = {@brand}", brand);
                 return Ok(brandProducts);
             }
-
             catch (Exception ex)
             {
-                Console.WriteLine($"[GetByBrand] : {ex.Message}");
+                _logger.LogError(ex, "[GetProductByBrand]: Brand of Product is not found in the database");
                 return StatusCode(500, "Internal Server Error. Brand not found");
             }
         }
@@ -88,11 +90,12 @@ namespace YourEasyRent.Controllers
             try
             {
                 var nameProduct = await _repository.GetByName(name);
+                _logger.LogInformation("ActionResult = {@name}", name);
                 return Ok(nameProduct);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[GetByName] : {ex.Message}");
+                _logger.LogError(ex, "[GetProductByName]: Name of Product is not found in the database");
                 return StatusCode(404, "Unable to process the request. Name not found");
             }
         }
@@ -103,11 +106,12 @@ namespace YourEasyRent.Controllers
             try
             {
                 await _repository.Create(newProduct);
+                _logger.LogInformation("ActionResult = {@newProduct}", newProduct);
                 return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Create] : {ex.Message}");
+                _logger.LogError(ex, "[Post]: Failed to create user");
                 return StatusCode(500, "Failed to create user.");
             }
         }
@@ -119,24 +123,22 @@ namespace YourEasyRent.Controllers
         {
             try
             {
-
                 var product = await _repository.Get(id);
-
                 if (product is null)
                 {
+                    _logger.LogInformation($"Product with this id {id} is not found");
                     return NotFound();
                 }
 
                 updateProduct.Id = product.Id;
-
                 await _repository.Update(updateProduct);
-
+                _logger.LogInformation("ActionResult = {@id} - product with this id is updated",id);
                 return Ok();
 
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Update] : {ex.Message}");
+                _logger.LogError(ex, "[UpdateProduct]: Failed to update user");
                 return StatusCode(500, "Failed to update user.");
             }
         }
@@ -148,17 +150,18 @@ namespace YourEasyRent.Controllers
             try
             {
                 var product = await _repository.Get(id);
-
                 if (product is null)
                 {
+                    _logger.LogInformation($"Product with this id {id} is not found");
                     return NotFound();
                 }
                 await _repository.Delete(id);
+                _logger.LogInformation("ActionResult = {@id} - product with this id is deleted", id);
                 return Ok();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Delete] : {ex.Message}");
+                _logger.LogError(ex, "[DeleteProduct]: Failed to delete user");
                 return StatusCode(500, "Failed to delete user.");
             }
         }

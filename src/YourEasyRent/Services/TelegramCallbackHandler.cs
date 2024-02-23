@@ -6,6 +6,9 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using YourEasyRent.Entities;
 using System.Data;
+using YourEasyRent.Services.Buttons;
+using Microsoft.AspNetCore.Http.Connections;
+using System.Security.Cryptography.Xml;
 
 namespace YourEasyRent.Services
 {
@@ -13,296 +16,125 @@ namespace YourEasyRent.Services
     {
         private readonly ITelegramBotClient _botClient;
         private ITelegramActionsHandler _actionsHandler;
-        private ITelegramMenu _telegramMenu;
-        private BotState _currentBotState = BotState.Initial; //  инициализация  переменной _currentState для отслеживания текущего состояния  бота.
+        private Dictionary<string, IButtonHandler> _buttonHandlers;
+        private Dictionary<long, BotState> _userResponsesToChat = new();
+        private readonly ILogger<TelegramCallbackHandler> _logger;
+        // сделать еше один словать которыцй будет содержать  userId (long)  и связанный с ним словать  ключ - бренд и категория, значения - Мейбелин и тушь
 
-        private string _currentBrand = "";
-        private string _currentCategory = "";
-
-
-        public TelegramCallbackHandler(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler, ITelegramMenu telegramMenu)
+        public TelegramCallbackHandler(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler,ILogger<TelegramCallbackHandler> logger)
         {
             _botClient = botClient;
             _actionsHandler = actionsHandler;
-            _telegramMenu = telegramMenu;
+            _buttonHandlers = new Dictionary<string, IButtonHandler>()
+            {
+                { "MainMenu", new MainMenuButtonHandler(_botClient) },
+                { "BrandMenu", new BrandButtonHandler(_botClient) },
+                { "CategoryMenu", new CategoryButtonHandler(_botClient)  }
+            };
+               _logger = logger;    
+                        //{"ReturnToMenu", new ReturnButtonHandler() },
+            //{"Back", new BackReturnHandler() }
+
         }
 
-        public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
+        public async Task HandleUpdateAsync(Update update)
         {
-            if (update.Type == UpdateType.Message && update.Message!.Type == MessageType.Text)
+            var messageText = update.Message?.Text;
+            var firstName = update.Message?.From.FirstName;
+
+            if (messageText != null && messageText.Contains("/start"))
             {
-                var chatId = update.Message.Chat.Id;
-                var messageText = update.Message.Text;
-                var firstName = update.Message.From.FirstName;
+                var startedForUserId = update.Message.From.Id;
+                _userResponsesToChat[startedForUserId] = new BotState() { ChatId = update.Message.Chat.Id };
 
-                Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
+                var mainMenuHandler = _buttonHandlers["MainMenu"];
+                await mainMenuHandler.SendMenuToTelegramHandle(startedForUserId);
+                _logger.LogInformation(messageText);
+                return;
+            }
+            if (update.Type != UpdateType.CallbackQuery)
+            {
+                throw new Exception("The user did not send a message");
+            }
 
-                if (messageText.Contains("/start"))
+            var callbackId = update.CallbackQuery.Id;
+            var userResponse = update.CallbackQuery?.Data;
+            var userId = update.CallbackQuery!.From.Id;
+
+            var chatId = GetChatIdOrDefalt(userId);
+
+            var buttonName = update.CallbackQuery.Data;
+
+            if (buttonName == "BrandMenu" || buttonName == "CategoryMenu")
+            {
+                var handler = _buttonHandlers[buttonName];// если выбирать какую-то конкретную категорию или бренд, но выдается ошибка, тк в словаре _buttonHandlers нет этих значений
+                await handler.SendMenuToTelegramHandle(chatId);
+                return;
+            }
+
+            _logger.LogInformation($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+           // Console.WriteLine($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+
+            var botState = _userResponsesToChat[userId];
+            bool result = false;
+          
+            //var result = botState.PropertiesAreFilled();
+            //if (result == true) 
+            //{
+            //    string brand = botState.Brand;
+            //    string category = botState.Category;
+            //    await _actionsHandler.GetFilteredProductsMessage(brand, category);
+            //    return;
+
+            //}
+
+            if (buttonName.StartsWith("Brand_"))
+            {
+                botState.ChatId = update.CallbackQuery!.From.Id; // или ChatID?
+                botState.Brand = buttonName.Replace("Brand_", "");
+                var categoryMenuHandler = _buttonHandlers["CategoryMenu"];
+                await categoryMenuHandler.SendMenuToTelegramHandle(chatId);
+                botState.Status = BotState.MenuStatus.BrandChosen;
+                return;
+            }
+
+            if (buttonName.StartsWith("Category_"))
+            {
+                botState.ChatId = update.CallbackQuery!.From.Id; // или ChatID?
+                botState.Category =  buttonName.Replace("Category_", "");
+                //var categoryMenuHandler = _buttonHandlers["CategoryMenu"];
+                // await categoryMenuHandler.SendMenuToTelegramHandle(chatId);
+                botState.Status = BotState.MenuStatus.CategoryChosen;
+
+                result = botState.PropertiesAreFilled();
+                if (result == true)
                 {
-                    _currentBotState = BotState.Initial;
-                    Console.WriteLine($"Received a '{messageText}' message in chat {chatId} and user name {firstName}.");
-                    await _botClient.SendTextMessageAsync(chatId, "Hello! Let me find some cosmetics for you!", cancellationToken: cancellationToken);
-                    await _botClient.SendTextMessageAsync(chatId, "Mein menu", replyMarkup: _telegramMenu.Mein);
+                    string brand = botState.Brand;
+                    string category = botState.Category;
+                    var products  = await _actionsHandler.GetFilteredProductsMessage(brand, category);
+                    foreach ( var product in products )
+                    {
+                        await _botClient.SendTextMessageAsync(chatId, product, parseMode: ParseMode.Markdown);
+                    }
+                    _logger.LogInformation($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
                     return;
                 }
-            }
-
-            else if (update.Type == UpdateType.CallbackQuery)
-            {
-
-                var callbackQuery = update.CallbackQuery;
-
-                var callbackQueryChatId = callbackQuery.Message.Chat.Id;
-                var callbackQueryNameOfButton = callbackQuery.Data;
-                var firstName = callbackQuery.Message.Chat.Username;
-
-                switch (_currentBotState)
-                {
-                    case BotState.Initial:
-                        if (callbackQuery != null)
-                        {
-                            DateTime callbackQueryTime = callbackQuery.Message.Date; // Это время создания сообщения, на основе которого будет рассчитываться возраст запроса.
-                            DateTime currentTime = DateTime.UtcNow;  // Это текущее время, которое будет использоваться для сравнения с временем создания запроса.
-                            TimeSpan queryTime = currentTime - callbackQueryTime; // Этот интервал позволяет нам определить, сколько времени прошло с момента создания запроса.
-
-                            if (queryTime.TotalSeconds > 70)
-                            {
-                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id, "This action is no longer valid.");
-                            }
-                            else
-                            {
-                                if (callbackQuery?.Data == "Brand")
-                                {
-                                    _currentBotState = BotState.BrandSelected;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the brand:", replyMarkup: _telegramMenu.Brand);
-                                }
-                                else if (callbackQuery!.Data == "Category")
-                                {
-                                    _currentBotState = BotState.CategorySelected;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Сhoose the category:", replyMarkup: _telegramMenu.Category);
-                                }
-                            }
-                        }
-                        break;
-
-                    case BotState.BrandSelected:
-                        if (callbackQuery != null)
-                        {
-                            DateTime callbackQueryTime = callbackQuery.Message.Date; // Это время создания сообщения, на основе которого будет рассчитываться возраст запроса.
-                            DateTime currentTime = DateTime.UtcNow;  // Это текущее время, которое будет использоваться для сравнения с временем создания запроса.
-                            TimeSpan queryTime = currentTime - callbackQueryTime; // Этот интервал позволяет нам определить, сколько времени прошло с момента создания запроса.
-
-                            if (queryTime.TotalSeconds > 70)
-                            {
-                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id, "This action is no longer valid.");
-                            }
-                            else
-                            {
-
-                                if (callbackQuery!.Data == "Maybelline")
-                                {
-                                    _currentBrand = "Maybelline";
-                                    _currentBotState = BotState.CategorySelected;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.Category);
-                                }
-
-                                else if (callbackQuery!.Data == "TARTE")
-                                {
-                                    _currentBrand = "TARTE";
-                                    _currentBotState = BotState.CategorySelected;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.Category);
-
-                                }
-
-                                else if (callbackQuery!.Data == "MAC")
-                                {
-                                    _currentBrand = "MAC";
-                                    _currentBotState = BotState.CategorySelected;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.Category);
-
-                                }
-
-                                else if (callbackQuery!.Data == "FENTY_BEAUTY")
-                                {
-                                    _currentBrand = "FENTY BEAUTY";
-                                    _currentBotState = BotState.CategorySelected;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Now choose the category of the product", replyMarkup: _telegramMenu.Category);
-                                }
-
-                                else if (callbackQuery!.Data == "Back")
-                                {
-                                    _currentBotState = BotState.Initial;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.Mein);
-                                }
-                            }
-                        }
-                        break;
-
-                    case BotState.CategorySelected:
-
-                        if (callbackQuery != null)
-                        {
-                            DateTime callbackQueryTime = callbackQuery.Message.Date;
-                            DateTime currentTime = DateTime.UtcNow;
-                            TimeSpan queryTime = currentTime - callbackQueryTime;
-
-                            if (queryTime.TotalSeconds > 70)
-                            {
-                                await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id, "This action is no longer valid.");
-                            }
-                            else
-                            {
-
-                                if (callbackQuery!.Data == "Mascara")
-                                {
-                                    _currentCategory = "Mascara";
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                                    foreach (var productMessage in productMessages)
-                                    {
-                                        await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
-                                    }
-
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
-                                    _currentBotState = BotState.ReturnToMeinMenu;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-
-                                }
-
-                                else if (callbackQuery!.Data == "Foundation")
-                                {
-                                    _currentCategory = "Foundation";
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                                    foreach (var productMessage in productMessages)
-                                    {
-                                        await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
-                                    }
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
-                                    _currentBotState = BotState.ReturnToMeinMenu;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                }
-
-                                else if (callbackQuery!.Data == "Concealer")
-                                {
-                                    _currentCategory = "Concealer";
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                                    foreach (var productMessage in productMessages)
-                                    {
-                                        await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
-                                    }
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
-                                    _currentBotState = BotState.ReturnToMeinMenu;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                }
-
-                                else if (callbackQuery!.Data == "Blush")
-                                {
-                                    _currentCategory = "Blush";
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                                    foreach (var productMessage in productMessages)
-                                    {
-                                        await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
-                                    }
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
-                                    _currentBotState = BotState.ReturnToMeinMenu;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                }
-
-                                else if (callbackQuery!.Data == "Highlighter")
-                                {
-                                    _currentCategory = "Consealer";
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                                    foreach (var productMessage in productMessages)
-                                    {
-                                        await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
-                                    }
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
-                                    _currentBotState = BotState.ReturnToMeinMenu;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                }
-
-                                else if (callbackQuery!.Data == "Eyeshadow")
-                                {
-                                    _currentCategory = "Eyeshadow";
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                                    foreach (var productMessage in productMessages)
-                                    {
-                                        await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
-                                    }
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
-                                    _currentBotState = BotState.ReturnToMeinMenu;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                }
-
-                                else if (callbackQuery!.Data == "Brow pencils")
-                                {
-                                    _currentCategory = "Brow pencils";
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                                    foreach (var productMessage in productMessages)
-                                    {
-                                        await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
-                                    }
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
-                                    _currentBotState = BotState.ReturnToMeinMenu;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                }
-
-                                else if (callbackQuery!.Data == "Lipstick")
-                                {
-                                    _currentCategory = "Lipstick";
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    var productMessages = await _actionsHandler.GetFilteredProductsMessage(_currentBrand, _currentCategory);
-                                    foreach (var productMessage in productMessages)
-                                    {
-                                        await _botClient.SendTextMessageAsync(callbackQueryChatId, productMessage, parseMode: ParseMode.Markdown);
-                                    }
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Find new product", replyMarkup: _telegramMenu.ReturnToMeinMenu);
-                                    _currentBotState = BotState.ReturnToMeinMenu;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                }
-
-                                else if (callbackQuery!.Data == "Back")
-                                {
-                                    _currentBotState = BotState.Initial;
-                                    Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                                    await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                                    await _botClient.SendTextMessageAsync(callbackQueryChatId, "Main Menu", replyMarkup: _telegramMenu.Mein);
-                                }
-                            }
-                        }
-                        break;
-
-                    case BotState.ReturnToMeinMenu:
-                        if (callbackQuery!.Data == "Return_To_MeinMenu")
-                        {
-                            _currentBotState = BotState.Initial;
-                            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id);
-                            await _botClient.SendTextMessageAsync(callbackQueryChatId, "Welcome back to the main menu.", replyMarkup: _telegramMenu.Mein);
-                            Console.WriteLine($"Received a '{callbackQueryNameOfButton}' message in chat {callbackQueryChatId} and user name {firstName}.");
-                        }
-                        break;
-                }
 
             }
 
         }
+
+        private long GetChatIdOrDefalt(long userId) 
+        {
+            if(!_userResponsesToChat.ContainsKey(userId))
+            {
+                return userId;
+            }
+            var botState = _userResponsesToChat[userId];
+            return botState.ChatId;
+        }
+
+
+
     }
 }
