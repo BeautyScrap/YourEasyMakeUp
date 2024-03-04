@@ -1,38 +1,49 @@
-﻿using System.Threading;
+﻿using Microsoft.OpenApi.Extensions;
+using System.Threading;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using YourEasyRent.DataBase.Interfaces;
+using YourEasyRent.Entities;
 
 namespace YourEasyRent.Services.Buttons
 {
     internal class BrandButtonHandler : IButtonHandler
     {
         private readonly ITelegramBotClient _botClient;
-        public BrandButtonHandler(ITelegramBotClient botClient)
+        private readonly IProductRepository _productRepository;
+
+
+        public BrandButtonHandler(ITelegramBotClient botClient,IProductRepository productRepository)
         {
             _botClient = botClient;
+            _productRepository = productRepository; 
         }
+
 
         public async Task SendMenuToTelegramHandle(long chatId)
         {
-            var menu =  new InlineKeyboardMarkup(
-                new[]
-                {
-                    new[]
-            {InlineKeyboardButton.WithCallbackData(text:"TARTE",callbackData:"TARTE"),// написать префикс brand_Tarte
-            InlineKeyboardButton.WithCallbackData(text:"MAC",callbackData:"MAC") },
-                    new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Maybelline",callbackData:"Brand_Maybelline"),
-            InlineKeyboardButton.WithCallbackData(text:"FENTY BEAUTY",callbackData:"Brand_FENTY BEAUTY")},
-                    new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
+            var brandsMenu = await _productRepository.GetBrandForMenu(limit: 5);
+            var InlineKeyboardMarkup = CreateInlineKeyboardMarkup(brandsMenu);
 
-            await SendBrandMenuInlineKeyboardButton(chatId, menu);
+            await SendBrandMenuInlineKeyboardButton(chatId, InlineKeyboardMarkup);
         }
 
-        private async Task<Message> SendBrandMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup menu)
+        private InlineKeyboardMarkup CreateInlineKeyboardMarkup(List<string> brandsMenu)
         {
-            return await _botClient.SendTextMessageAsync(chatId, "Сhoose the brand:", replyMarkup: menu);
+            var InlineKeyboardButtons = new List<List<InlineKeyboardButton>>();
+            foreach (var brand in brandsMenu)
+            {
+                var buttone = InlineKeyboardButton.WithCallbackData(text: brand, callbackData: brand);
+                InlineKeyboardButtons.Add(new List<InlineKeyboardButton> { buttone });
+            }
+            return new InlineKeyboardMarkup(InlineKeyboardButtons);
         }
+
+    
+        private async Task<Message> SendBrandMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup brandsMenu)
+        {
+            return await _botClient.SendTextMessageAsync(chatId, "Сhoose the brand:", replyMarkup: brandsMenu);
+        }   
     }
 }

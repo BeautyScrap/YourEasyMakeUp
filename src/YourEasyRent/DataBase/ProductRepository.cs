@@ -1,4 +1,5 @@
 ﻿using MongoDB;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Entities;
@@ -101,5 +102,21 @@ namespace YourEasyRent.DataBase
                 await UpsertProduct(product);  
             }
         }
+
+        public async Task<List<string>> GetBrandForMenu(int limit)
+        {
+            var pipeline = new List<BsonDocument>() 
+            {
+                BsonDocument.Parse("{ $group: { _id: '$Brand' } }"),
+                BsonDocument.Parse("{ $sample: { size:  5} }")
+               // BsonDocument.Parse("{ $sample: { size: " + limit + " } }")
+            };
+            var aggregation = _productCollection.Aggregate<BsonDocument>(pipeline);
+            var result = await aggregation.ToListAsync();   
+            var menuOfBrand = result.Select(b => b["_id"].AsString).ToList();
+            return menuOfBrand;
+        }
+
+       
     }
 }

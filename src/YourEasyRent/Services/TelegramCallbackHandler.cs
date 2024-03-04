@@ -9,6 +9,7 @@ using System.Data;
 using YourEasyRent.Services.Buttons;
 using Microsoft.AspNetCore.Http.Connections;
 using System.Security.Cryptography.Xml;
+using YourEasyRent.DataBase.Interfaces;
 
 namespace YourEasyRent.Services
 {
@@ -19,16 +20,17 @@ namespace YourEasyRent.Services
         private Dictionary<string, IButtonHandler> _buttonHandlers;
         private Dictionary<long, BotState> _userResponsesToChat = new();
         private readonly ILogger<TelegramCallbackHandler> _logger;
-        // сделать еше один словать которыцй будет содержать  userId (long)  и связанный с ним словать  ключ - бренд и категория, значения - Мейбелин и тушь
-
-        public TelegramCallbackHandler(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler,ILogger<TelegramCallbackHandler> logger)
+        private readonly IProductRepository _productRepository;
+        public TelegramCallbackHandler(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler,IProductRepository productRepository,ILogger<TelegramCallbackHandler> logger)
         {
             _botClient = botClient;
             _actionsHandler = actionsHandler;
+
+            _productRepository = productRepository;
             _buttonHandlers = new Dictionary<string, IButtonHandler>()
             {
                 { "MainMenu", new MainMenuButtonHandler(_botClient) },
-                { "BrandMenu", new BrandButtonHandler(_botClient) },
+                { "BrandMenu", new BrandButtonHandler(_botClient, _productRepository) },
                 { "CategoryMenu", new CategoryButtonHandler(_botClient)  }
             };
                _logger = logger;    
@@ -65,38 +67,45 @@ namespace YourEasyRent.Services
 
             var buttonName = update.CallbackQuery.Data;
 
-            if (buttonName == "BrandMenu" || buttonName == "CategoryMenu")
+            if (buttonName == "BrandMenu")
             {
-                var handler = _buttonHandlers[buttonName];// если выбирать какую-то конкретную категорию или бренд, но выдается ошибка, тк в словаре _buttonHandlers нет этих значений
+                var handler = _buttonHandlers[buttonName];
+                await handler.SendMenuToTelegramHandle(chatId);
+                return;// возможно нужно будет присвоить MenuStatus, чтобы определить какой шаг делать дальше
+            }
+
+
+            if (buttonName == "CategoryMenu") 
+            {
+                var handler = _buttonHandlers[buttonName];
                 await handler.SendMenuToTelegramHandle(chatId);
                 return;
             }
 
-            _logger.LogInformation($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
-           // Console.WriteLine($"4. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+                //if (buttonName == "BrandMenu" || buttonName == "CategoryMenu")
+                //{
+                //    var handler = _buttonHandlers[buttonName];
+                //    await handler.SendMenuToTelegramHandle(chatId);
+                //    return;
+                //}
+
+                _logger.LogInformation($"Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+          
 
             var botState = _userResponsesToChat[userId];
             bool result = false;
-          
-            //var result = botState.PropertiesAreFilled();
-            //if (result == true) 
-            //{
-            //    string brand = botState.Brand;
-            //    string category = botState.Category;
-            //    await _actionsHandler.GetFilteredProductsMessage(brand, category);
-            //    return;
-
-            //}
+         
 
             if (buttonName.StartsWith("Brand_"))
             {
-                botState.ChatId = update.CallbackQuery!.From.Id; // или ChatID?
+                botState.ChatId = update.CallbackQuery!.From.Id;
                 botState.Brand = buttonName.Replace("Brand_", "");
                 var categoryMenuHandler = _buttonHandlers["CategoryMenu"];
                 await categoryMenuHandler.SendMenuToTelegramHandle(chatId);
                 botState.Status = BotState.MenuStatus.BrandChosen;
                 return;
             }
+            if(botState.Status == BotState.MenuStatus.BrandChosen)
 
             if (buttonName.StartsWith("Category_"))
             {
