@@ -38,7 +38,7 @@ namespace YourEasyRent.Services.Buttons
 
         private async Task<Message> SendCategotyInlineeyboardMarkup(InlineKeyboardMarkup menu, long chatId)
         {
-            return await _botClient.SendTextMessageAsync(chatId, "Сhoose the category:", replyMarkup: menu);
+            return await _botClient.SendTextMessageAsync(chatId, "Сhoose a category:", replyMarkup: menu);
         }
     }
 }

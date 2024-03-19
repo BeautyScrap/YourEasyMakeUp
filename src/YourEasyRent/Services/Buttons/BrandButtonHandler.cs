@@ -43,7 +43,7 @@ namespace YourEasyRent.Services.Buttons
     
         private async Task<Message> SendBrandMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup brandsMenu)
         {
-            return await _botClient.SendTextMessageAsync(chatId, "Сhoose the brand:", replyMarkup: brandsMenu);
+            return await _botClient.SendTextMessageAsync(chatId, "Сhoose a brand:", replyMarkup: brandsMenu);
         }   
     }
 }

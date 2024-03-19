@@ -34,7 +34,6 @@ namespace YourEasyRent.Services.Buttons
             try
             {
                 var test = _botClient.SendTextMessageAsync(chatId, $"Hello! Let me find some cosmetics for you!");
-                Console.WriteLine($"2. Received a chatID {chatId} .");
             }
             catch (Exception e)
             {
