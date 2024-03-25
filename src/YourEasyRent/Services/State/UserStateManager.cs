@@ -25,16 +25,19 @@
             IsCategoryChosen = true;
             menuStatuses.Add("CategoryChosen");
         }
-         public void BackOnOneStep()
+         public void BackOnOneStep(string status)
         {
             IsBackOnOneStep = true;
+           
             menuStatuses.Last();
+            menuStatuses.Remove(status);
+            
         }
          public void ReturnToMainMenu()
         {
             IsReturnToMainMenu = true;
             menuStatuses.Clear();
-            menuStatuses.Add("MainMenu");
+            menuStatuses.Add("Started");
         }
         
         public void AddStatusToList(string status)//  в листе должны быть уникальные значения,
@@ -56,7 +59,7 @@
         {
             if(menuStatuses.Contains("BrandChosen") && menuStatuses.Contains("CategoryChosen"))
             {
-                return "ReadyToResul";
+                return "ReadyToResult";
                 // наверно, лучше вернуть статут ReadyToResul, который потом даст команду к запуску фианльно запроса к бд
             }
             if (menuStatuses.Contains("BrandChosen"))
@@ -65,7 +68,7 @@
                 {
                     return "CategoryMenu";
                 }
-                return "ReadyToResul";// написать проверку для цены, !menuStatuses.Contains("PriceChosen")
+                return "ReadyToResult";// написать проверку для цены, !menuStatuses.Contains("PriceChosen")
             }
             if (menuStatuses.Contains("CategoryChosen"))
             {
@@ -73,10 +76,15 @@
                 {
                     return "CategoryMenu";
                 }
-                return "ReadyToResul";// написать проверку для цены, !menuStatuses.Contains("PriceChosen")
+                return "ReadyToResult";// написать проверку для цены, !menuStatuses.Contains("PriceChosen")
             }
 
-            return "ReadyToResul";
+            return "ReadyToResult";
+        }
+
+        public string MethodBackOnOneStep()
+        {
+            return menuStatuses.Last();
         }
     }
 }

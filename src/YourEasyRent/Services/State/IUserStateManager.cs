@@ -8,12 +8,13 @@
 
         void CategoryChosen(MenuStatus status);
 
-        void BackOnOneStep();
+        void BackOnOneStep(string status);
 
         void ReturnToMainMenu();
 
 
         void AddStatusToList(string status);
         public string CheckStatusInList(string status);
+        public string MethodBackOnOneStep();
     }
 }

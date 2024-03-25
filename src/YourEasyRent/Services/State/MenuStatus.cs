@@ -9,7 +9,7 @@
             CategoryMenu,
             CategoryChosen,
             BackOnOneStep,
-            ReadyToResul,
+            ReadyToResult,
             ReturnToMainMenu
 
         }

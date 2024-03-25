@@ -10,7 +10,7 @@ using YourEasyRent.Services.Buttons;
 using Microsoft.AspNetCore.Http.Connections;
 using System.Security.Cryptography.Xml;
 using YourEasyRent.DataBase.Interfaces;
-using static YourEasyRent.Services.State.MenuStatus;
+//using YourEasyRent.Services.State.MenuStatus;
 using YourEasyRent.Services.State;
 
 namespace YourEasyRent.Services
@@ -23,25 +23,30 @@ namespace YourEasyRent.Services
         private Dictionary<long, BotState> _userResponsesToChat = new();
         private readonly ILogger<TelegramCallbackHandler> _logger;
         private readonly IProductRepository _productRepository;
-        private MenuStatus _currentMenuStatus = Started;
-        private readonly UserStateManager _userStateManager = new UserStateManager(); 
-        public TelegramCallbackHandler(ITelegramBotClient botClient, ITelegramActionsHandler actionsHandler,IProductRepository productRepository,UserStateManager userStateManager,MenuStatus menuStatus,ILogger<TelegramCallbackHandler> logger)
+        private MenuStatus _currentMenuStatus = MenuStatus.Started;
+        private readonly IUserStateManager _userStateManager = new UserStateManager(); 
+
+        public TelegramCallbackHandler
+            (
+            ITelegramBotClient botClient, 
+            ITelegramActionsHandler actionsHandler,
+            IProductRepository productRepository,
+            IUserStateManager userStateManager,
+            ILogger<TelegramCallbackHandler> logger
+            )
         {
             _botClient = botClient;
             _actionsHandler = actionsHandler;
-
             _productRepository = productRepository;
             _buttonHandlers = new Dictionary<string, IButtonHandler>()
             {
                 {"MainMenu" , new MainMenuButtonHandler(_botClient) },
                 {"BrandMenu", new BrandButtonHandler(_botClient, _productRepository) },
-                {"CategoryMenu", new CategoryButtonHandler(_botClient)  }
+                {"CategoryMenu", new CategoryButtonHandler(_botClient)  },
             };
             _logger = logger;    
             _userStateManager = userStateManager;  
-            _currentMenuStatus = menuStatus;    
-                        //{"ReturnToMenu", new ReturnButtonHandler() },
-            //{"Back", new BackReturnHandler() }
+                        //{"ReturnToMenu", new ReturnButtonHandler() },           
         }
 
         public async Task HandleUpdateAsync(Update update)
@@ -55,7 +60,7 @@ namespace YourEasyRent.Services
             {
                 var startedForUserId = update.Message.From.Id;
                 _userResponsesToChat[startedForUserId] = new BotState() { ChatId = update.Message.Chat.Id };
-                _currentMenuStatus = MainMenu;
+                _currentMenuStatus = MenuStatus.MainMenu;
                 var mainMenuHandler = _buttonHandlers["MainMenu"];
                 await mainMenuHandler.SendMenuToTelegramHandle(startedForUserId);
                 _logger.LogInformation(messageText);
@@ -75,12 +80,17 @@ namespace YourEasyRent.Services
 
             if(buttonName == "Back")
             {
-                _userStateManager.BackOnOneStep();
+                _userStateManager.BackOnOneStep(status);
+                var lastMenu =  _userStateManager.MethodBackOnOneStep().ToString();
+                var lastMenuHandler = _buttonHandlers[lastMenu];
+                await lastMenuHandler.SendMenuToTelegramHandle(chatId);
+                return;
+                
             }
 
             if (buttonName == "BrandMenu") 
             {
-                _currentMenuStatus = BrandMenu;
+                _currentMenuStatus = MenuStatus.BrandMenu;
                 var handler = _buttonHandlers[buttonName];
                 await handler.SendMenuToTelegramHandle(chatId);
                 return;
@@ -88,12 +98,12 @@ namespace YourEasyRent.Services
 
             if (buttonName == "CategoryMenu") 
             {
-                _currentMenuStatus = CategoryMenu;
+                _currentMenuStatus = MenuStatus.CategoryMenu;
                 var handler = _buttonHandlers[buttonName];
                 await handler.SendMenuToTelegramHandle(chatId);
                 return;
             }
-            _logger.LogInformation($"Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+            _logger.LogInformation($"1.Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
           
             var botState = _userResponsesToChat[userId];
             //bool result = false;
@@ -102,25 +112,19 @@ namespace YourEasyRent.Services
             { 
                 botState.ChatId = update.CallbackQuery!.From.Id;
                 botState.Brand = buttonName.Replace("Brand_", "");
-                _currentMenuStatus = BrandChosen;
-                _userStateManager.BrandChosen(BrandChosen);
+                _currentMenuStatus = MenuStatus.BrandChosen;
+                _userStateManager.BrandChosen(MenuStatus.BrandChosen);
                 string resultOfMenu = _userStateManager.CheckStatusInList("BrandChosen");
                 
                 if (resultOfMenu != "ReadyToResult")
                 {
-                    await _buttonHandlers[buttonName].SendMenuToTelegramHandle(chatId);
+                    await _buttonHandlers[resultOfMenu].SendMenuToTelegramHandle(chatId); // тут выдает ошибку, добавила .Replace("Brand_", ""
                     return;
                 }
 
-                botState.PropertiesAreFilled();
-                string brand = botState.Brand;
-                string category = botState.Category;
-                var products = await _actionsHandler.GetFilteredProductsMessage(brand, category);
-                foreach (var product in products)
-                {
-                    await _botClient.SendTextMessageAsync(chatId, product, parseMode: ParseMode.Markdown);
-                }
-                _logger.LogInformation($" Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+                botState.PropertiesAreFilled();// ! тут возможно надо ввести переменную, если ее результат будет true, тогда вызываем метод SendAllResult и меняем ReturnToMainMenu, а если false возможно тогда просто return
+                var result = SendAllResult(chatId, botState);
+                _logger.LogInformation($"2. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
                 _userStateManager.ReturnToMainMenu();   
                 return;
             }
@@ -129,14 +133,14 @@ namespace YourEasyRent.Services
             { //  выставляем  метод  void BrandChosen(); чтобы пометить, чтоб бренд дейстительно выбран и менюСтатут изменяется на BrandChosen 
                 botState.ChatId = update.CallbackQuery!.From.Id;
                 botState.Category = buttonName.Replace("Category_", "");
-                _currentMenuStatus = CategoryChosen;
-                _userStateManager.CategoryChosen(CategoryChosen);
+                _currentMenuStatus = MenuStatus.CategoryChosen;
+                _userStateManager.CategoryChosen(MenuStatus.CategoryChosen);
                 string resultOfMenu = _userStateManager.CheckStatusInList("CategoryChosen");// // !! и  на этом этапе я уже знаю, что статут BrandChosen записан в лист и после этого телеграм должен сходить в CheckStatusInLis и вызвать мне другое о
 
                 if (resultOfMenu != "ReadyToResult")
                 {
 
-                    await _buttonHandlers[buttonName].SendMenuToTelegramHandle(chatId);
+                    await _buttonHandlers[resultOfMenu].SendMenuToTelegramHandle(chatId);
                     return;
                 }
 
@@ -145,7 +149,7 @@ namespace YourEasyRent.Services
 
                 var result  = SendAllResult(chatId, botState);
                 
-                _logger.LogInformation($" Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+                _logger.LogInformation($"3. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
                 _userStateManager.ReturnToMainMenu();//  после получения результатов возможно где то здесь нужно сделать кнопку ReturnToMenu(StartNewSearch), которая перекинет нас обратно в главное меню как то
                 //  скинуть предыдущие статусы и результаты, оставив только chatID
                 return;
@@ -156,7 +160,7 @@ namespace YourEasyRent.Services
 
         }
 
-        private async Task SendAllResult(long chatId, BotState botState)
+        private async Task<IEnumerable<string>> SendAllResult(long chatId, BotState botState)
         {
             string brand = botState.Brand;
             string category = botState.Category;
@@ -164,7 +168,9 @@ namespace YourEasyRent.Services
             foreach (var product in products)
             {
                 await _botClient.SendTextMessageAsync(chatId, product, parseMode: ParseMode.Markdown);
-            }  
+            }
+            return products;
+
         }
        
 
