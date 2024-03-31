@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Entities;
+using MongoDB.Driver.Linq;
 
 
 
@@ -51,19 +52,19 @@ namespace YourEasyRent.DataBase
             return createdIds;
         }
 
-        public async Task<bool> Update(Product updateProduct) // метод Update возвращает значение типа bool, указывающее на успешность операции обновления. Если операция обновления прошла успешно, метод вернет true
+        public async Task<bool> Update(Product updateProduct)
         {
             var filter = Builders<Product>.Filter.And(
                 Builders<Product>.Filter.Eq(_ => _.Brand, updateProduct.Brand),
-                Builders<Product>.Filter.Eq(_ => _.Name, updateProduct.Name)); // создаю фильтр для поиска продукта по его идентификатору.
-            var updateResult = await _productCollection.ReplaceOneAsync(filter, updateProduct);// выполняет замену документа с учетом заданного фильтра.
-            return updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;//возвращает true, если и операция была успешно подтверждена сервером (acknowledged), и хотя бы один документ был изменен в результате операции обновления.
+                Builders<Product>.Filter.Eq(_ => _.Name, updateProduct.Name));
+            var updateResult = await _productCollection.ReplaceOneAsync(filter, updateProduct);
+            return updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
         }
 
         public async Task<bool> Delete(string id)
         {
             var filter = Builders<Product>.Filter.Eq(_ => _.Id, id);
-            var deleteProduct = await _productCollection.DeleteOneAsync(filter);//  Выполняет удаление элемента с учетом задаанного фильтра
+            var deleteProduct = await _productCollection.DeleteOneAsync(filter);
             return deleteProduct.IsAcknowledged && deleteProduct.DeletedCount > 0;
         }
 
@@ -105,18 +106,14 @@ namespace YourEasyRent.DataBase
 
         public async Task<List<string>> GetBrandForMenu(int limit)
         {
-            var pipeline = new List<BsonDocument>() 
-            {
-                BsonDocument.Parse("{ $group: { _id: '$Brand' } }"),
-                BsonDocument.Parse("{ $sample: { size:  5} }")
-               // BsonDocument.Parse("{ $sample: { size: " + limit + " } }")
-            };
-            var aggregation = _productCollection.Aggregate<BsonDocument>(pipeline);
-            var result = await aggregation.ToListAsync();   
-            var menuOfBrand = result.Select(b => b["_id"].AsString).ToList();
-            return menuOfBrand;
-        }
+            var res = await _productCollection
+                .AsQueryable()
+                .Select(x => x.Brand)
+                .Take(limit)
+                .Distinct()
+                .ToListAsync();
 
-       
+            return res;
+        }
     }
 }

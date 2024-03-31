@@ -1,25 +1,27 @@
 ﻿using YourEasyRent.Entities;
 using System.Text.Json;
 using YourEasyRent.Entities.Douglas;
+using static System.Net.WebRequestMethods;
 
 namespace YourEasyRent.Services
 {
-    public class DouglasClient: IProductsSiteClient
+    public class DouglasClient : IProductsSiteClient
     {
         private readonly HttpClient _httpClient;
         private readonly Dictionary<Section, string> sectionMapping = new()
-        {       
+        {
             [Section.Makeup] = "make-up"
         };
         private readonly JsonSerializerOptions _options;
-        //private static string _baseProductPageUrl = "https://www.douglas.de/de/p/";  
+        private readonly string _baseProductPageUrl = "https://www.douglas.de/de/c/";
 
         public Site Site => Site.Douglas;
 
         public DouglasClient(HttpClient client)
         {
             _httpClient = client;
-            _options = new JsonSerializerOptions()
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36");
+            _options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
@@ -28,40 +30,39 @@ namespace YourEasyRent.Services
 
         public async Task<IEnumerable<Product>> FetchFromSectionAndPage(Section section, int pageNumber)
         {
-            //var url = GetSectionUrl(sectionMapping[section], pageNumber);
+            var url = GetSectionUrl(sectionMapping[section], pageNumber);
 
-            var url = $"https://www.douglas.de/jsapi/v2/products/search/category/03?currentPage={pageNumber}&pageSize=47&fields=FULL";
-            var douglasHTTPResponce = await _httpClient.GetAsync(url);   
+            var douglasHTTPResponce = await _httpClient.GetAsync(url);   // код 403
 
             var douglasRawJsonString = await douglasHTTPResponce.Content.ReadAsStringAsync();
 
-            var douglasProducts = JsonSerializer.Deserialize<DouglasResponse>(douglasRawJsonString, _options);
+            var douglasProducts = JsonSerializer.Deserialize<DouglasResponse>(douglasRawJsonString, _options); // тут  выдает ошибку
 
             var products = douglasProducts.Products.Select(p => ToProduct(p));
 
             return products;
         }
 
-        private static Product ToProduct(DouglasProduct p)  // переложить из douglas.product  в new product , создать в дуглас файл с продуктами, которые будут называться как "code, baseProductName,imageURL 
+        private string GetSectionUrl(string section, int pageNumber)
         {
-            var product = new Product  // а тут уже поставить сопоставление со своими названиями с названиями, которые выдает дуглас( как в золотом яблоке)
+            return $"{_baseProductPageUrl}{section}/03?page={pageNumber}";
+        }
+
+        private static Product ToProduct(DouglasProduct p)  
+        {
+            var product = new Product  
             {
                 SiteId = p.Code,
                 Url = $"https://www.douglas.de{p.Url}",
-                Price = p.Price.Value,               
+                Price = p.Price.Value,
                 ImageUrl = p.Images.First().Url,
                 Brand = p.Brand.Name,
                 Name = p.BaseProductName,
                 Category = p.Classifications.First().Name,
 
             };
-            return product; 
-
-                // переложить из douglas.product  в new product , создать в дуглас файл с продуктами, которые будут называться как "code, baseProductName,imageURL 
-            
-        }// а тут уже поставить сопоставление со своими названиями с названиями, которые выдает дуглас( как в золотом яблоке)
-
-       
+            return product;  
+        }
     }
 
 }

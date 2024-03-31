@@ -2,13 +2,13 @@
 {
     public interface IUserStateManager
     {
-        void Started();
+        void Start();
 
-        void BrandChosen(MenuStatus status);
+        void SetBrand(MenuStatus status);
 
-        void CategoryChosen(MenuStatus status);
+        void SetCategory(MenuStatus status);
 
-        void BackOnOneStep(string status);
+        void GoBackToOneStep(string status);
 
         void ReturnToMainMenu();
 

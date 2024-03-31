@@ -6,6 +6,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Entities;
 
+
 namespace YourEasyRent.Services.Buttons
 {
     internal class BrandButtonHandler : IButtonHandler
@@ -31,13 +32,14 @@ namespace YourEasyRent.Services.Buttons
 
         private InlineKeyboardMarkup CreateInlineKeyboardMarkup(List<string> brandsMenu)
         {
-            var InlineKeyboardButtons = new List<List<InlineKeyboardButton>>();
-            foreach (var brand in brandsMenu)
+            var InlineKeyboardButtons = brandsMenu.Select(brand =>
             {
                 var buttone = InlineKeyboardButton.WithCallbackData(text: brand, callbackData: brand);
-                InlineKeyboardButtons.Add(new List<InlineKeyboardButton> { buttone });
-            }
+                return new List<InlineKeyboardButton> { buttone };
+            }).ToList();
+           
             return new InlineKeyboardMarkup(InlineKeyboardButtons);
+
         }
 
     

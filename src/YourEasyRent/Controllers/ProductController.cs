@@ -9,11 +9,11 @@ using System.Xml.Linq;
 namespace YourEasyRent.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")] // было [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class ProductController : ControllerBase
     {
         private readonly IProductRepository _repository;
-        private readonly ILogger<ProductController> _logger;    
+        private readonly ILogger<ProductController> _logger;
 
         public ProductController(IProductRepository productRepository, ILogger<ProductController> logger)
         {
@@ -51,12 +51,12 @@ namespace YourEasyRent.Controllers
                     _logger.LogError($"Product with {id} is not found.");
                     return NotFound();
                 }
-                _logger.LogInformation("ActionResult = {@product}" , product );
+                _logger.LogInformation("ActionResult = {@product}", product);
                 return Ok(product);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,"[GetProductById]: Product not found in the database");
+                _logger.LogError(ex, "[GetProductById]: Product not found in the database");
                 return StatusCode(500, "Internal Server Error. Product not found");
             }
         }
@@ -116,8 +116,6 @@ namespace YourEasyRent.Controllers
             }
         }
 
-
-
         [HttpPut("{id:length(24)}")]
         public async Task<IActionResult> UpdateProduct(string id, Product updateProduct)
         {
@@ -132,7 +130,7 @@ namespace YourEasyRent.Controllers
 
                 updateProduct.Id = product.Id;
                 await _repository.Update(updateProduct);
-                _logger.LogInformation("ActionResult = {@id} - product with this id is updated",id);
+                _logger.LogInformation("ActionResult = {@id} - product with this id is updated", id);
                 return Ok();
 
             }
@@ -142,7 +140,6 @@ namespace YourEasyRent.Controllers
                 return StatusCode(500, "Failed to update user.");
             }
         }
-
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(string id)
@@ -165,9 +162,5 @@ namespace YourEasyRent.Controllers
                 return StatusCode(500, "Failed to delete user.");
             }
         }
-
-        
-
-
     }
 }

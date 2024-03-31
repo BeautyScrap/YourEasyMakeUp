@@ -12,6 +12,7 @@ using YourEasyRent.Services;
 using Microsoft.AspNetCore.Mvc;
 using YourEasyRent.Entities.Douglas;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Extensions.Logging;
 
 namespace YourEasyRentTest.Controllers
 {
@@ -23,8 +24,10 @@ namespace YourEasyRentTest.Controllers
             // arrange
             var products = new List<Product> { new Product { Id = "test", Name = "Product 1" }, new Product { Id = "test", Name = "Product 2" } };
             var productRepoMock = new Mock<IProductRepository>();
+            var loggerMock = new Mock<ILogger<ProductController>>();
+
             productRepoMock.Setup(repo => repo.GetProducts()).ReturnsAsync(products);
-            var controller = new ProductController(productRepoMock.Object); // Создала экземпляр контроллера ProductsController, передавая фейковый repositoryMock в конструктор.
+            var controller = new ProductController(productRepoMock.Object,loggerMock.Object); // Создала экземпляр контроллера ProductsController, передавая фейковый repositoryMock в конструктор.
 
             // act
             var result = await controller.GetProducts();
