@@ -9,22 +9,26 @@ namespace YourEasyRent.Controllers
 {
 
     [ApiController]
-    [Route("[controller]")] // было [Route("api/v1/[controller]")] - Этот атрибут указывает, что маршруты к действиям контроллера будут начинаться с имени контроллера в URL. 
+    [Route("[controller]")] 
     public class ListingController : ControllerBase
     {
         private readonly IProductRepository _repository; 
         private readonly IEnumerable<IProductsSiteClient> _clients; 
+        private ILogger<ListingController> _logger; 
 
-        public ListingController(IProductRepository repository, IEnumerable<IProductsSiteClient> clients)
+        public ListingController(IProductRepository repository, IEnumerable<IProductsSiteClient> clients, ILogger<ListingController> logger)
         {
             _repository = repository;
             _clients = clients;
+            _logger = logger;   
         }
 
-        [HttpGet] 
-        [Route("products/")] //Параметры в фигурных скобках ({category:categoryEnum} и {source}) будут извлечены из URL запроса. 
-        public async Task<IEnumerable<Product>> GetProducts()// публичный метод  GetProducts с аргументами(Section- тип аргумента, section- название аргумента)  тип  возвращаеммого значение Task<IEnumerable<Product>> 
+        [HttpGet]
+        [Route("products/")] 
+        public async Task<IEnumerable<Product>> GetProducts()
         {
+            try 
+            { 
             var section = Section.Makeup;
             var allListings = new List<Product>();
             for (var pagenumber = 1; pagenumber < 4; pagenumber++)
@@ -36,7 +40,15 @@ namespace YourEasyRent.Controllers
                 }
             }
             await _repository.UpsertManyProducts(allListings);
-            return allListings; // Объединяет две последовательности, сохраняя все элементы исходных последовательностей, включая дубликаты.
+            return allListings;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[GetProductsListings] : An error occurred while processing the request");
+                return (IEnumerable<Product>)StatusCode(500, "Internal Server Error.");
+
+            }
         } 
     }
 }

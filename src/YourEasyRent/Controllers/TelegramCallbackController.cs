@@ -6,7 +6,7 @@ using Telegram.Bot.Types;
 namespace YourEasyRent.Controllers;
 
 [ApiController]
-[Route("")] // It should not have any prefix
+[Route("")]
 public class TelegramCallbackController : ControllerBase
 {
     private readonly ITelegramCallbackHandler _handler;
@@ -26,10 +26,10 @@ public class TelegramCallbackController : ControllerBase
         {
             await _handler.HandleUpdateAsync(update);
         }
-        catch (Exception e) 
+        catch (Exception ex) 
         {
-            var test = e;
-            // we swallow all exception so tg recives OK and does not resend an Update
+            _logger.LogError(ex, "[ProcessCallback] : Callback is not correct");
+            var test = ex; 
         }
         _logger.LogInformation("CallbackIsDone");
         return Ok();
