@@ -8,13 +8,13 @@
 
         void SetCategory(MenuStatus status);
 
-        void GoBackToOneStep(string status);
+        void MethodBackOnOneStep(string status);
 
         void ReturnToMainMenu();
 
 
         void AddStatusToList(string status);
-        public string CheckStatusInList(string status);
-        public string MethodBackOnOneStep();
+        public string GetNextStep(string status);
+        public string GetPreviousStep(); //  use an enum stead of a string
     }
 }

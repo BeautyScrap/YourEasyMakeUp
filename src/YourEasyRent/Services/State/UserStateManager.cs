@@ -1,9 +1,51 @@
-﻿namespace YourEasyRent.Services.State
+﻿using YourEasyRent.Services.Buttons;
+
+namespace YourEasyRent.Services.State
 {
     public class UserStateManager : IUserStateManager
     {
-        public bool IsCategoryChosen { get; private set; }
-        public bool IsBrandChosen { get; private set; }
+        // class StateRepository
+
+        // тип UserSearchState GetForUser(userId);
+        // Task Save(UserSearchState);
+        // UserSearchState доменная модель
+
+        // UserSearchStateDTO //  модель в базе
+        // {userId}
+        // {chatId} // все поля приватные 
+        // {brand}
+        // {category}
+        // {state} статус тоже храним в базе
+
+        // UserSearchStateDTO => UserSearchState
+
+        // class UserSearchState// этот класс получает ответы от пользователя и сохраняет данные в базу
+        // или это как аналог userStateManager (да) и он тоже должен записывать в базу
+        // StartSearch(chatId)
+        // StepBeck()
+        // TgMenu GetNextMenu()
+        // SetBrand(brand) 
+        // SetCategory()
+        // IsFiniShed();
+        // TOMongoRepresintation() тк тут поля не побличные, метод должен вернуть UserSearchStateDTO , который мы потом положем в базу
+
+        // class tgSender // ответственность только пульнуть нужное меню в телегу, а не собирать данные, в ракках телеграмХендлера из репозитория он получает нужные данные
+
+        // SendCategoryMenu()// откуда мы должны брать эти листы categoryList итд?
+        // SendBrandMenu(brandList)
+        // SendResults(results)
+
+
+        // class TgSender(botClient): ITgSender
+        //   _menues = new Dictionary<string, IButtonHandler>()
+        //        { "CategoryMenu", new CategoryButtonHandler(_botClient)  },
+        //...
+        // SendCategoryMenu(){
+        //  var menu = _menues["CategoryMenu"].GetMatckup() => new InlineKeyboardMarkup(.....);
+        //  return await _botClient.SendTextMessageAsync(chatId, "Сhoose a category:", replyMarkup: menu);
+        // 
+        //}
+        public bool IsCategory { get; private set; }// await tgSender.SendMenu(nextMenu);en { get; private set; }
         public bool IsBackOnOneStep { get; private set; }
         public bool IsReturnToMainMenu { get; private set; }
 
@@ -22,7 +64,7 @@
             IsCategoryChosen = true;
             menuStatuses.Add("CategoryChosen");
         }
-        public void GoBackToOneStep(string status)
+        public void MethodBackOnOneStep(string status)
         {
             IsBackOnOneStep = true;
             menuStatuses.Last();
@@ -46,7 +88,7 @@
                 menuStatuses.Add("Started");
             }
         }
-        public string CheckStatusInList(string status) // или тут object. Еще возмодно стоит сделать метод ассинхронным
+        public string GetNextStep(string status) // или тут object. Еще возмодно стоит сделать метод ассинхронным
         {
             if (menuStatuses.Contains("BrandChosen") && menuStatuses.Contains("CategoryChosen"))
             {
@@ -70,7 +112,7 @@
             }
             return "ReadyToResult";
         }
-        public string MethodBackOnOneStep()
+        public string GetPreviousStep()
         {
             return menuStatuses.Last();
         }

@@ -6,6 +6,6 @@ namespace YourEasyRent.Services.Buttons
 {
     internal interface IButtonHandler
     {
-        Task SendMenuToTelegramHandle(long chatId); //  может добавить ему второй аргумент с продукт репозиторием
+        Task SendMenuToTelegramHandle(long chatId);
     }
 }
