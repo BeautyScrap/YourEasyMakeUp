@@ -9,7 +9,7 @@ using MongoDB.Driver.Linq;
 
 namespace YourEasyRent.DataBase
 {
-    public class ProductRepository : IProductRepository // заменила на mongocollection  публичный класс ,который представляет контекст базы данных для работы с коллекцией Products.
+    public class ProductRepository : IProductRepository  
 
     {
         private readonly IMongoCollection<Product> _productCollection;//  вводим экземпляр  _productCollection класса IMongoCollection дла работы с базой данных

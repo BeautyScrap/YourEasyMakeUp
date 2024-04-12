@@ -5,31 +5,24 @@ using Telegram.Bot.Types.ReplyMarkups;
 namespace YourEasyRent.Services.Buttons
 {
     public class ReturnToMMButtonHandler : IButtonHandler
-    {
-        private readonly ITelegramBotClient _botClient;
+    { 
 
-        public ReturnToMMButtonHandler (ITelegramBotClient botClient)
+        public ReturnToMMButtonHandler ()
         {
-            _botClient = botClient; 
+
         }
-
-        public async Task SendMenuToTelegramHandle(long chatId)
+        public  async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
         {
-            var menu = new InlineKeyboardMarkup(
-                new[]
+            var menuaAterSearchResult = new[]
                 {
                     new []
                     {
                         InlineKeyboardButton.WithCallbackData(text: "Start a New Search",callbackData: "StartNewSearch"),
+                        InlineKeyboardButton.WithCallbackData(text: "Monitor the price",callbackData: "StartNewSearch"),
                     },
-                });
+                };
 
-            await SendMeinMenuInlineKeyboardButton(chatId, menu);
-        }
-
-        private  async Task<Message> SendMeinMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup menu)
-        {
-            return await _botClient.SendTextMessageAsync(chatId, "Do you want to start a new search?", replyMarkup: menu);
+            return new InlineKeyboardMarkup(menuaAterSearchResult);
         }
     }
 }

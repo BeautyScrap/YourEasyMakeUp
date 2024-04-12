@@ -7,41 +7,22 @@ namespace YourEasyRent.Services.Buttons
 {
     public class MainMenuButtonHandler : IButtonHandler
     {
-        private readonly ITelegramBotClient _botClient;
-        public MainMenuButtonHandler(ITelegramBotClient botClient)
+        public MainMenuButtonHandler()
         {
-
-            _botClient = botClient;
         }
 
-        public async Task SendMenuToTelegramHandle(long chatId)
+        public async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
         {
-            var menu = new InlineKeyboardMarkup(
-                new[]
-                {
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData(text: "Brand",callbackData: "BrandMenu"),
-                        InlineKeyboardButton.WithCallbackData(text: "Product Category",callbackData: "CategoryMenu"),
-                    },
-                });
-
-            await SendMeinMenuInlineKeyboardButton(chatId, menu);
-        }
-
-        private async Task<Message> SendMeinMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup telegramMenu)
+            var buttonForMM = new[]
         {
-            try
+            new[]
             {
-                var test = _botClient.SendTextMessageAsync(chatId, $"Hello! Let me find some cosmetics for you!");
-            }
-            catch (Exception e)
-            {
-                var zalupa = e;
+                InlineKeyboardButton.WithCallbackData(text: "Brand", callbackData: "BrandMenu"),
+                InlineKeyboardButton.WithCallbackData(text: "Product Category", callbackData: "CategoryMenu"),
+            },
+        };
 
-            }
-           return await _botClient.SendTextMessageAsync(chatId, "Main menu. Choose one:", replyMarkup: telegramMenu);
-            
+            return new InlineKeyboardMarkup(buttonForMM);
         }
     }
 }

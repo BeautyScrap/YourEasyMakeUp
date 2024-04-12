@@ -6,19 +6,19 @@ namespace YourEasyRent.Services.State
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public long UserId { get; private set; }
+        public long UserId { get; set; }
 
         [BsonRepresentation(BsonType.Int32)]
-        public long ChatId { get; private set; }
+        public long ChatId { get; set; }
 
         [BsonRepresentation(BsonType.String)]
-        public string Category { get; private set; }
+        public string Category { get; set; }
 
         [BsonRepresentation(BsonType.String)]
-        public string Brand { get; private set; }
+        public string Brand { get; set; }
 
         [BsonRepresentation(BsonType.String)]
-        public MenuStatus Status { get; private set; }
+        public MenuStatus Status { get; set; }
 
     }
 

@@ -4,31 +4,7 @@ namespace YourEasyRent.Services.State
 {
     public class UserStateManager : IUserStateManager
     {
-        // class StateRepository
-
-        // тип UserSearchState GetForUser(userId);
-        // Task Save(UserSearchState);
-        // UserSearchState доменная модель
-
-        // UserSearchStateDTO //  модель в базе
-        // {userId}
-        // {chatId} // все поля приватные 
-        // {brand}
-        // {category}
-        // {state} статус тоже храним в базе
-
-        // UserSearchStateDTO => UserSearchState
-
-        // class UserSearchState// этот класс получает ответы от пользователя и сохраняет данные в базу
-        // или это как аналог userStateManager (да) и он тоже должен записывать в базу
-        // StartSearch(chatId)
-        // StepBeck()
-        // TgMenu GetNextMenu()
-        // SetBrand(brand) 
-        // SetCategory()
-        // IsFiniShed();
-        // TOMongoRepresintation() тк тут поля не побличные, метод должен вернуть UserSearchStateDTO , который мы потом положем в базу
-
+       
         // class tgSender // ответственность только пульнуть нужное меню в телегу, а не собирать данные, в ракках телеграмХендлера из репозитория он получает нужные данные
 
         // SendCategoryMenu()// откуда мы должны брать эти листы categoryList итд?

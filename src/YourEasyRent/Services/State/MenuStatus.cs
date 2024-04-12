@@ -10,8 +10,8 @@
             CategoryChosen,
             BackOnOneStep,
             ReadyToResult,
-            ReturnToMainMenu
+            MenuAfterReceivingRresult
 
-        }
+    }
     
 }

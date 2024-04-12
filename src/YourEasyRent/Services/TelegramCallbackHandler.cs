@@ -22,18 +22,31 @@ namespace YourEasyRent.Services
         private Dictionary<long, BotState> _userResponsesToChat = new();// получется словарь  мы заменяем классом IUserSearchState
         private readonly ILogger<TelegramCallbackHandler> _logger;
         private readonly IProductRepository _productRepository;
-        private MenuStatus _currentMenuStatus = MenuStatus.Started;
-        private readonly IUserStateManager _userStateManager = new UserStateManager();// потом этот класс нужно будет удалить
-        private readonly IUserSearchState _userSearchState;
+        private readonly IUserStateManagerRepository _userStateRepository;
+        //
+        private readonly IUserSearchStateFactory _factory;
+        // Factory
+        public class UserSearchStateFactory: IUserSearchStateFactory // отдельный класс и интерфейс для фабрики  по созданию новых UserSearchState
+        {
+            public IUserSearchState CreateNew()
+            {
+                return new UserSearchState();
+            }
+        }
+
+        public interface IUserSearchStateFactory
+        {
+            IUserSearchState CreateNew();
+        }
 
         public TelegramCallbackHandler
             (
             ITelegramBotClient botClient,
             ITelegramActionsHandler actionsHandler,
             IProductRepository productRepository,
-            IUserStateManager userStateManager,
             ILogger<TelegramCallbackHandler> logger,
-            IUserSearchState userSearchState
+            IUserStateManagerRepository userStateRepository,
+            IUserSearchStateFactory factory
             )
         {
             _botClient = botClient;
@@ -44,42 +57,40 @@ namespace YourEasyRent.Services
                 {"MainMenu" , new MainMenuButtonHandler(_botClient) },
                 {"BrandMenu", new BrandButtonHandler(_botClient, _productRepository) },
                 {"CategoryMenu", new CategoryButtonHandler(_botClient)  },
-                {"ReturnToMainMenu", new ReturnToMMButtonHandler(_botClient) } // You can now bind to enum steps
-                                                                              //{Steps.MainMenuStep, new MainMenuButtonHandler(_botClient) }
+                {"ReturnToMainMenu", new ReturnToMMButtonHandler(_botClient) }
             };
             _logger = logger;
-            _userStateManager = userStateManager;
-            _userSearchState = userSearchState; 
+            _userStateRepository = userStateRepository;
         }
 
+        // public async Task HandleUpdateAsync(ITgButtonCallback update)\\ интерфейс ITgButtonCallback был  как пример пример для мока
+        // mock<ITgButtonCallback>.Set(_=> _.IsStart()).Returns(true);
         public async Task HandleUpdateAsync(Update update) 
             // BeutiyPussyCallbeack(Update updte)
             // bool IsBotStart()
             // long GetUserId()
             // bool IsValid()
             // bool IsMenuButton() // categoryMenu, brandMenu
-            // bool IsValueButton() // sephora, dildo, elf
-            // string GetName() 
-
+            // bool IsValueButton() // sephora, dildo, elf  -куда мы идем, чтобы проверить валидность кнопки?проверка на знаки и буквы?
+            // string GetName() // метод отвчает за получение название кнопки?  эти методы объединить в один интерфейс ? не могу понять что от чего будет зависеть((
+            //
         {
-            var category = 
-            string mgg = _userSearchState.SetCategory(category);
+            // эти переменныетеперь должны быть ынутри метода  tgButtonCallback который отвечает за прорерку принятого соббщения
+            // после их можно будет удалить
             var messageText = update.Message?.Text;
             var firstName = update.Message?.From.FirstName;
-            var status = _currentMenuStatus.ToString();
             var buttonName = update.CallbackQuery?.Data;
-            _userStateManager.AddStatusToList(status);
-            //isStart(callback)
-            if (messageText != null && messageText.Contains("/start") || status == "Started" || buttonName == "StartNewSearch")
+            var userId = update.CallbackQuery!.From.Id;
+            //tgCallback.isStart() => messageText != null && messageText.Contains("/start")  || buttonName == "StartNewSearch";
+            //это метод внутри класса  tgButtonCallback, который отвечает за прорерку принятого соббщения
+            if (messageText != null && messageText.Contains("/start")  || buttonName == "StartNewSearch")
             {
-                _userStateManager.ReturnToMainMenu(); // ShowMainMenu
-                var startedForUserId = update.Message.From.Id;
 
-                // await userStateManager.StartSearch(chatId)
-                // var nextMenu = userStateManager.GetNextMenu();
-                // await tgSender.SendMenu(nextMenu);
-                _userResponsesToChat[startedForUserId] = new BotState() { ChatId = update.Message.Chat.Id };
-                _currentMenuStatus = MenuStatus.MainMenu;
+                var userState = new UserSearchState(userId);
+
+                await _userStateRepository.CreateAsync(userState);
+
+                var startedForUserId = update.Message.From.Id;
                 var mainMenuHandler = _buttonHandlers["MainMenu"];
                 await mainMenuHandler.SendMenuToTelegramHandle(startedForUserId);
                 _logger.LogInformation(messageText);
@@ -92,20 +103,16 @@ namespace YourEasyRent.Services
 
             var callbackId = update.CallbackQuery.Id;
             var userResponse = update.CallbackQuery?.Data;
-            var userId = update.CallbackQuery!.From.Id;
+            ;
             var chatId = GetChatIdOrDefalt(userId);
 
             if (buttonName == "Back")
             {
                 // await um.GetSearchStateForUser(userId);
-                // await um.StepBack(); // если нужно перейти на шаг назад по статусам,
-                                        // тогда мы дожны где то хранить предыдущие статусы пользователя?
-                                        // в базе или в листе, как это было до этого?
-                                        // раньше я использовала new List<string>(); и сохраняла туда статусы в формате строки,
-                                        // потому что buttonName у меня строка
+                // await um.StepBack();
                                         
                 // var nextMenu = userStateManager.GetNextMenu();
-                // await tgSender.SendMenu(nextMenu);
+                // await tgSender.SendMenu(nextMenu); \\ аналог для выбора меню 
                 _userStateManager.MethodBackOnOneStep(status);
                 var lastMenu = _userStateManager.GetPreviousStep().ToString();
                 var lastMenuHandler = _buttonHandlers[lastMenu];
@@ -116,6 +123,7 @@ namespace YourEasyRent.Services
 
             if (buttonName == "BrandMenu")
             {
+
                 _currentMenuStatus = MenuStatus.BrandMenu;
                 var handler = _buttonHandlers[buttonName];
                 await handler.SendMenuToTelegramHandle(chatId);
@@ -143,7 +151,16 @@ namespace YourEasyRent.Services
             {
 
                 botState.ChatId = update.CallbackQuery!.From.Id;
-                botState.Brand = buttonName.Replace("Brand_", "");
+                var brand = buttonName.Replace("Brand_", "");
+
+
+                var currentState = await _userStateRepository.GetForUser(userId);
+                currentState.SetBrand(brand);
+                await _userStateRepository.UpdateAsync(currentState);
+
+                 
+                // await _userStateRepository.SetBrandForUser(userId); вместо методов, котоорые представлены ниже
+
                 _currentMenuStatus = MenuStatus.BrandChosen;
                 _userStateManager.SetBrand(MenuStatus.BrandChosen);
                 string resultOfMenu = _userStateManager.GetNextStep("BrandChosen");

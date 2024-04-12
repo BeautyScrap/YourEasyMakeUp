@@ -24,6 +24,9 @@ public class TelegramCallbackController : ControllerBase
     {
         try
         {
+            // var tgButtonCallback = new TgButtonCallback(update);
+            // tgButtonCallback.IsStart()
+            // tgButtonCallback.IsButton() && tgButtonCallback.IsBrandValue()
             await _handler.HandleUpdateAsync(update);
         }
         catch (Exception ex) 

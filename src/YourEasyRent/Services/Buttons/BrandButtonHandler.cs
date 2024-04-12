@@ -11,23 +11,19 @@ namespace YourEasyRent.Services.Buttons
 {
     internal class BrandButtonHandler : IButtonHandler
     {
-        private readonly ITelegramBotClient _botClient;
         private readonly IProductRepository _productRepository;
 
-
-        public BrandButtonHandler(ITelegramBotClient botClient,IProductRepository productRepository)
+        public BrandButtonHandler(IProductRepository productRepository)
         {
-            _botClient = botClient;
             _productRepository = productRepository; 
         }
 
-
-        public async Task SendMenuToTelegramHandle(long chatId)
+        public  async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
         {
             var brandsMenu = await _productRepository.GetBrandForMenu(limit: 5);
             var InlineKeyboardMarkup = CreateInlineKeyboardMarkup(brandsMenu);
+            return InlineKeyboardMarkup;
 
-            await SendBrandMenuInlineKeyboardButton(chatId, InlineKeyboardMarkup);
         }
 
         private InlineKeyboardMarkup CreateInlineKeyboardMarkup(List<string> brandsMenu)
@@ -40,12 +36,6 @@ namespace YourEasyRent.Services.Buttons
            
             return new InlineKeyboardMarkup(InlineKeyboardButtons);
 
-        }
-
-    
-        private async Task<Message> SendBrandMenuInlineKeyboardButton(long chatId, InlineKeyboardMarkup brandsMenu)
-        {
-            return await _botClient.SendTextMessageAsync(chatId, "Сhoose a brand:", replyMarkup: brandsMenu);
         }   
     }
 }

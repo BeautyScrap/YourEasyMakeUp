@@ -5,11 +5,11 @@ using MongoDB.Driver;
 
 namespace YourEasyRent.DataBase.Interfaces
 {
-    public interface IStateRepository
+    public interface IUserStateManagerRepository
     {
-
         Task<UserSearchState> GetForUser(long userId);
-        Task Save(UserSearchState userSearchState);
+        Task CreateAsync(UserSearchState userSearchState);
 
+        Task UpdateAsync(UserSearchState userSearchState);
     }
 }
