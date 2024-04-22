@@ -19,11 +19,13 @@ namespace YourEasyRent.Services
     {
         private readonly ITelegramBotClient _botClient;
         private ITelegramActionsHandler _actionsHandler;
-        private readonly ITgButtonCallback _tgButtonCallback;
         private readonly IProductRepository _productRepository;
         private readonly IUserStateManagerRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
+        private readonly IUserSearchState _userSearchState;
+        private readonly ITgButtonCallback _tgButtonCallback;
+
         //
        // private readonly IUserSearchStateFactory _factory;
         // Factory
@@ -49,7 +51,8 @@ namespace YourEasyRent.Services
             IUserStateManagerRepository userStateRepository,
             ITelegramSender telegramSender,
             //IUserSearchStateFactory factory,
-            ITgButtonCallback tgButtonCallback
+            ITgButtonCallback tgButtonCallback,
+            IUserSearchState userSearchState
             )
         {
             _botClient = botClient;
@@ -59,6 +62,8 @@ namespace YourEasyRent.Services
             _userStateRepository = userStateRepository;
             _telegramSender = telegramSender;
             _tgButtonCallback = tgButtonCallback;
+            _userSearchState = userSearchState;
+
             //_factory = factory;
         }
 
@@ -74,18 +79,7 @@ namespace YourEasyRent.Services
         // bool IsValueButton() // sephora, dildo, elf  -куда мы идем, чтобы проверить валидность кнопки?проверка на знаки и буквы?
         // string GetName() // метод отвчает за получение название кнопки?  эти методы объединить в один интерфейс ? не могу понять что от чего будет зависеть((
         //
-        {
-
-            //var tgButtonCallback = new TgButtonCallback(update);
-            //tgButtonCallback.IsBotStart();
-            // var userId = tgButtonCallback.GetUserId(update);
-            // var chatId = tgButtonCallback.GetChatId(update);
-            //tgButtonCallback.IsValidMsg();
-            //tgButtonCallback.GetNameOfButton(update);
-            //tgButtonCallback.IsMenuButton();
-            //tgButtonCallback.IsProductButton();
-
-           
+        { 
             var userId =  _tgButtonCallback.GetUserId(update);// пока пришла к такому решению, все таки протестировать, чтобы посмотеть как ведут себя переменные
             var chatId = _tgButtonCallback.GetChatId(update);
 
@@ -120,17 +114,7 @@ namespace YourEasyRent.Services
 
             }
 
-            // эти переменныетеперь должны быть ынутри метода  tgButtonCallback который отвечает за прорерку принятого соббщения
-            // после их можно будет удалить
-            ////var messageText = update.Message?.Text;
-            ////var firstName = update.Message?.From.FirstName;
-            ////var buttonName = update.CallbackQuery?.Data;
-            ////var userId = update.CallbackQuery!.From.Id;
-            //tgCallback.isStart() => messageText != null && messageText.Contains("/start")  || buttonName == "StartNewSearch";
-            //это метод внутри класса  tgButtonCallback, который отвечает за прорерку принятого соббщения
-
-
-            //if (messageText != null && messageText.Contains("/start")  || buttonName == "StartNewSearch")
+             //if (messageText != null && messageText.Contains("/start")  || buttonName == "StartNewSearch")
             //{
 
             //    var userState = new UserSearchState(userId);

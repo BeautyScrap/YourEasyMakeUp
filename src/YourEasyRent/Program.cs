@@ -42,13 +42,17 @@ builder.Services.AddHttpClient<IProductsSiteClient, SephoraClient>();
 builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();      
-builder.Services.AddSingleton<IUserSearchState ,  UserSearchState>();
 builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
 builder.Services.AddSingleton<IUserStateManagerRepository, UserStateManagerRepository>();
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
 builder.Services.AddSingleton<ITelegramCallbackHandler, TelegramCallbackHandler>();
+
+builder.Services.AddTransient<ITgButtonCallback, TgButtonCallback>();
+
+builder.Services.AddSingleton<IUserSearchState,  UserSearchState>();
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("log.txt",

@@ -20,10 +20,6 @@ namespace YourEasyRent.Services
             this.update = update;
         }
 
-        //public TgButtonCallback()
-        //{
-           
-        //}
 
         public void IsBotStart()
         {

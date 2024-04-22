@@ -24,14 +24,14 @@ public class TelegramCallbackController : ControllerBase
     {
         try
         {
-            var tgButtonCallback = new TgButtonCallback(update);
-            tgButtonCallback.IsBotStart();
-            tgButtonCallback.GetUserId(update);
-            tgButtonCallback.GetChatId(update);
-            tgButtonCallback.IsValidMsg();
-            tgButtonCallback.GetNameOfButton(update);
-            tgButtonCallback.IsMenuButton();
-            tgButtonCallback.IsProductButton();
+            //var tgButtonCallback = new TgButtonCallback(update);
+            //tgButtonCallback.IsBotStart();
+            //tgButtonCallback.GetUserId(update);
+            //tgButtonCallback.GetChatId(update);
+            //tgButtonCallback.IsValidMsg();
+            //tgButtonCallback.GetNameOfButton(update);
+            //tgButtonCallback.IsMenuButton();
+            //tgButtonCallback.IsProductButton();
 
             await _handler.HandleUpdateAsync(update);
         }

@@ -4,7 +4,7 @@ namespace YourEasyRent.Services.State
 {
     public class UserSearchState :IUserSearchState                                             
     {
-        public  long UserId { get; private set; }
+        public  long UserId { get; set; }
         public long ChatId { get; private set; }
         public string Category { get; private set; }
         public string Brand{ get; private set; }
@@ -25,7 +25,9 @@ namespace YourEasyRent.Services.State
             Category = dto.Category;
             Brand = dto.Brand;
             _menuStatus = dto.Status;
+
         }
+
         public void SetStatus(MenuStatus status)
         {
             menuStatuses.Add(status);
