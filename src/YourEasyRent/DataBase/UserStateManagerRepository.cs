@@ -37,5 +37,16 @@ namespace YourEasyRent.DataBase
             var dto = userSearchState.TOMongoRepresintation();
             await _collectionOfUserSearchState.ReplaceOneAsync(filter, dto);
         }
+
+        public async Task<MenuStatus> GetCurrentStateForUser(long userId)
+        {
+            var filter = Builders<UserSearchStateDTO>.Filter.Eq(u =>u.UserId, userId);
+            var dto = await _collectionOfUserSearchState.Find(filter).FirstOrDefaultAsync();
+
+            var state = new UserSearchState(dto);
+
+            return state._menuStatus;// не уверена, надо при запуске посмотреть что возвращает метод, точно ли корректный статус
+
+        }
     }
 }

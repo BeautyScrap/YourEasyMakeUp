@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 using YourEasyRent.Services.State;
+using YourEasyRent.Services.Keyboard;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -40,8 +41,10 @@ builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.Conne
 builder.Services.AddHttpClient<IProductsSiteClient, SephoraClient>();
 builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
-builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();     
-builder.Services.AddSingleton<IUserStateManager, UserStateManager>();   
+builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();      
+builder.Services.AddSingleton<IUserSearchState ,  UserSearchState>();
+builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
+builder.Services.AddSingleton<IUserStateManagerRepository, UserStateManagerRepository>();
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));

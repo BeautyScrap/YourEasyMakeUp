@@ -9,7 +9,6 @@ namespace YourEasyRent.Services.Buttons
 
         public ReturnToMMButtonHandler ()
         {
-
         }
         public  async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
         {

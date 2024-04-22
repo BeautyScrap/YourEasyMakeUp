@@ -30,7 +30,8 @@ namespace YourEasyRent.Services.Buttons
         {
             var InlineKeyboardButtons = brandsMenu.Select(brand =>
             {
-                var buttone = InlineKeyboardButton.WithCallbackData(text: brand, callbackData: brand);
+                var buttone = InlineKeyboardButton.WithCallbackData(text: brand, callbackData: $"Brand_{brand}");//  возможно так можно будет
+                // распознать какой коллбек из какого меню пришел
                 return new List<InlineKeyboardButton> { buttone };
             }).ToList();
            

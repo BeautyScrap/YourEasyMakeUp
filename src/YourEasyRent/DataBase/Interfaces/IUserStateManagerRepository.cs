@@ -11,5 +11,6 @@ namespace YourEasyRent.DataBase.Interfaces
         Task CreateAsync(UserSearchState userSearchState);
 
         Task UpdateAsync(UserSearchState userSearchState);
+        Task<MenuStatus> GetCurrentStateForUser(long userId);
     }
 }

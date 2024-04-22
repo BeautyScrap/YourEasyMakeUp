@@ -2,6 +2,7 @@
 using System.Security.Cryptography.X509Certificates;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
+using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services.Buttons;
 using YourEasyRent.Services.State;
 
@@ -11,6 +12,7 @@ namespace YourEasyRent.Services.Keyboard
     {
         private readonly ITelegramBotClient _botClient;
         private Dictionary<MenuStatus, IButtonHandler> _menus;
+        private readonly IProductRepository _productRepository;
 
         public TelegramSender(ITelegramBotClient botClient)
         {
@@ -18,17 +20,16 @@ namespace YourEasyRent.Services.Keyboard
             _menus = new Dictionary<MenuStatus, IButtonHandler>()
             {
                 { MenuStatus.MainMenu, new MainMenuButtonHandler() },
-                { MenuStatus.BrandMenu, new BrandButtonHandler() },//  _botClient  можно и убрать и написать репозиторий, который ходит в базу
+                { MenuStatus.BrandMenu, new BrandButtonHandler(_productRepository) },//  _botClient  можно и убрать и написать репозиторий, который ходит в базу
                 { MenuStatus.CategoryMenu, new CategoryButtonHandler() },
                 { MenuStatus.MenuAfterReceivingRresult, new ReturnToMMButtonHandler() }
-
             };
-
         }
         public async Task SendMainMenu(long chatId)
         { 
             var menu = await _menus[MenuStatus.MainMenu].SendMenuToTelegramHandle();
-            await _botClient.SendTextMessageAsync(chatId, "Main menu. Choose one:", replyMarkup: menu) ;
+            await _botClient.SendTextMessageAsync(chatId, "Main menu. Choose one:", replyMarkup: menu);
+            // надо ли тут return?
         }
         public async Task SendBrandMenu(long chatId)
         {
