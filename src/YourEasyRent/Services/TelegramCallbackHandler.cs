@@ -23,8 +23,7 @@ namespace YourEasyRent.Services
         private readonly IUserStateManagerRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
-        private readonly IUserSearchState _userSearchState;
-        private readonly ITgButtonCallback _tgButtonCallback;
+     // private readonly ITgButtonCallback _tgButtonCallback;
 
         //
        // private readonly IUserSearchStateFactory _factory;
@@ -49,10 +48,9 @@ namespace YourEasyRent.Services
             IProductRepository productRepository,
             ILogger<TelegramCallbackHandler> logger,
             IUserStateManagerRepository userStateRepository,
-            ITelegramSender telegramSender,
+            ITelegramSender telegramSender
             //IUserSearchStateFactory factory,
-            ITgButtonCallback tgButtonCallback,
-            IUserSearchState userSearchState
+ 
             )
         {
             _botClient = botClient;
@@ -61,60 +59,54 @@ namespace YourEasyRent.Services
             _logger = logger;
             _userStateRepository = userStateRepository;
             _telegramSender = telegramSender;
-            _tgButtonCallback = tgButtonCallback;
-            _userSearchState = userSearchState;
+
 
             //_factory = factory;
         }
 
         // public async Task HandleUpdateAsync(ITgButtonCallback update)\\ интерфейс ITgButtonCallback был  как пример пример для мока
         // mock<ITgButtonCallback>.Set(_=> _.IsStart()).Returns(true);
-        public async Task HandleUpdateAsync(Update update)
-
-        // BeutiyPussyCallbeack(Update updte)
-        // bool IsBotStart()
-        // long GetUserId()
-        // bool IsValid() // проверка что не содержит цифр и тд
-        // bool IsMenuButton() // categoryMenu, brandMenu -  проверка, что выбрал именно меню
-        // bool IsValueButton() // sephora, dildo, elf  -куда мы идем, чтобы проверить валидность кнопки?проверка на знаки и буквы?
-        // string GetName() // метод отвчает за получение название кнопки?  эти методы объединить в один интерфейс ? не могу понять что от чего будет зависеть((
-        //
-        { 
-            var userId =  _tgButtonCallback.GetUserId(update);// пока пришла к такому решению, все таки протестировать, чтобы посмотеть как ведут себя переменные
-            var chatId = _tgButtonCallback.GetChatId(update);
-
-            var userState = new UserSearchState(userId);
-            await _userStateRepository.CreateAsync(userState);
-
-            var currentState = await _userStateRepository.GetForUser(userId); // !!использование нового метода для установки актуального статуса
-                                                                 //currentState.SetBrand(brand);               
-            await _userStateRepository.UpdateAsync(currentState);
-
-            if (_tgButtonCallback.IsStart) // именно кнопка старт
+        public async Task HandleUpdateAsync(TgButtonCallback tgButtonCallback) // наверно надо изменить этот метод, чтобы в ургументе у него был не update, а TgButtonCallback
+        {
+            tgButtonCallback.IsMenuButton();
+            if (tgButtonCallback.IsStart)
             {
-                await _telegramSender.SendMainMenu(chatId);
-                return;
-                
-            }
-            if (_tgButtonCallback.IsValueMenuMessage) // какой то вариант из меню
-            {
-                var nameOfButton = _tgButtonCallback.GetNameOfButton(update);
-                if (nameOfButton == "BrandMenu")
-                {
-                    await _telegramSender.SendBrandMenu(chatId);
-                    return;
-                }
-                if( nameOfButton == "BrandMenu")
-                {
-                    await _telegramSender.SendCategoryMenu(chatId);
-                    return;
-                }
 
-               
+            } ;
 
-            }
+            //var userId =  _tgButtonCallback.GetUserId();// пока пришла к такому решению, все таки протестировать, чтобы посмотеть как ведут себя переменные
+            //var chatId = _tgButtonCallback.GetChatId(update);
 
-             //if (messageText != null && messageText.Contains("/start")  || buttonName == "StartNewSearch")
+
+            //var currentState = await _userStateRepository.GetForUser(userId); // !!использование нового метода для установки актуального статуса
+            //currentState.SetBrand(brand);
+            //await _userStateRepository.UpdateAsync(currentState);
+
+            //if (_tgButtonCallback.IsStart) // именно кнопка старт
+            //{
+            //    await _telegramSender.SendMainMenu(chatId);
+            //    return;
+
+            //}
+            //if (_tgButtonCallback.IsValueMenuMessage) // какой то вариант из меню
+            //{
+            //    var nameOfButton = _tgButtonCallback.GetNameOfButton(update);
+            //    if (nameOfButton == "BrandMenu")
+            //    {
+            //        await _telegramSender.SendBrandMenu(chatId);
+            //        return;
+            //    }
+            //    if (nameOfButton == "BrandMenu")
+            //    {
+            //        await _telegramSender.SendCategoryMenu(chatId);
+            //        return;
+            //    }
+
+
+
+            //}
+
+            //if (messageText != null && messageText.Contains("/start")  || buttonName == "StartNewSearch")
             //{
 
             //    var userState = new UserSearchState(userId);
@@ -123,7 +115,7 @@ namespace YourEasyRent.Services
             //    //currentState.SetBrand(brand);               
             //    await _userStateRepository.UpdateAsync(currentState);
 
-               
+
 
 
 
@@ -133,10 +125,10 @@ namespace YourEasyRent.Services
             //    //_logger.LogInformation(messageText);
             //    //return;
             //}
-            if (update.Type != UpdateType.CallbackQuery)
-            {
-                throw new Exception("The user did not send a message");
-            }
+            //if (update.Type != UpdateType.CallbackQuery)
+            //{
+            //    throw new Exception("The user did not send a message");
+            //}
 
             //var callbackId = update.CallbackQuery.Id;
             //var userResponse = update.CallbackQuery?.Data;
@@ -147,7 +139,7 @@ namespace YourEasyRent.Services
             //{
             //    // await um.GetSearchStateForUser(userId);
             //    // await um.StepBack();
-                                        
+
             //    // var nextMenu = userStateManager.GetNextMenu();
             //    // await tgSender.SendMenu(nextMenu); \\ аналог для выбора меню 
             //    _userStateManager.MethodBackOnOneStep(status);

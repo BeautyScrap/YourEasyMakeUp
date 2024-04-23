@@ -2,7 +2,7 @@
 
 namespace YourEasyRent.Services.State
 {
-    public class UserSearchState :IUserSearchState                                             
+    public class UserSearchState                                            
     {
         public  long UserId { get; set; }
         public long ChatId { get; private set; }

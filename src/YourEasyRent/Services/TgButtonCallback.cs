@@ -5,26 +5,24 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace YourEasyRent.Services
 {
-    public class TgButtonCallback: ITgButtonCallback
+    public class TgButtonCallback
     {
-        private readonly Update update;
+        private readonly Update _update;
         public bool IsStart { get; set; }
         public bool IsValidMessage {  get; set; }
         public bool IsValueMenuMessage { get; set; }  
         public bool IsValueProductButton {  get; set; }
 
 
-
         public TgButtonCallback(Update update)
         {
-            this.update = update;
+            _update = update;
         }
-
 
         public void IsBotStart()
         {
-            var messageText = update.Message?.Text;
-            var nameOfButton = update.CallbackQuery?.Data;
+            var messageText = _update.Message?.Text;
+            var nameOfButton = _update.CallbackQuery?.Data;
             if (messageText != null && messageText.Contains("/start") || nameOfButton == "StartNewSearch") 
             { 
                 IsStart = true;
@@ -52,7 +50,7 @@ namespace YourEasyRent.Services
         }
         public void IsValidMsg()
         {
-            var nameOfButton = update.CallbackQuery?.Data;
+            var nameOfButton = _update.CallbackQuery?.Data;
             if (nameOfButton.All(c => char.IsLetter(c) || c == '_'))
             {
                 IsValidMessage = true;
@@ -66,7 +64,7 @@ namespace YourEasyRent.Services
 
         public void IsMenuButton()
         {
-            var nameOfButton = update.CallbackQuery?.Data;
+            var nameOfButton = _update.CallbackQuery?.Data;
             if (nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu")
             {
                 IsValueMenuMessage = true;
@@ -78,7 +76,7 @@ namespace YourEasyRent.Services
         }
         public void IsProductButton()
         {
-            var nameOfButton = update.CallbackQuery?.Data;
+            var nameOfButton = _update.CallbackQuery?.Data;
             if (nameOfButton.StartsWith("Brand_") || nameOfButton.StartsWith("Category_")) 
             {
                 IsValueProductButton = true;
