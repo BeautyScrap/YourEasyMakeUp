@@ -25,7 +25,6 @@ namespace YourEasyRent.Entities.Douglas
 
         public string BaseProductName { get; set; }
 
-
       
         public DouglasProduct()
         {

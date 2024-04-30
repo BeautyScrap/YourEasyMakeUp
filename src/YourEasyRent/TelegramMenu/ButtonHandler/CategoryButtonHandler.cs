@@ -3,7 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace YourEasyRent.Services.Buttons
+namespace YourEasyRent.TelegramMenu.ButtonHandler
 {
     public class CategoryButtonHandler : IButtonHandler
 

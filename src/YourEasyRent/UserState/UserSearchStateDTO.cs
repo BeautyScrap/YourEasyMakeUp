@@ -1,12 +1,15 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace YourEasyRent.Services.State
+using YourEasyRent.Entities;
+
+namespace YourEasyRent.UserState
 {
+
     public class UserSearchStateDTO // шаблон с данными, которые должны храниться в бд
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public long UserId { get; set; }
+        public string? UserId { get; set; }
 
         [BsonRepresentation(BsonType.Int32)]
         public long ChatId { get; set; }

@@ -32,7 +32,7 @@ namespace YourEasyRent.Services
         {
             var url = GetSectionUrl(sectionMapping[section], pageNumber);
 
-            var douglasHTTPResponce = await _httpClient.GetAsync(url);   // код 403
+            var douglasHTTPResponce = await _httpClient.GetAsync(url); 
 
             var douglasRawJsonString = await douglasHTTPResponce.Content.ReadAsStringAsync();
 

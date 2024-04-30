@@ -10,8 +10,8 @@ using YourEasyRent.Services.Buttons;
 using Microsoft.AspNetCore.Http.Connections;
 using System.Security.Cryptography.Xml;
 using YourEasyRent.DataBase.Interfaces;
-using YourEasyRent.Services.State;
-using YourEasyRent.Services.Keyboard;
+using YourEasyRent.UserState;
+using YourEasyRent.TelegramMenu;
 
 namespace YourEasyRent.Services
 {
@@ -74,7 +74,7 @@ namespace YourEasyRent.Services
 
             } ;
 
-            //var userId =  _tgButtonCallback.GetUserId();// пока пришла к такому решению, все таки протестировать, чтобы посмотеть как ведут себя переменные
+            // пока пришла к такому решению, все таки протестировать, чтобы посмотеть как ведут себя переменные
             //var chatId = _tgButtonCallback.GetChatId(update);
 
 

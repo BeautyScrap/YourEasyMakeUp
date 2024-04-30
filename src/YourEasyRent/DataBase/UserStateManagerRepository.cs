@@ -1,7 +1,8 @@
 ﻿using MongoDB.Driver;
 using Telegram.Bot.Types;
 using YourEasyRent.DataBase.Interfaces;
-using YourEasyRent.Services.State;
+using YourEasyRent.Entities;
+using YourEasyRent.UserState;
 
 namespace YourEasyRent.DataBase
 {
@@ -14,7 +15,7 @@ namespace YourEasyRent.DataBase
             _collectionOfUserSearchState = dataBase.GetCollection<UserSearchStateDTO>(dateBaseConfig.CollectionName);
         }
 
-        public async Task<UserSearchState> GetForUser(long userId)
+        public async Task<UserSearchState> GetForUser(string userId)
         {
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
 
@@ -38,7 +39,7 @@ namespace YourEasyRent.DataBase
             await _collectionOfUserSearchState.ReplaceOneAsync(filter, dto);
         }
 
-        public async Task<MenuStatus> GetCurrentStateForUser(long userId)
+        public async Task<MenuStatus> GetCurrentStateForUser(string userId)
         {
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u =>u.UserId, userId);
             var dto = await _collectionOfUserSearchState.Find(filter).FirstOrDefaultAsync();

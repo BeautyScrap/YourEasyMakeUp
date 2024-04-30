@@ -3,10 +3,13 @@ using System.Security.Cryptography.X509Certificates;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 using YourEasyRent.DataBase.Interfaces;
+using YourEasyRent.Entities;
 using YourEasyRent.Services.Buttons;
-using YourEasyRent.Services.State;
+using YourEasyRent.UserState;
+using YourEasyRent.TelegramMenu.ButtonHandler;
 
-namespace YourEasyRent.Services.Keyboard
+
+namespace YourEasyRent.TelegramMenu
 {
     public class TelegramSender : ITelegramSender //  как мы понмаем какое кокренто меню вызвать, когда получаем ответ 
     {
@@ -26,7 +29,7 @@ namespace YourEasyRent.Services.Keyboard
             };
         }
         public async Task SendMainMenu(long chatId)
-        { 
+        {
             var menu = await _menus[MenuStatus.MainMenu].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "Main menu. Choose one:", replyMarkup: menu);
             // надо ли тут return?
@@ -43,7 +46,7 @@ namespace YourEasyRent.Services.Keyboard
             await _botClient.SendTextMessageAsync(chatId, "Сhoose a category:", replyMarkup: menu);
         }
 
-        public  async Task SendMenuAfterResult(long chatId)
+        public async Task SendMenuAfterResult(long chatId)
         {
             var menu = await _menus[MenuStatus.MenuAfterReceivingRresult].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "What do you want to do next?", replyMarkup: menu);
@@ -51,7 +54,7 @@ namespace YourEasyRent.Services.Keyboard
         public Task SendResults()
         {
             throw new NotImplementedException();
-            
+
         }
 
     }

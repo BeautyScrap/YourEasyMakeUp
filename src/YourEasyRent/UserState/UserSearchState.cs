@@ -1,26 +1,27 @@
 ﻿using MongoDB.Bson;
+using YourEasyRent.Entities;
 
-namespace YourEasyRent.Services.State
+namespace YourEasyRent.UserState
 {
-    public class UserSearchState                                            
+    public class UserSearchState
     {
-        public  long UserId { get; set; }
+        public string UserId { get; private set; }
         public long ChatId { get; private set; }
         public string Category { get; private set; }
-        public string Brand{ get; private set; }
+        public string Brand { get; private set; }
         public MenuStatus _menuStatus { get; private set; }
 
         private List<MenuStatus> menuStatuses = new List<MenuStatus>();
 
-        public UserSearchState(long userId)
+        public UserSearchState(string userId)
         {
-            UserId = userId;
+            UserId = userId.ToString();
             _menuStatus = MenuStatus.Started;
         }
 
         public UserSearchState(UserSearchStateDTO dto)
         {
-            UserId = dto.UserId;   
+            UserId = dto.UserId;
             ChatId = dto.ChatId;
             Category = dto.Category;
             Brand = dto.Brand;
@@ -40,7 +41,7 @@ namespace YourEasyRent.Services.State
         {
             Brand = brand;
             _menuStatus = MenuStatus.BrandChosen;
-            menuStatuses.Add(MenuStatus.BrandChosen);   
+            menuStatuses.Add(MenuStatus.BrandChosen);
         }
 
         public void SetCategory(string category)
@@ -56,7 +57,7 @@ namespace YourEasyRent.Services.State
             menuStatuses.Remove(status);
         }
 
-        public void GetNextMenu() 
+        public void GetNextMenu()
         {
             throw new NotImplementedException(); // от того какой будет следующий статус в основном классе TCH зависит показ следующего меню
             // те мы передаем сюда аргумент со статусом , который потом будем сопоставлять с словарем и присылать в ответ нужное меню

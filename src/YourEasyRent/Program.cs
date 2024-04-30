@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Serilog;
 using YourEasyRent.Services.State;
-using YourEasyRent.Services.Keyboard;
+using YourEasyRent.TelegramMenu;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {

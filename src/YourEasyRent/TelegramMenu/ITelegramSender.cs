@@ -1,4 +1,4 @@
-﻿namespace YourEasyRent.Services.Keyboard
+﻿namespace YourEasyRent.TelegramMenu
 {
     public interface ITelegramSender
     {

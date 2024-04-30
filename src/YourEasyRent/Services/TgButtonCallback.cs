@@ -32,9 +32,9 @@ namespace YourEasyRent.Services
                 IsStart = false;
             }
         }
-        public long GetUserId(Update update)
+        public string GetUserId()
         {
-            long userId = update.CallbackQuery!.From.Id;
+            var userId = _update.CallbackQuery!.From.Id.ToString();
             return userId;
         }
         public long GetChatId(Update update)
