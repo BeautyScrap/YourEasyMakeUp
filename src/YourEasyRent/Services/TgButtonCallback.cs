@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.VisualBasic;
 using System.Numerics;
 using Telegram.Bot.Types;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -21,6 +22,7 @@ namespace YourEasyRent.Services
 
         public void IsBotStart()
         {
+            //var startedForUserId = _update.Message.From.Id;
             var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
             if (messageText != null && messageText.Contains("/start") || nameOfButton == "StartNewSearch") 
@@ -34,38 +36,49 @@ namespace YourEasyRent.Services
         }
         public string GetUserId()
         {
-            var userId = _update.CallbackQuery!.From.Id.ToString();
+            var userId = _update.CallbackQuery?.From.Id.ToString();
+            if (userId == null)
+            {
+                var startedForUserId = _update.Message?.From.Id.ToString();
+                return startedForUserId;
+            }
             return userId;
         }
-        public long GetChatId(Update update)
+        public long GetChatId(Update update) // аргумент из скобом можно и удалить?
         {
             var chatId = update.Message.Chat.Id;
-            var userId = update.CallbackQuery!.From.Id;
-            if ( chatId  == null)
-            {
-                chatId = userId;
-                return chatId;
-            }
+            //var userId = update.CallbackQuery!.From.Id;
+            //if ( chatId  == null)
+            //{
+            //    chatId = userId;
+            //    return chatId;
+            //}
             return chatId;
         }
-        public void IsValidMsg()
+        public void IsValidMsg() 
         {
             var nameOfButton = _update.CallbackQuery?.Data;
+            if (nameOfButton == null)
+            {
+                nameOfButton = _update.Message?.Text;
+
+                if (nameOfButton == null)
+                {
+                    IsValidMessage = false;
+                    throw new Exception("The user did not send a message");
+                }
+            }
             if (nameOfButton.All(c => char.IsLetter(c) || c == '_'))
             {
                 IsValidMessage = true;
-            }
-            else
-            {
-                IsValidMessage = false;
-                throw new Exception("The user did not send a message");
             }
         }
 
         public void IsMenuButton()
         {
+            var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            if (nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu")
+            if (messageText == null && nameOfButton == "BrandMenu" || messageText == null && nameOfButton == "CategoryMenu")
             {
                 IsValueMenuMessage = true;
             }
@@ -76,8 +89,9 @@ namespace YourEasyRent.Services
         }
         public void IsProductButton()
         {
+            var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            if (nameOfButton.StartsWith("Brand_") || nameOfButton.StartsWith("Category_")) 
+            if (messageText == null && nameOfButton.StartsWith("Brand_") || messageText == null && nameOfButton.StartsWith("Category_")) 
             {
                 IsValueProductButton = true;
             }
@@ -87,10 +101,10 @@ namespace YourEasyRent.Services
             }
         }
 
-        public string GetNameOfButton(Update update)
-        {
-            var nameOfButton = update.CallbackQuery?.Data;
-            return nameOfButton;
-        }        
+        //public string GetNameOfButton(Update update)
+        //{
+        //    var nameOfButton = update.CallbackQuery?.Data;
+        //    return nameOfButton;
+        //}        
     }
 }

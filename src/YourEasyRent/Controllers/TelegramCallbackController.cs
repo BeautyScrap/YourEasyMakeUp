@@ -30,7 +30,7 @@ public class TelegramCallbackController : ControllerBase
             tgButtonCallback.GetUserId();
             tgButtonCallback.GetChatId(update);
             tgButtonCallback.IsValidMsg();
-            tgButtonCallback.GetNameOfButton(update);
+            //tgButtonCallback.GetNameOfButton(update);
             tgButtonCallback.IsMenuButton();
             tgButtonCallback.IsProductButton();
 

@@ -23,7 +23,7 @@ namespace YourEasyRent.Services
         private readonly IUserStateManagerRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
-     // private readonly ITgButtonCallback _tgButtonCallback;
+
 
         //
        // private readonly IUserSearchStateFactory _factory;
