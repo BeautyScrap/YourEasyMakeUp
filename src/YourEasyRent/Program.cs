@@ -6,8 +6,9 @@ using Telegram.Bot;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Serilog;
-using YourEasyRent.Services.State;
+using YourEasyRent.UserState;
 using YourEasyRent.TelegramMenu;
+
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
