@@ -11,8 +11,8 @@ namespace YourEasyRent.UserState
         [BsonRepresentation(BsonType.ObjectId)]
         public string? UserId { get; set; }
 
-        [BsonRepresentation(BsonType.Int32)]
-        public long ChatId { get; set; }
+        [BsonRepresentation(BsonType.String)]
+        public string ChatId { get; set; }
 
         [BsonRepresentation(BsonType.String)]
         public string Category { get; set; }

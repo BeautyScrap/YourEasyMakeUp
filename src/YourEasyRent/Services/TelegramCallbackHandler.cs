@@ -64,195 +64,225 @@ namespace YourEasyRent.Services
             //_factory = factory;
         }
 
-        // public async Task HandleUpdateAsync(ITgButtonCallback update)\\ интерфейс ITgButtonCallback был  как пример пример для мока
-        // mock<ITgButtonCallback>.Set(_=> _.IsStart()).Returns(true);
-        public async Task HandleUpdateAsync(TgButtonCallback tgButtonCallback) // наверно надо изменить этот метод, чтобы в ургументе у него был не update, а TgButtonCallback
+        public async Task HandleUpdateAsync(TgButtonCallback tgButtonCallback) 
         {
-            tgButtonCallback.IsMenuButton();
-            if (tgButtonCallback.IsStart)
+
+            var userId = tgButtonCallback.GetUserId();
+            var chatId = tgButtonCallback.GetChatId();
+            var userSearchState = new UserSearchState(userId);  
+
+            userSearchState.SetChatId(chatId);
+            await _userStateRepository.CreateAsync(userSearchState);
+            await _userStateRepository.UpdateAsync(userSearchState);
+
+
+            if (tgButtonCallback.IsStart)  //  надо проверить как будет устанавливаться и меняться статус меню!!
+                
             {
+                MenuStatus status = MenuStatus.MainMenu;
+                userSearchState.AddStatusToHistory(status);
+                await _userStateRepository.GetCurrentStateForUser(userId);
+                await _telegramSender.SendMainMenu(chatId);
 
-            } ;
+                return;
+            };
 
-            // пока пришла к такому решению, все таки протестировать, чтобы посмотеть как ведут себя переменные
-            //var chatId = _tgButtonCallback.GetChatId(update);
+            if (tgButtonCallback.IsValueMenuMessage) // какой то вариант из меню
+            {
+                if (tgButtonCallback.IsBrandMenu)
+                {
+                    await _telegramSender.SendBrandMenu(chatId); // тут еще нужно устанавливать и сохранять значение Статуса меню, чтобы потом можно было пользоваться кнопкой назад
+                    return;
+
+                }
+                if (tgButtonCallback.IsCategoryMenu)
+                {
+                    await _telegramSender.SendCategoryMenu(chatId);
+                    return;
+                }
 
 
-            //var currentState = await _userStateRepository.GetForUser(userId); // !!использование нового метода для установки актуального статуса
-            //currentState.SetBrand(brand);
-            //await _userStateRepository.UpdateAsync(currentState);
 
-            //if (_tgButtonCallback.IsStart) // именно кнопка старт
+
+                // пока пришла к такому решению, все таки протестировать, чтобы посмотеть как ведут себя переменные
+                //var chatId = _tgButtonCallback.GetChatId(update);
+
+
+                //var currentState = await _userStateRepository.GetForUser(userId); // !!использование нового метода для установки актуального статуса
+                //currentState.SetBrand(brand);
+                //await _userStateRepository.UpdateAsync(currentState);
+
+                //if (_tgButtonCallback.IsStart) // именно кнопка старт
+                //{
+                //    await _telegramSender.SendMainMenu(chatId);
+                //    return;
+
+                //}
+                //if (_tgButtonCallback.IsValueMenuMessage) // какой то вариант из меню
+                //{
+                //    var nameOfButton = _tgButtonCallback.GetNameOfButton(update);
+                //    if (nameOfButton == "BrandMenu")
+                //    {
+                //        await _telegramSender.SendBrandMenu(chatId);
+                //        return;
+                //    }
+                //    if (nameOfButton == "BrandMenu")
+                //    {
+                //        await _telegramSender.SendCategoryMenu(chatId);
+                //        return;
+                //    }
+
+
+
+                //}
+
+                //if (messageText != null && messageText.Contains("/start")  || buttonName == "StartNewSearch")
+                //{
+
+                //    var userState = new UserSearchState(userId);
+                //    await _userStateRepository.CreateAsync(userState);
+                //    var currentState = await _userStateRepository.GetForUser(userId); // !!использование нового метода для установки актуального статуса
+                //    //currentState.SetBrand(brand);               
+                //    await _userStateRepository.UpdateAsync(currentState);
+
+
+
+
+
+                //    //var startedForUserId = update.Message.From.Id;
+                //    //var mainMenuHandler = _buttonHandlers["MainMenu"];
+                //    //await mainMenuHandler.SendMenuToTelegramHandle(startedForUserId);
+                //    //_logger.LogInformation(messageText);
+                //    //return;
+                //}
+                //if (update.Type != UpdateType.CallbackQuery)
+                //{
+                //    throw new Exception("The user did not send a message");
+                //}
+
+                //var callbackId = update.CallbackQuery.Id;
+                //var userResponse = update.CallbackQuery?.Data;
+                //;
+                //var chatId = GetChatIdOrDefalt(userId);
+
+                //if (buttonName == "Back")
+                //{
+                //    // await um.GetSearchStateForUser(userId);
+                //    // await um.StepBack();
+
+                //    // var nextMenu = userStateManager.GetNextMenu();
+                //    // await tgSender.SendMenu(nextMenu); \\ аналог для выбора меню 
+                //    _userStateManager.MethodBackOnOneStep(status);
+                //    var lastMenu = _userStateManager.GetPreviousStep().ToString();
+                //    var lastMenuHandler = _buttonHandlers[lastMenu];
+                //    await lastMenuHandler.SendMenuToTelegramHandle(chatId);
+                //    return;
+
+                //}
+
+                //if (buttonName == "BrandMenu")
+                //{
+
+                //    _currentMenuStatus = MenuStatus.BrandMenu;
+                //    var handler = _buttonHandlers[buttonName];
+                //    await handler.SendMenuToTelegramHandle(chatId);
+                //    return;
+                //}
+
+                //if (buttonName == "CategoryMenu")
+                //{
+                //    _currentMenuStatus = MenuStatus.CategoryMenu;
+                //    var handler = _buttonHandlers[buttonName];
+                //    await handler.SendMenuToTelegramHandle(chatId);
+                //    return;
+                //}
+
+                //var botState = _userResponsesToChat[userId];
+
+                //if (buttonName.StartsWith("Brand_")) //  var botButton = new BotButton(update); // как мы понимаем какй пришел ответ, если пришла строка 
+                //                                     // а не enum?
+                //                                     // It's a new wrapper around update.CallbackQuery
+                //                                     // check the button type, same as buttonName.StartsWith("Brand_") but hidden
+                //                                     //if (botButton.IsBrand) / как мы понимаем какй пришел ответ, если пришла строка 
+                //                                     // а не enum?Сделать проверку, если ответ не содержит "Back", то записываем ответ в базу и выдаем следующее меню?
+                //                                     // класс BotButton  это аналог класса class tgSender
+
+                //{
+
+                //    botState.ChatId = update.CallbackQuery!.From.Id;
+                //    var brand = buttonName.Replace("Brand_", "");
+
+
+                //    var currentState = await _userStateRepository.GetForUser(userId); // !!использование нового метода для установки актуального статуса
+                //    currentState.SetBrand(brand);
+                //    await _userStateRepository.UpdateAsync(currentState);
+
+
+                //    // await _userStateRepository.SetBrandForUser(userId); вместо методов, котоорые представлены ниже
+
+                //    _currentMenuStatus = MenuStatus.BrandChosen;
+                //    _userStateManager.SetBrand(MenuStatus.BrandChosen);
+                //    string resultOfMenu = _userStateManager.GetNextStep("BrandChosen");
+
+                //    if (resultOfMenu != "ReadyToResult")
+                //    {
+                //        await _buttonHandlers[resultOfMenu].SendMenuToTelegramHandle(chatId);
+                //        return;
+                //    }
+
+                //    botState.PropertiesAreFilled();
+                //    var result = SendAllResult(chatId, botState);
+                //    _logger.LogInformation($"2. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+
+                //    await Task.Delay(3000);
+
+                //    var handler = _buttonHandlers["ReturnToMainMenu"];
+                //    await handler.SendMenuToTelegramHandle(chatId);
+                //    return;
+                //}
+
+                //if (buttonName.StartsWith("Category_")) // для брендов из БД как мы можем понять что это именно название какого-то бренда, а не кнопка Back&&
+                //{
+                //    botState.ChatId = update.CallbackQuery!.From.Id;
+                //    botState.Category = buttonName.Replace("Category_", "");
+                //    _currentMenuStatus = MenuStatus.CategoryChosen;
+                //    _userStateManager.SetCategory(MenuStatus.CategoryChosen);
+                //    string resultOfMenu = _userStateManager.GetNextStep("CategoryChosen");
+
+                //    if (resultOfMenu != "ReadyToResult")
+                //    {
+
+                //        await _buttonHandlers[resultOfMenu].SendMenuToTelegramHandle(chatId);
+                //        return;
+                //    }
+                //    botState.PropertiesAreFilled();
+                //    var result = SendAllResult(chatId, botState);
+                //    _logger.LogInformation($"3. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
+                //    await Task.Delay(3000);
+                //    var handler = _buttonHandlers["ReturnToMainMenu"];
+                //    await handler.SendMenuToTelegramHandle(chatId);
+                //    return;
+                //}
+            }
+            //private async Task<IEnumerable<string>> SendAllResult(long chatId, BotState botState)
             //{
-            //    await _telegramSender.SendMainMenu(chatId);
-            //    return;
-
-            //}
-            //if (_tgButtonCallback.IsValueMenuMessage) // какой то вариант из меню
-            //{
-            //    var nameOfButton = _tgButtonCallback.GetNameOfButton(update);
-            //    if (nameOfButton == "BrandMenu")
+            //    string brand = botState.Brand;
+            //    string category = botState.Category;
+            //    var products = await _actionsHandler.GetFilteredProductsMessage(brand, category);
+            //    foreach (var product in products)
             //    {
-            //        await _telegramSender.SendBrandMenu(chatId);
-            //        return;
+            //        await _botClient.SendTextMessageAsync(chatId, product, parseMode: ParseMode.Markdown);
             //    }
-            //    if (nameOfButton == "BrandMenu")
+            //    return products;
+            //}
+            //private long GetChatIdOrDefalt(long userId)
+            //{
+            //    if (!_userResponsesToChat.ContainsKey(userId))
             //    {
-            //        await _telegramSender.SendCategoryMenu(chatId);
-            //        return;
+            //        return userId;
             //    }
-
-
-
-            //}
-
-            //if (messageText != null && messageText.Contains("/start")  || buttonName == "StartNewSearch")
-            //{
-
-            //    var userState = new UserSearchState(userId);
-            //    await _userStateRepository.CreateAsync(userState);
-            //    var currentState = await _userStateRepository.GetForUser(userId); // !!использование нового метода для установки актуального статуса
-            //    //currentState.SetBrand(brand);               
-            //    await _userStateRepository.UpdateAsync(currentState);
-
-
-
-
-
-            //    //var startedForUserId = update.Message.From.Id;
-            //    //var mainMenuHandler = _buttonHandlers["MainMenu"];
-            //    //await mainMenuHandler.SendMenuToTelegramHandle(startedForUserId);
-            //    //_logger.LogInformation(messageText);
-            //    //return;
-            //}
-            //if (update.Type != UpdateType.CallbackQuery)
-            //{
-            //    throw new Exception("The user did not send a message");
-            //}
-
-            //var callbackId = update.CallbackQuery.Id;
-            //var userResponse = update.CallbackQuery?.Data;
-            //;
-            //var chatId = GetChatIdOrDefalt(userId);
-
-            //if (buttonName == "Back")
-            //{
-            //    // await um.GetSearchStateForUser(userId);
-            //    // await um.StepBack();
-
-            //    // var nextMenu = userStateManager.GetNextMenu();
-            //    // await tgSender.SendMenu(nextMenu); \\ аналог для выбора меню 
-            //    _userStateManager.MethodBackOnOneStep(status);
-            //    var lastMenu = _userStateManager.GetPreviousStep().ToString();
-            //    var lastMenuHandler = _buttonHandlers[lastMenu];
-            //    await lastMenuHandler.SendMenuToTelegramHandle(chatId);
-            //    return;
-
-            //}
-
-            //if (buttonName == "BrandMenu")
-            //{
-
-            //    _currentMenuStatus = MenuStatus.BrandMenu;
-            //    var handler = _buttonHandlers[buttonName];
-            //    await handler.SendMenuToTelegramHandle(chatId);
-            //    return;
-            //}
-
-            //if (buttonName == "CategoryMenu")
-            //{
-            //    _currentMenuStatus = MenuStatus.CategoryMenu;
-            //    var handler = _buttonHandlers[buttonName];
-            //    await handler.SendMenuToTelegramHandle(chatId);
-            //    return;
-            //}
-
-            //var botState = _userResponsesToChat[userId];
-
-            //if (buttonName.StartsWith("Brand_")) //  var botButton = new BotButton(update); // как мы понимаем какй пришел ответ, если пришла строка 
-            //                                     // а не enum?
-            //                                     // It's a new wrapper around update.CallbackQuery
-            //                                     // check the button type, same as buttonName.StartsWith("Brand_") but hidden
-            //                                     //if (botButton.IsBrand) / как мы понимаем какй пришел ответ, если пришла строка 
-            //                                     // а не enum?Сделать проверку, если ответ не содержит "Back", то записываем ответ в базу и выдаем следующее меню?
-            //                                     // класс BotButton  это аналог класса class tgSender
-
-            //{
-
-            //    botState.ChatId = update.CallbackQuery!.From.Id;
-            //    var brand = buttonName.Replace("Brand_", "");
-
-
-            //    var currentState = await _userStateRepository.GetForUser(userId); // !!использование нового метода для установки актуального статуса
-            //    currentState.SetBrand(brand);
-            //    await _userStateRepository.UpdateAsync(currentState);
-
-
-            //    // await _userStateRepository.SetBrandForUser(userId); вместо методов, котоорые представлены ниже
-
-            //    _currentMenuStatus = MenuStatus.BrandChosen;
-            //    _userStateManager.SetBrand(MenuStatus.BrandChosen);
-            //    string resultOfMenu = _userStateManager.GetNextStep("BrandChosen");
-
-            //    if (resultOfMenu != "ReadyToResult")
-            //    {
-            //        await _buttonHandlers[resultOfMenu].SendMenuToTelegramHandle(chatId);
-            //        return;
-            //    }
-
-            //    botState.PropertiesAreFilled();
-            //    var result = SendAllResult(chatId, botState);
-            //    _logger.LogInformation($"2. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
-
-            //    await Task.Delay(3000);
-
-            //    var handler = _buttonHandlers["ReturnToMainMenu"];
-            //    await handler.SendMenuToTelegramHandle(chatId);
-            //    return;
-            //}
-
-            //if (buttonName.StartsWith("Category_")) // для брендов из БД как мы можем понять что это именно название какого-то бренда, а не кнопка Back&&
-            //{
-            //    botState.ChatId = update.CallbackQuery!.From.Id;
-            //    botState.Category = buttonName.Replace("Category_", "");
-            //    _currentMenuStatus = MenuStatus.CategoryChosen;
-            //    _userStateManager.SetCategory(MenuStatus.CategoryChosen);
-            //    string resultOfMenu = _userStateManager.GetNextStep("CategoryChosen");
-
-            //    if (resultOfMenu != "ReadyToResult")
-            //    {
-
-            //        await _buttonHandlers[resultOfMenu].SendMenuToTelegramHandle(chatId);
-            //        return;
-            //    }
-            //    botState.PropertiesAreFilled();
-            //    var result = SendAllResult(chatId, botState);
-            //    _logger.LogInformation($"3. Received a  button'{buttonName}' userID {userId} and user First Name {firstName} and chatID {chatId}   и callbackId {callbackId}, userResponse {userResponse} ");
-            //    await Task.Delay(3000);
-            //    var handler = _buttonHandlers["ReturnToMainMenu"];
-            //    await handler.SendMenuToTelegramHandle(chatId);
-            //    return;
-            //}
-        }
-        //private async Task<IEnumerable<string>> SendAllResult(long chatId, BotState botState)
-        //{
-        //    string brand = botState.Brand;
-        //    string category = botState.Category;
-        //    var products = await _actionsHandler.GetFilteredProductsMessage(brand, category);
-        //    foreach (var product in products)
-        //    {
-        //        await _botClient.SendTextMessageAsync(chatId, product, parseMode: ParseMode.Markdown);
-        //    }
-        //    return products;
-        //}
-        //private long GetChatIdOrDefalt(long userId)
-        //{
-        //    if (!_userResponsesToChat.ContainsKey(userId))
-        //    {
-        //        return userId;
-        //    }
-        //    var botState = _userResponsesToChat[userId];
-        //    return botState.ChatId;
-        //}
+            //    var botState = _userResponsesToChat[userId];
+            //    return botState.ChatId;
+        }   //}
     }
 }

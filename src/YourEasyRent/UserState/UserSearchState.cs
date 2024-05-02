@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using Telegram.Bot.Types;
 using YourEasyRent.Entities;
 
 namespace YourEasyRent.UserState
@@ -6,17 +7,24 @@ namespace YourEasyRent.UserState
     public class UserSearchState
     {
         public string UserId { get; private set; }
-        public long ChatId { get; private set; }
+        public string ChatId { get; private set; }
         public string Category { get; private set; }
         public string Brand { get; private set; }
-        public MenuStatus _menuStatus { get; private set; }
+        public MenuStatus CurrentMenuStatus { get; private set; }
+        public IEnumerable<MenuStatus> HistoryOfMenuStatuses
+        {
+            get { return _historyOfMenuStatuses; } 
+            private set { _historyOfMenuStatuses = (List<MenuStatus>)value; }
+        }
 
-        private List<MenuStatus> menuStatuses = new List<MenuStatus>();
+        private List<MenuStatus> _historyOfMenuStatuses = new List<MenuStatus>();
 
         public UserSearchState(string userId)
         {
             UserId = userId.ToString();
-            _menuStatus = MenuStatus.Started;
+            CurrentMenuStatus = MenuStatus.Started;
+            _historyOfMenuStatuses.Add(MenuStatus.Started);
+
         }
 
         public UserSearchState(UserSearchStateDTO dto)
@@ -25,36 +33,45 @@ namespace YourEasyRent.UserState
             ChatId = dto.ChatId;
             Category = dto.Category;
             Brand = dto.Brand;
-            _menuStatus = dto.Status;
+            CurrentMenuStatus = dto.Status;
 
         }
 
-        public void SetStatus(MenuStatus status)
-        {
-            menuStatuses.Add(status);
-        }
-        public void SetChatId(long chatId)
+        //public void SetStatus(MenuStatus status)
+        //{
+        //    _historyOfMenuStatuses.Add(status);
+        //}
+        public void SetChatId(string chatId)
         {
             ChatId = chatId;
         }
         public void SetBrand(string brand)
         {
             Brand = brand;
-            _menuStatus = MenuStatus.BrandChosen;
-            menuStatuses.Add(MenuStatus.BrandChosen);
+            CurrentMenuStatus = MenuStatus.BrandChosen;
+            _historyOfMenuStatuses.Add(MenuStatus.BrandChosen);
         }
 
         public void SetCategory(string category)
         {
             Category = category;
-            _menuStatus = MenuStatus.CategoryChosen;
-            menuStatuses.Add(MenuStatus.CategoryChosen);
+            CurrentMenuStatus = MenuStatus.CategoryChosen;
+            _historyOfMenuStatuses.Add(MenuStatus.CategoryChosen);
         }
+
+        public void AddStatusToHistory(MenuStatus status)
+        {
+            _historyOfMenuStatuses.Add(status);
+        }
+        //public void SetCurrentState(MenuStatus status)
+        //{
+        //    var currentState = MenuStatus(status);
+        //}
 
         public void BackOnPreviousStep(MenuStatus status)
         {
-            menuStatuses.Last();
-            menuStatuses.Remove(status);
+            _historyOfMenuStatuses.Last();
+            _historyOfMenuStatuses.Remove(status);
         }
 
         public void GetNextMenu()
@@ -77,7 +94,7 @@ namespace YourEasyRent.UserState
                 ChatId = ChatId,
                 Brand = Brand,
                 Category = Category,
-                Status = _menuStatus,
+                Status = CurrentMenuStatus,
             };
             return userSearchStateDTO;
         }

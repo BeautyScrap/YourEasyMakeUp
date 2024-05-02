@@ -46,7 +46,7 @@ namespace YourEasyRent.DataBase
 
             var state = new UserSearchState(dto);
 
-            return state._menuStatus;// не уверена, надо при запуске посмотреть что возвращает метод, точно ли корректный статус
+            return state.CurrentMenuStatus;// не уверена, надо при запуске посмотреть что возвращает метод, точно ли корректный статус
 
         }
     }

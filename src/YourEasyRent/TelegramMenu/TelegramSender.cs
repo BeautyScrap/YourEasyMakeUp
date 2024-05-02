@@ -28,25 +28,25 @@ namespace YourEasyRent.TelegramMenu
                 { MenuStatus.MenuAfterReceivingRresult, new ReturnToMMButtonHandler() }
             };
         }
-        public async Task SendMainMenu(long chatId)
+        public async Task SendMainMenu(string chatId)
         {
             var menu = await _menus[MenuStatus.MainMenu].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "Main menu. Choose one:", replyMarkup: menu);
             // надо ли тут return?
         }
-        public async Task SendBrandMenu(long chatId)
+        public async Task SendBrandMenu(string chatId)
         {
             var menu = await _menus[MenuStatus.BrandMenu].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "Сhoose a brand:", replyMarkup: menu);
         }
 
-        public async Task SendCategoryMenu(long chatId)
+        public async Task SendCategoryMenu(string chatId)
         {
             var menu = await _menus[MenuStatus.CategoryMenu].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "Сhoose a category:", replyMarkup: menu);
         }
 
-        public async Task SendMenuAfterResult(long chatId)
+        public async Task SendMenuAfterResult(string chatId)
         {
             var menu = await _menus[MenuStatus.MenuAfterReceivingRresult].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "What do you want to do next?", replyMarkup: menu);
