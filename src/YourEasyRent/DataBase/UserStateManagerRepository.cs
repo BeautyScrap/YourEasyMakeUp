@@ -26,7 +26,8 @@ namespace YourEasyRent.DataBase
             return state;
         }
 
-        public async Task CreateAsync(UserSearchState userSearchState)
+        public async Task CreateAsync(UserSearchState userSearchState)//  мы должны выполнить этот метод когда все поля будут заполены или 
+            // достаточно и одного поля??
         {
             var dto = userSearchState.TOMongoRepresintation();
             await _collectionOfUserSearchState.InsertOneAsync(dto);

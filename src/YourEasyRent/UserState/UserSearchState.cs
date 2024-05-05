@@ -6,7 +6,7 @@ namespace YourEasyRent.UserState
 {
     public class UserSearchState
     {
-        public string UserId { get; private set; }
+        public string UserId { get; private set; } // куда сохраняются эти поля все они не заполнены? мы должны найти таблицу с незаполненными полями через UserID?
         public string ChatId { get; private set; }
         public string Category { get; private set; }
         public string Brand { get; private set; }
@@ -19,15 +19,15 @@ namespace YourEasyRent.UserState
 
         private List<MenuStatus> _historyOfMenuStatuses = new List<MenuStatus>();
 
-        public UserSearchState(string userId)
+        public UserSearchState()
         {
-            UserId = userId.ToString();
-            CurrentMenuStatus = MenuStatus.Started;
-            _historyOfMenuStatuses.Add(MenuStatus.Started);
+            //UserId = userId.ToString();
+            //CurrentMenuStatus = MenuStatus.Started;
+            //_historyOfMenuStatuses.Add(MenuStatus.Started);
 
         }
 
-        public UserSearchState(UserSearchStateDTO dto)
+        public UserSearchState(UserSearchStateDTO dto)//  как передать в конструктор лист??
         {
             UserId = dto.UserId;
             ChatId = dto.ChatId;
@@ -35,8 +35,20 @@ namespace YourEasyRent.UserState
             Brand = dto.Brand;
             CurrentMenuStatus = dto.Status;
 
-        }
 
+        }
+        public UserSearchState CreateNewUserSearchState(string userId) // factory
+        {
+            UserSearchState userSearchState = new UserSearchState
+            {
+                UserId = userId,
+                HistoryOfMenuStatuses = new List<MenuStatus>(),
+                CurrentMenuStatus = MenuStatus.Started,
+
+                
+            };
+            return userSearchState;
+        }
         //public void SetStatus(MenuStatus status)
         //{
         //    _historyOfMenuStatuses.Add(status);
@@ -85,16 +97,17 @@ namespace YourEasyRent.UserState
             throw new NotImplementedException();
         }
 
-        public UserSearchStateDTO TOMongoRepresintation()
+        public UserSearchStateDTO TOMongoRepresintation() //  вызываем этот метод когда все поля уже заполнены и их можно передавать в репозиторий??
         {
             var userSearchStateDTO = new UserSearchStateDTO()
             {
 
-                UserId = UserId,
+                UserId = UserId.ToString(),
                 ChatId = ChatId,
                 Brand = Brand,
                 Category = Category,
                 Status = CurrentMenuStatus,
+
             };
             return userSearchStateDTO;
         }

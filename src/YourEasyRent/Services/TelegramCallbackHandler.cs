@@ -69,28 +69,34 @@ namespace YourEasyRent.Services
 
             var userId = tgButtonCallback.GetUserId();
             var chatId = tgButtonCallback.GetChatId();
-            var userSearchState = new UserSearchState(userId);  
-
-            userSearchState.SetChatId(chatId);
-            await _userStateRepository.CreateAsync(userSearchState);
-            await _userStateRepository.UpdateAsync(userSearchState);
-
+            var userSearchState = new UserSearchState();
 
             if (tgButtonCallback.IsStart)  //  надо проверить как будет устанавливаться и меняться статус меню!!
-                
+
             {
+                userSearchState.CreateNewUserSearchState(userId);
+
+                userSearchState.SetChatId(chatId);
+                //await _userStateRepository.CreateAsync(userSearchState);
+                //await _userStateRepository.UpdateAsync(userSearchState);
+
                 MenuStatus status = MenuStatus.MainMenu;
                 userSearchState.AddStatusToHistory(status);
-                await _userStateRepository.GetCurrentStateForUser(userId);
+                //await _userStateRepository.GetCurrentStateForUser(userId);
                 await _telegramSender.SendMainMenu(chatId);
 
                 return;
             };
 
-            if (tgButtonCallback.IsValueMenuMessage) // какой то вариант из меню
+            if (tgButtonCallback.IsValueMenuMessage && tgButtonCallback.IsBrandMenu) 
             {
                 if (tgButtonCallback.IsBrandMenu)
                 {
+                    await _userStateRepository.GetForUser(userId);
+                    MenuStatus status = MenuStatus.BrandMenu;
+                    userSearchState.AddStatusToHistory(status);
+                    //await _userStateRepository.UpdateAsync(userSearchState);
+
                     await _telegramSender.SendBrandMenu(chatId); // тут еще нужно устанавливать и сохранять значение Статуса меню, чтобы потом можно было пользоваться кнопкой назад
                     return;
 
@@ -101,8 +107,11 @@ namespace YourEasyRent.Services
                     return;
                 }
 
-
-
+            }
+            
+        }   
+    }
+}
 
                 // пока пришла к такому решению, все таки протестировать, чтобы посмотеть как ведут себя переменные
                 //var chatId = _tgButtonCallback.GetChatId(update);
@@ -263,26 +272,3 @@ namespace YourEasyRent.Services
                 //    await handler.SendMenuToTelegramHandle(chatId);
                 //    return;
                 //}
-            }
-            //private async Task<IEnumerable<string>> SendAllResult(long chatId, BotState botState)
-            //{
-            //    string brand = botState.Brand;
-            //    string category = botState.Category;
-            //    var products = await _actionsHandler.GetFilteredProductsMessage(brand, category);
-            //    foreach (var product in products)
-            //    {
-            //        await _botClient.SendTextMessageAsync(chatId, product, parseMode: ParseMode.Markdown);
-            //    }
-            //    return products;
-            //}
-            //private long GetChatIdOrDefalt(long userId)
-            //{
-            //    if (!_userResponsesToChat.ContainsKey(userId))
-            //    {
-            //        return userId;
-            //    }
-            //    var botState = _userResponsesToChat[userId];
-            //    return botState.ChatId;
-        }   //}
-    }
-}

@@ -82,19 +82,15 @@ namespace YourEasyRent.Services
             var nameOfButton = _update.CallbackQuery?.Data;
             if (messageText == null && nameOfButton == "BrandMenu")//  || messageText == null && nameOfButton == "CategoryMenu")
             {
-                IsValueMenuMessage = true;
                 IsBrandMenu = true;
+                IsValueMenuMessage = true;
             }
             if (messageText == null && nameOfButton == "CategoryMenu")
             {
                 IsValueMenuMessage = true;
                 IsCategoryMenu = true;
 
-            }
-            else 
-            { 
-                IsValueMenuMessage = false;
-            }
+            }        
         }
 
         public string GetMenuButton()
@@ -118,11 +114,7 @@ namespace YourEasyRent.Services
             if (messageText == null && nameOfButton.StartsWith("Brand_") || messageText == null && nameOfButton.StartsWith("Category_")) 
             {
                 IsValueProductButton = true;
-            }
-            else
-            { 
-                IsValueProductButton = false; 
-            }
+            } 
         }        
     }
 }

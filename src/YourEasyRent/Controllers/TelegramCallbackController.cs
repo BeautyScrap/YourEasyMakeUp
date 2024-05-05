@@ -27,8 +27,8 @@ public class TelegramCallbackController : ControllerBase
 
             TgButtonCallback tgButtonCallback = new TgButtonCallback(update);
             tgButtonCallback.IsBotStart();
-            tgButtonCallback.GetUserId();
-            tgButtonCallback.GetChatId();// надо протестировать и можно их удрать от сюда в само меню
+            //tgButtonCallback.GetUserId();
+            //tgButtonCallback.GetChatId();// надо протестировать и можно их удрать от сюда в само меню
             tgButtonCallback.IsValidMsg();
             tgButtonCallback.IsMenuButton();
             tgButtonCallback.IsProductButton();

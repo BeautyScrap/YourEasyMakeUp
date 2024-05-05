@@ -22,6 +22,8 @@ namespace YourEasyRent.UserState
 
         [BsonRepresentation(BsonType.String)]
         public MenuStatus Status { get; set; }
+        [BsonRepresentation(BsonType.String)]
+        public List<MenuStatus> HistoryOfMenuStatuses { get; set; }
 
     }
 
