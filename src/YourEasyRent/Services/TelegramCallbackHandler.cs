@@ -72,8 +72,7 @@ namespace YourEasyRent.Services
             var userSearchState = new UserSearchState();
 
             if (tgButtonCallback.IsStart)  //  надо проверить как будет устанавливаться и меняться статус меню!!
-
-            {
+            {              
                 userSearchState.CreateNewUserSearchState(userId);
 
                 userSearchState.SetChatId(chatId);
@@ -84,15 +83,14 @@ namespace YourEasyRent.Services
                 userSearchState.AddStatusToHistory(status);
                 //await _userStateRepository.GetCurrentStateForUser(userId);
                 await _telegramSender.SendMainMenu(chatId);
-
                 return;
             };
 
-            if (tgButtonCallback.IsValueMenuMessage && tgButtonCallback.IsBrandMenu) 
+            if (tgButtonCallback.IsValueMenuMessage) 
             {
                 if (tgButtonCallback.IsBrandMenu)
                 {
-                    await _userStateRepository.GetForUser(userId);
+                    //await _userStateRepository.GetForUser(userId);// как мы оссобносим что предыдущее сообщение и это сообщение отправляет один и тот же пользователь??
                     MenuStatus status = MenuStatus.BrandMenu;
                     userSearchState.AddStatusToHistory(status);
                     //await _userStateRepository.UpdateAsync(userSearchState);

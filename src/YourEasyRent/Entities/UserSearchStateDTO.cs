@@ -8,7 +8,7 @@ namespace YourEasyRent.UserState
     public class UserSearchStateDTO // шаблон с данными, которые должны храниться в бд
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
+        [BsonRepresentation(BsonType.ObjectId)]     
         public string? UserId { get; set; }
 
         [BsonRepresentation(BsonType.String)]
@@ -22,6 +22,7 @@ namespace YourEasyRent.UserState
 
         [BsonRepresentation(BsonType.String)]
         public MenuStatus Status { get; set; }
+
         [BsonRepresentation(BsonType.String)]
         public List<MenuStatus> HistoryOfMenuStatuses { get; set; }
 

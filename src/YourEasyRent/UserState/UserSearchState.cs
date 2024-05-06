@@ -27,14 +27,14 @@ namespace YourEasyRent.UserState
 
         }
 
-        public UserSearchState(UserSearchStateDTO dto)//  как передать в конструктор лист??
+        public UserSearchState(UserSearchStateDTO dto)
         {
             UserId = dto.UserId;
             ChatId = dto.ChatId;
             Category = dto.Category;
             Brand = dto.Brand;
             CurrentMenuStatus = dto.Status;
-
+            _historyOfMenuStatuses = dto.HistoryOfMenuStatuses;
 
         }
         public UserSearchState CreateNewUserSearchState(string userId) // factory
@@ -101,13 +101,12 @@ namespace YourEasyRent.UserState
         {
             var userSearchStateDTO = new UserSearchStateDTO()
             {
-
-                UserId = UserId.ToString(),
+                UserId = UserId,
                 ChatId = ChatId,
                 Brand = Brand,
                 Category = Category,
                 Status = CurrentMenuStatus,
-
+                HistoryOfMenuStatuses = _historyOfMenuStatuses,
             };
             return userSearchStateDTO;
         }

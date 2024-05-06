@@ -17,7 +17,9 @@ namespace YourEasyRent.DataBase
 
         public async Task<UserSearchState> GetForUser(string userId)
         {
-            var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
+
+            
+            var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId.ToString(), userId);// ошибка MongoDB.Driver.Linq.ExpressionNotSupportedException: 'Expression not supported: u.UserId.ToString().'
 
             var dto = await _collectionOfUserSearchState.Find(filter).FirstOrDefaultAsync();
 
