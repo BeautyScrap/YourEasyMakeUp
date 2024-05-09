@@ -4,6 +4,6 @@ namespace YourEasyRent.Services;
 
 public interface ITelegramCallbackHandler
 {   
-    Task HandleUpdateAsync(Update update);
+    Task HandleUpdateAsync(TgButtonCallback tgButtonCallback);
 }
 

@@ -10,7 +10,6 @@ namespace YourEasyRent.Entities
         [BsonRepresentation(BsonType.ObjectId)]   
         public string? Id { get; set; }
 
-        //[BsonId]
         [BsonRepresentation(BsonType.String)]
         public Site Site { get; set; }
         public string SiteId { get; set; }

@@ -3,42 +3,34 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace YourEasyRent.Services.Buttons
+namespace YourEasyRent.TelegramMenu.ButtonHandler
 {
     public class CategoryButtonHandler : IButtonHandler
 
     {
-        private readonly ITelegramBotClient _botClient;
+        public CategoryButtonHandler()
+        {
 
-        public CategoryButtonHandler(ITelegramBotClient botClient)
-        {
-            _botClient = botClient;
         }
-        public async Task SendMenuToTelegramHandle(long chatId)
+        public async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
         {
-            var menu = new InlineKeyboardMarkup(
-                new[]
-                {
-                    new[]
+            var buttonForCategory = new[]
+                {new[]
             {InlineKeyboardButton.WithCallbackData(text:"Mascara",callbackData:"Category_Mascara"),
             InlineKeyboardButton.WithCallbackData(text:"Concealer",callbackData:"Category_Concealer")},
-            new[]
+                new[]
             {InlineKeyboardButton.WithCallbackData(text:"Blush",callbackData:"Blush"),
             InlineKeyboardButton.WithCallbackData(text:"Highlighter",callbackData:"Highlighter")},
-            new[]
+                new[]
             {InlineKeyboardButton.WithCallbackData(text:"Foundation",callbackData:"Foundation"),
             InlineKeyboardButton.WithCallbackData(text:"Eyeshadow",callbackData:"Eyeshadow")},
-            new[]
+                new[]
             {InlineKeyboardButton.WithCallbackData(text:"Brow pencils",callbackData:"Brow pencils"),
             InlineKeyboardButton.WithCallbackData(text:"Lipstick",callbackData:"Lipstick")},
-            new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}});
-            await SendCategotyInlineeyboardMarkup(menu , chatId);   
-        }
+                new[]
+            {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}};
 
-        private async Task<Message> SendCategotyInlineeyboardMarkup(InlineKeyboardMarkup menu, long chatId)
-        {
-            return await _botClient.SendTextMessageAsync(chatId, "Сhoose a category:", replyMarkup: menu);
+            return new InlineKeyboardMarkup(buttonForCategory);
         }
     }
 }

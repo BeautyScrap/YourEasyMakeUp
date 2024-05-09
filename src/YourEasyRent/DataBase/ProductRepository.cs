@@ -9,7 +9,7 @@ using MongoDB.Driver.Linq;
 
 namespace YourEasyRent.DataBase
 {
-    public class ProductRepository : IProductRepository // заменила на mongocollection  публичный класс ,который представляет контекст базы данных для работы с коллекцией Products.
+    public class ProductRepository : IProductRepository  
 
     {
         private readonly IMongoCollection<Product> _productCollection;//  вводим экземпляр  _productCollection класса IMongoCollection дла работы с базой данных
@@ -17,7 +17,7 @@ namespace YourEasyRent.DataBase
         public ProductRepository(DataBaseConfig configuration, IMongoClient client) //вводим конструктор класса CatalogContext. Конструктор принимает два аргумента: DataBaseConfig configuration и IMongoClient client. Класс DataBaseConfig используется для передачи конфигурационных данных, а IMongoClient представляет клиент MongoDB, который используется для установления соединения с базой данных.
         {
             var database = client.GetDatabase(configuration.DataBaseName); //переменная database инициализируется с помощью метода GetDatabase, вызываемого из объекта client, и передается имя базы данных из объекта configuration.
-            _productCollection = database.GetCollection<Product>(configuration.CollectionName); // GetCollection<Product> - это метод, который возвращает коллекцию объектов типа Product.
+            _productCollection = database.GetCollection<Product>("Products"); // GetCollection<Product> - это метод, который возвращает коллекцию объектов типа Product.
         }
 
         public async Task<IEnumerable<Product>> GetProducts()

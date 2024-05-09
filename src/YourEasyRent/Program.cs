@@ -6,7 +6,9 @@ using Telegram.Bot;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Serilog;
-using YourEasyRent.Services.State;
+using YourEasyRent.UserState;
+using YourEasyRent.TelegramMenu;
+
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -40,12 +42,16 @@ builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.Conne
 builder.Services.AddHttpClient<IProductsSiteClient, SephoraClient>();
 builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
-builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();     
-builder.Services.AddSingleton<IUserStateManager, UserStateManager>();   
+builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();      
+builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
+builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
 builder.Services.AddSingleton<ITelegramCallbackHandler, TelegramCallbackHandler>();
+
+
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("log.txt",
