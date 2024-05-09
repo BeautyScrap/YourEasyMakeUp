@@ -5,12 +5,12 @@ using YourEasyRent.UserState;
 
 namespace YourEasyRent.DataBase.Interfaces
 {
-    public interface IUserStateManagerRepository
+    public interface IUserStateRepository
     {
         Task<UserSearchState> GetForUser(string userId);
-        Task CreateAsync(UserSearchState userSearchState);
+        Task CreateAsync(UserSearchState userSearchState,string userId, MenuStatus status);
 
-        Task UpdateAsync(UserSearchState userSearchState);
+        Task<bool> UpdateAsync(UserSearchState userSearchState, string userId, MenuStatus status);
         Task<MenuStatus> GetCurrentStateForUser(string userId);
     }
 }

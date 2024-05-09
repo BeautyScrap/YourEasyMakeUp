@@ -6,20 +6,19 @@ using YourEasyRent.UserState;
 
 namespace YourEasyRent.DataBase
 {
-    public class UserStateManagerRepository : IUserStateManagerRepository
+    public class UserStateRepository : IUserStateRepository
     {
         private readonly IMongoCollection<UserSearchStateDTO> _collectionOfUserSearchState;
-        public UserStateManagerRepository(DataBaseConfig dateBaseConfig, IMongoClient mongoClient)
+        public UserStateRepository(DataBaseConfig dateBaseConfig, IMongoClient mongoClient)
         {
             var dataBase = mongoClient.GetDatabase(dateBaseConfig.DataBaseName);
-            _collectionOfUserSearchState = dataBase.GetCollection<UserSearchStateDTO>(dateBaseConfig.CollectionName);
+            _collectionOfUserSearchState = dataBase.GetCollection<UserSearchStateDTO>("UsersDataCollection");
         }
 
         public async Task<UserSearchState> GetForUser(string userId)
         {
-
             
-            var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId.ToString(), userId);// ошибка MongoDB.Driver.Linq.ExpressionNotSupportedException: 'Expression not supported: u.UserId.ToString().'
+            var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
 
             var dto = await _collectionOfUserSearchState.Find(filter).FirstOrDefaultAsync();
 
@@ -28,18 +27,25 @@ namespace YourEasyRent.DataBase
             return state;
         }
 
-        public async Task CreateAsync(UserSearchState userSearchState)//  мы должны выполнить этот метод когда все поля будут заполены или 
-            // достаточно и одного поля??
+        public async Task CreateAsync(UserSearchState userSearchState, string userId, MenuStatus status)
         {
-            var dto = userSearchState.TOMongoRepresintation();
+            var dto = userSearchState.ToMongoRepresintation(userId, status);
             await _collectionOfUserSearchState.InsertOneAsync(dto);
         }
 
-        public async Task UpdateAsync(UserSearchState userSearchState)
+        public async Task<bool> UpdateAsync(UserSearchState userSearchState, string userId, MenuStatus status)
         {
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userSearchState.UserId);
-            var dto = userSearchState.TOMongoRepresintation();
-            await _collectionOfUserSearchState.ReplaceOneAsync(filter, dto);
+            var update = Builders<UserSearchStateDTO>.Update
+                .Set(u => u.UserId, userSearchState.UserId)
+                .Set(u => u.Brand, userSearchState.Brand)
+                .Set(u => u.Category, userSearchState.Category)
+                .Set(u => u.Status, status)
+                .Set(u => u.HistoryOfMenuStatuses, userSearchState.HistoryOfMenuStatuses);
+
+            //var dto = userSearchState.ToMongoRepresintation(userId, status);
+            var updateResult = await _collectionOfUserSearchState.UpdateOneAsync(filter, update);
+            return updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
         }
 
         public async Task<MenuStatus> GetCurrentStateForUser(string userId)

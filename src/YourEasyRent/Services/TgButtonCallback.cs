@@ -9,12 +9,12 @@ namespace YourEasyRent.Services
     public class TgButtonCallback
     {
         private readonly Update _update;
-        public bool IsStart { get; set; }
-        public bool IsValidMessage {  get; set; }
-        public bool IsValueMenuMessage { get; set; } 
-        public bool IsBrandMenu {  get; set; }  
-        public bool IsCategoryMenu { get; set; }    
-        public bool IsValueProductButton {  get; set; }
+        public bool IsStart => IsBotStart();
+        public bool IsValidMessage => IsValidMsg();
+        public bool IsValueMenuMessage  => IsMenuButton();
+        public bool IsBrandMenu { get; set; }
+        public bool IsCategoryMenu { get; set; }
+        public bool IsValueProductButton => IsProductButton();
 
 
         public TgButtonCallback(Update update)
@@ -22,19 +22,12 @@ namespace YourEasyRent.Services
             _update = update;
         }
 
-        public void IsBotStart()
+        public bool IsBotStart()
         {
-
             var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            if (messageText != null && messageText.Contains("/start") || nameOfButton == "StartNewSearch") 
-            { 
-                IsStart = true;
-            }
-            else
-            {
-                IsStart = false;
-            }
+            return messageText != null && messageText.Contains("/start") || nameOfButton == "StartNewSearch";
+
         }
         public string GetUserId()
         {
@@ -57,40 +50,20 @@ namespace YourEasyRent.Services
             return chatId;
         }
 
-        public void IsValidMsg() 
+        public bool IsValidMsg() 
         {
-            var nameOfButton = _update.CallbackQuery?.Data;
-            if (nameOfButton == null)
-            {
-                nameOfButton = _update.Message?.Text;
+            var nameOfButton = _update.CallbackQuery?.Data ?? _update.Message?.Text ?? throw new Exception("The user did not send a message");
 
-                if (nameOfButton == null)
-                {
-                    IsValidMessage = false;
-                    throw new Exception("The user did not send a message");
-                }
-            }
-            if (nameOfButton.All(c => char.IsLetter(c) || c == '_' || c == '/'))
-            {
-                IsValidMessage = true;
-            }
+            return nameOfButton.All(c => char.IsLetter(c) || c == '_' || c == '/');
+            
         }
 
-        public void IsMenuButton()
+        public bool IsMenuButton()
         {
             var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            if (messageText == null && nameOfButton == "BrandMenu")//  || messageText == null && nameOfButton == "CategoryMenu")
-            {
-                IsBrandMenu = true;
-                IsValueMenuMessage = true;
-            }
-            if (messageText == null && nameOfButton == "CategoryMenu")
-            {
-                IsValueMenuMessage = true;
-                IsCategoryMenu = true;
-
-            }        
+            return messageText == null && (nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu");
+        
         }
 
         public string GetMenuButton()
@@ -107,14 +80,11 @@ namespace YourEasyRent.Services
             }
             return menuButton;
         }
-        public void IsProductButton()
+        public bool IsProductButton()
         {
             var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            if (messageText == null && nameOfButton.StartsWith("Brand_") || messageText == null && nameOfButton.StartsWith("Category_")) 
-            {
-                IsValueProductButton = true;
-            } 
+            return messageText == null && nameOfButton.StartsWith("Brand_") || messageText == null && nameOfButton.StartsWith("Category_"); 
         }        
     }
 }

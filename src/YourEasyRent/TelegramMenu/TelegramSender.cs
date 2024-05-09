@@ -11,7 +11,7 @@ using YourEasyRent.TelegramMenu.ButtonHandler;
 
 namespace YourEasyRent.TelegramMenu
 {
-    public class TelegramSender : ITelegramSender //  как мы понмаем какое кокренто меню вызвать, когда получаем ответ 
+    public class TelegramSender : ITelegramSender 
     {
         private readonly ITelegramBotClient _botClient;
         private Dictionary<MenuStatus, IButtonHandler> _menus;

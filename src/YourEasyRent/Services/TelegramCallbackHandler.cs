@@ -20,26 +20,10 @@ namespace YourEasyRent.Services
         private readonly ITelegramBotClient _botClient;
         private ITelegramActionsHandler _actionsHandler;
         private readonly IProductRepository _productRepository;
-        private readonly IUserStateManagerRepository _userStateRepository;
+        private readonly IUserStateRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
 
-
-        //
-       // private readonly IUserSearchStateFactory _factory;
-        // Factory
-        //public class UserSearchStateFactory: IUserSearchStateFactory // отдельный класс и интерфейс для фабрики  по созданию новых UserSearchState
-        //{
-        //    public IUserSearchState CreateNew()
-        //    {
-        //        return new UserSearchState();
-        //    }
-        //}
-
-        //public interface IUserSearchStateFactory
-        //{
-        //    IUserSearchState CreateNew();
-        //}
 
         public TelegramCallbackHandler
             (
@@ -47,9 +31,8 @@ namespace YourEasyRent.Services
             ITelegramActionsHandler actionsHandler,
             IProductRepository productRepository,
             ILogger<TelegramCallbackHandler> logger,
-            IUserStateManagerRepository userStateRepository,
+            IUserStateRepository userStateRepository,
             ITelegramSender telegramSender
-            //IUserSearchStateFactory factory,
  
             )
         {
@@ -69,41 +52,68 @@ namespace YourEasyRent.Services
 
             var userId = tgButtonCallback.GetUserId();
             var chatId = tgButtonCallback.GetChatId();
-            var userSearchState = new UserSearchState();
 
-            if (tgButtonCallback.IsStart)  //  надо проверить как будет устанавливаться и меняться статус меню!!
+            if (tgButtonCallback.IsStart)  
             {              
-                userSearchState.CreateNewUserSearchState(userId);
+                var userSearchState = UserSearchState.CreateNewUserSearchState(userId);
 
                 userSearchState.SetChatId(chatId);
-                //await _userStateRepository.CreateAsync(userSearchState);
-                //await _userStateRepository.UpdateAsync(userSearchState);
-
                 MenuStatus status = MenuStatus.MainMenu;
                 userSearchState.AddStatusToHistory(status);
-                //await _userStateRepository.GetCurrentStateForUser(userId);
+                userSearchState.ToMongoRepresintation(userId, status);
+                await _userStateRepository.CreateAsync(userSearchState, userId, status);
                 await _telegramSender.SendMainMenu(chatId);
                 return;
+
+
             };
 
             if (tgButtonCallback.IsValueMenuMessage) 
             {
-                if (tgButtonCallback.IsBrandMenu)
+                var nameOfButton = tgButtonCallback.GetMenuButton();
+
+                if (nameOfButton == "BrandMenu")
                 {
-                    //await _userStateRepository.GetForUser(userId);// как мы оссобносим что предыдущее сообщение и это сообщение отправляет один и тот же пользователь??
+                    UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
+
                     MenuStatus status = MenuStatus.BrandMenu;
                     userSearchState.AddStatusToHistory(status);
-                    //await _userStateRepository.UpdateAsync(userSearchState);
+                    userSearchState.ToMongoRepresintation(userId, status);
+                    await _userStateRepository.UpdateAsync(userSearchState, userId, status);
 
-                    await _telegramSender.SendBrandMenu(chatId); // тут еще нужно устанавливать и сохранять значение Статуса меню, чтобы потом можно было пользоваться кнопкой назад
+                    await _telegramSender.SendBrandMenu(chatId); //  тут ошибка : 'Object reference not set to an instance of an object.'
+
                     return;
-
                 }
-                if (tgButtonCallback.IsCategoryMenu)
+                if (nameOfButton == "CategoryMenu")
                 {
+                    UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
+
+                    MenuStatus status = MenuStatus.BrandMenu;
+                    userSearchState.AddStatusToHistory(status);
+                    userSearchState.ToMongoRepresintation(userId, status);
+                    await _userStateRepository.UpdateAsync(userSearchState, userId, status);
                     await _telegramSender.SendCategoryMenu(chatId);
                     return;
                 }
+
+
+                //if (tgButtonCallback.IsBrandMenu)
+                //{
+                //    //await _userStateRepository.GetForUser(userId);// как мы оссобносим что предыдущее сообщение и это сообщение отправляет один и тот же пользователь??
+                //    MenuStatus status = MenuStatus.BrandMenu;
+                //    userSearchState.AddStatusToHistory(status);
+                //    //await _userStateRepository.UpdateAsync(userSearchState);
+
+                //    await _telegramSender.SendBrandMenu(chatId); // тут еще нужно устанавливать и сохранять значение Статуса меню, чтобы потом можно было пользоваться кнопкой назад
+                //    return;
+
+                //}
+                //if (tgButtonCallback.IsCategoryMenu)
+                //{
+                //    await _telegramSender.SendCategoryMenu(chatId);
+                //    return;
+                //}
 
             }
             

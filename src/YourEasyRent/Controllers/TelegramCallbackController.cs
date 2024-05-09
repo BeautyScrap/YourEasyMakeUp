@@ -11,6 +11,7 @@ public class TelegramCallbackController : ControllerBase
 {
     private readonly ITelegramCallbackHandler _handler;
     private readonly ILogger<TelegramCallbackController> _logger;
+    //private  TgButtonCallback tgButtonCallback;
 
     public TelegramCallbackController(ITelegramCallbackHandler handler, ILogger<TelegramCallbackController> logger)
     {
@@ -24,15 +25,7 @@ public class TelegramCallbackController : ControllerBase
     {
         try
         {
-
             TgButtonCallback tgButtonCallback = new TgButtonCallback(update);
-            tgButtonCallback.IsBotStart();
-            //tgButtonCallback.GetUserId();
-            //tgButtonCallback.GetChatId();// надо протестировать и можно их удрать от сюда в само меню
-            tgButtonCallback.IsValidMsg();
-            tgButtonCallback.IsMenuButton();
-            tgButtonCallback.IsProductButton();
-
             await _handler.HandleUpdateAsync(tgButtonCallback);
         }
         catch (Exception ex) 

@@ -44,7 +44,7 @@ builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();      
 builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
-builder.Services.AddSingleton<IUserStateManagerRepository, UserStateManagerRepository>();
+builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));

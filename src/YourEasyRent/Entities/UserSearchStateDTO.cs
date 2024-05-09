@@ -9,7 +9,11 @@ namespace YourEasyRent.UserState
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]     
-        public string? UserId { get; set; }
+        public string Id { get; set; }
+
+
+        [BsonRepresentation(BsonType.String)]
+        public string UserId { get; set; }
 
         [BsonRepresentation(BsonType.String)]
         public string ChatId { get; set; }
