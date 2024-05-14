@@ -11,8 +11,7 @@ public class TelegramCallbackController : ControllerBase
 {
     private readonly ITelegramCallbackHandler _handler;
     private readonly ILogger<TelegramCallbackController> _logger;
-    //private  TgButtonCallback tgButtonCallback;
-
+  
     public TelegramCallbackController(ITelegramCallbackHandler handler, ILogger<TelegramCallbackController> logger)
     {
         _handler = handler;

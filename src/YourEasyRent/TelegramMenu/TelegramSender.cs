@@ -2,10 +2,10 @@
 using System.Security.Cryptography.X509Certificates;
 using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
+using YourEasyRent.DataBase;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Entities;
 using YourEasyRent.Services.Buttons;
-using YourEasyRent.UserState;
 using YourEasyRent.TelegramMenu.ButtonHandler;
 
 
@@ -15,15 +15,15 @@ namespace YourEasyRent.TelegramMenu
     {
         private readonly ITelegramBotClient _botClient;
         private Dictionary<MenuStatus, IButtonHandler> _menus;
-        private readonly IProductRepository _productRepository;
+       // private readonly IProductRepository _productRepository;
 
-        public TelegramSender(ITelegramBotClient botClient)
+        public TelegramSender(ITelegramBotClient botClient, IProductRepository productRepository)
         {
             _botClient = botClient;
             _menus = new Dictionary<MenuStatus, IButtonHandler>()
             {
                 { MenuStatus.MainMenu, new MainMenuButtonHandler() },
-                { MenuStatus.BrandMenu, new BrandButtonHandler(_productRepository) },//  _botClient  можно и убрать и написать репозиторий, который ходит в базу
+                { MenuStatus.BrandMenu, new BrandButtonHandler(productRepository) },
                 { MenuStatus.CategoryMenu, new CategoryButtonHandler() },
                 { MenuStatus.MenuAfterReceivingRresult, new ReturnToMMButtonHandler() }
             };
@@ -32,7 +32,7 @@ namespace YourEasyRent.TelegramMenu
         {
             var menu = await _menus[MenuStatus.MainMenu].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "Main menu. Choose one:", replyMarkup: menu);
-            // надо ли тут return?
+
         }
         public async Task SendBrandMenu(string chatId)
         {
