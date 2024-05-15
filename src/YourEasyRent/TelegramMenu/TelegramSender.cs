@@ -51,7 +51,7 @@ namespace YourEasyRent.TelegramMenu
             var menu = await _menus[MenuStatus.MenuAfterReceivingRresult].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "What do you want to do next?", replyMarkup: menu);
         }
-        public Task SendResults()
+        public async Task SendResults(string chatId, string resultsMesage)
         {
             throw new NotImplementedException();
 

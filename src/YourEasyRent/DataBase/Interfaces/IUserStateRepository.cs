@@ -8,9 +8,10 @@ namespace YourEasyRent.DataBase.Interfaces
     public interface IUserStateRepository
     {
         Task<UserSearchState> GetForUser(string userId);
-        Task CreateAsync(UserSearchState userSearchState,string userId, MenuStatus status);
+        Task CreateAsync(UserSearchState userSearchState);
 
-        Task<bool> UpdateAsync(UserSearchState userSearchState, string userId, MenuStatus status);
+        Task<bool> UpdateAsync(UserSearchState userSearchState);
         Task<MenuStatus> GetCurrentStateForUser(string userId);
+        Task<List<string>> GetFilteredProducts(string userId);  
     }
 }

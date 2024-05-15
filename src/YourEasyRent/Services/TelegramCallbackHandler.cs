@@ -60,8 +60,8 @@ namespace YourEasyRent.Services
                 userSearchState.SetChatId(chatId);
                 MenuStatus status = MenuStatus.MainMenu;
                 userSearchState.AddStatusToHistory(status);
-                userSearchState.ToMongoRepresintation(userId, status);
-                await _userStateRepository.CreateAsync(userSearchState, userId, status);
+                userSearchState.ToMongoRepresintation();
+                await _userStateRepository.CreateAsync(userSearchState);
                 await _telegramSender.SendMainMenu(chatId);
                 return;
 
@@ -78,8 +78,8 @@ namespace YourEasyRent.Services
 
                     MenuStatus status = MenuStatus.BrandMenu;
                     userSearchState.AddStatusToHistory(status);
-                    userSearchState.ToMongoRepresintation(userId, status);
-                    await _userStateRepository.UpdateAsync(userSearchState, userId, status);
+                    userSearchState.ToMongoRepresintation();
+                    await _userStateRepository.UpdateAsync(userSearchState);
                     await _telegramSender.SendBrandMenu(chatId); 
 
                     return;
@@ -90,21 +90,51 @@ namespace YourEasyRent.Services
 
                     MenuStatus status = MenuStatus.CategoryMenu;
                     userSearchState.AddStatusToHistory(status);
-                    userSearchState.ToMongoRepresintation(userId, status);
-                    await _userStateRepository.UpdateAsync(userSearchState, userId, status);
+                    userSearchState.ToMongoRepresintation();
+                    await _userStateRepository.UpdateAsync(userSearchState);
                     await _telegramSender.SendCategoryMenu(chatId);
                     return;
                 }
             }
-            if (tgButtonCallback.IsValueProductButton)
+            if (tgButtonCallback.IsValueProductButton)//  протестировать как отрабатывает этот метод
             {
                 var productButton = tgButtonCallback.GetProductButton();
                 if (productButton.StartsWith("Brand_"))
                 {
-                    // 
+                    UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
+
+                    MenuStatus status = MenuStatus.BrandChosen;
+                    userSearchState.AddStatusToHistory(status);
+
+                    var brand = tgButtonCallback.GetProductButton();
+                    userSearchState.SetBrand(brand);
+
+                    userSearchState.ToMongoRepresintation();
+                    await _userStateRepository.UpdateAsync(userSearchState);
+                    //  проверка, что все поля заполнены, если все заполенно то вызвать метод SendResult, 
+                    // если нет, то вызов другого меню
+                    //  или можно создать еще начать специальную кнопку для меню "StartSearch"
+                    await _telegramSender.SendCategoryMenu(chatId);
+
+                    return;
                 };
                 if (productButton.StartsWith("Category_"))
                 {
+                    UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
+
+                    MenuStatus status = MenuStatus.CategoryChosen;
+                    userSearchState.AddStatusToHistory(status);
+
+                     var category = tgButtonCallback.GetProductButton();
+                    userSearchState.SetCategory(category);
+
+                    userSearchState.ToMongoRepresintation();
+                    await _userStateRepository.UpdateAsync(userSearchState);
+                    //  проверка, что все поля заполнены, если все заполенно то вызвать метод SendResult, 
+                    // если нет, то вызов другого меню
+                    await _telegramSender.SendCategoryMenu(chatId);
+
+                    return;
                 };
 
 

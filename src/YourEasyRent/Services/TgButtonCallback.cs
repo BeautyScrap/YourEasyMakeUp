@@ -14,7 +14,7 @@ namespace YourEasyRent.Services
         public bool IsValueMenuMessage  => IsMenuButton();
         public bool IsBrandMenu { get; set; }//  не знаю как мне сделать проверку для разных меню, чтобы потом воспользоваться этими свойствами в Handlder
         public bool IsCategoryMenu { get; set; }
-        public bool IsValueProductButton; //=> IsProductButton();
+        public bool IsValueProductButton => IsProductButton();
 
 
         public TgButtonCallback(Update update)
@@ -80,12 +80,12 @@ namespace YourEasyRent.Services
             }
             return menuButton;
         }
-        //public bool IsProductButton()
-        //{
-        //    var messageText = _update.Message?.Text;
-        //    var nameOfButton = _update.CallbackQuery?.Data;
-        //    return messageText == null && nameOfButton.StartsWith("Brand_") || messageText == null && nameOfButton.StartsWith("Category_"); 
-        //}
+        public bool IsProductButton()
+        {
+            var messageText = _update.Message?.Text;
+            var nameOfButton = _update.CallbackQuery?.Data;
+            return messageText == null && nameOfButton.StartsWith("Brand_") || messageText == null && nameOfButton.StartsWith("Category_");
+        }
 
         public string GetProductButton()
         {
@@ -93,11 +93,11 @@ namespace YourEasyRent.Services
             var productButton = _update.CallbackQuery.Data;
             if (productButton.StartsWith("Brand_"))
             {
-                return productButton;
+                return productButton.Replace("Brand_", "");
             }
             if (productButton.StartsWith("Category_"))
             {
-                return productButton;
+                return productButton.Replace("Category_", "");
             }
             return productButton;   
             

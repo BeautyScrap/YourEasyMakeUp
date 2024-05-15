@@ -17,12 +17,10 @@ namespace YourEasyRent.UserState
             private set { _historyOfMenuStatuses = (List<MenuStatus>)value; }
         }
 
-
         private List<MenuStatus> _historyOfMenuStatuses = new List<MenuStatus>();
 
         public UserSearchState()
         {
-
         }
 
         public UserSearchState(UserSearchStateDTO dto)
@@ -86,15 +84,15 @@ namespace YourEasyRent.UserState
             throw new NotImplementedException();
         }
 
-        public UserSearchStateDTO ToMongoRepresintation(string userId, MenuStatus status) //  вызываем этот метод когда все поля уже заполнены и их можно передавать в репозиторий??
+        public UserSearchStateDTO ToMongoRepresintation() //  вызываем этот метод когда  любое поле уже заполнено и их можно передавать в репозиторий??
         {
             var userSearchStateDTO = new UserSearchStateDTO()
             {
-                UserId = userId,
+                UserId = UserId,
                 ChatId = ChatId,
                 Brand = Brand,
                 Category = Category,
-                Status = status,
+                Status = CurrentMenuStatus ,
                 HistoryOfMenuStatuses = _historyOfMenuStatuses,
             };
             return userSearchStateDTO;
