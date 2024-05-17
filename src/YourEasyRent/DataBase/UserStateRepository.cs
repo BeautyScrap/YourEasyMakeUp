@@ -20,7 +20,6 @@ namespace YourEasyRent.DataBase
 
         public async Task<UserSearchState> GetForUser(string userId)
         {
-            
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
 
             var dto = await _collectionOfUserSearchState.Find(filter).FirstOrDefaultAsync();
@@ -71,7 +70,12 @@ namespace YourEasyRent.DataBase
             {
                 return false;
             }
-            var requiredFields = new List<string> {"UserId", "Brand", "Category" };
+
+            if(dto.UserId == null || dto.Brand = null || dto.Category)
+            {
+                return false; 
+            }
+
             foreach(var field in requiredFields)
             {
                 var property = typeof(UserSearchStateDTO).GetProperty(field);
@@ -84,17 +88,13 @@ namespace YourEasyRent.DataBase
 
         }
 
-        public async Task<List<string>> GetFilteredProducts(string userId )// должен быть коллекцией List, а не просто типом string,  чтобы возвращать несколько элементов
+        public async Task<(string Brand, string Category))> GetFilteredProducts(string userId )// должен быть коллекцией List, а не просто типом string,  чтобы возвращать несколько элементов
         {
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
-            var projection = Builders<UserSearchStateDTO>.Projection.Include(u =>u.Brand).Include(u => u.Category);
+            var projection = Builders<BrandAndCaegoryFromSearchStateDTO>.Projection.Include(u =>u.Brand).Include(u => u.Category);
             var brandAndCategoryResult = await _collectionOfUserSearchState.Find(filter).Project(projection).FirstOrDefaultAsync();
 
-            var listWithResult = new List<string>
-            {
-                brandAndCategoryResult.AsString
-            };
-            return listWithResult;          
+            return new (brandAndCategoryResult,Brand, brandAndCategoryResult.Category) 
         }
     }
 }

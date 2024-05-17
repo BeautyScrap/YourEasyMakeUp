@@ -80,11 +80,20 @@ namespace YourEasyRent.Services
             }
             return menuButton;
         }
-        public bool IsProductButton()
+
+
+        public bool IsBrandClickableButton()
         {
             var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            return messageText == null && nameOfButton.StartsWith("Brand_") || messageText == null && nameOfButton.StartsWith("Category_");
+            return messageText == null && nameOfButton.StartsWith("Brand_");
+        }
+
+        public bool IsCategoryClickableButton()
+        {
+            var messageText = _update.Message?.Text;
+            var nameOfButton = _update.CallbackQuery?.Data;
+            return messageText == null messageText == null && nameOfButton.StartsWith("Category_");
         }
 
         public string GetProductButton()

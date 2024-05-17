@@ -51,9 +51,25 @@ namespace YourEasyRent.TelegramMenu
             var menu = await _menus[MenuStatus.MenuAfterReceivingRresult].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "What do you want to do next?", replyMarkup: menu);
         }
-        public async Task SendResults(string chatId, List<string> listWithResult)// ActionHandler Сюда пробросить, чтобы тут формировал ответ
+        public async Task SendResults(string chatId, List<Product> listWithResult)// ActionHandler Сюда пробросить, чтобы тут формировал ответ
         {
-            throw new NotImplementedException();
+            var productsMessage = GetFilteredProductsMessage(listWithResult);
+            await _botClient.SendTextMessageAsync(chatId, "Luk at ZEEEEZ!", replyMarkup: productsMessage);
+        }
+
+        private async Task<IEnumerable<string>> GetFilteredProductsMessage(List<Product> p) //  не знаю как для этого метода "распаковать" данные(бренд и категорию) из Листа,
+                                                                                                         //  чтобы потом засунить их в аргемент метода GetProductsByBrandAndCategory
+        {
+            {
+                var productStrings = products.Select(p =>
+            $"*{p.Brand}*\n" +
+            $"{p.Name}\n" +
+            $"{p.Category}\n" +
+            $"{p.Price}\n" +
+            $"[.]({p.ImageUrl})\n" +
+            $"[Ссылка на продукт]({p.Url})");
+                return productStrings;
+            }
 
         }
 

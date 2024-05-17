@@ -68,14 +68,16 @@ namespace YourEasyRent.Services
 
             };
 
+            var userSearchState = await _userStateRepository.GetForUser(userId);
+
+
+
             if (tgButtonCallback.IsValueMenuMessage) 
             {
                 var nameOfButton = tgButtonCallback.GetMenuButton();
 
-                if (nameOfButton == "BrandMenu")
+                if (tgButtonCallback.IsBrandMenu nameOfButton == "BrandMenu")
                 {
-                    UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
-
                     MenuStatus status = MenuStatus.BrandMenu;
                     userSearchState.AddStatusToHistory(status);
                     userSearchState.ToMongoRepresintation();
@@ -86,7 +88,7 @@ namespace YourEasyRent.Services
                 }
                 if (nameOfButton == "CategoryMenu")
                 {
-                    UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
+
 
                     MenuStatus status = MenuStatus.CategoryMenu;
                     userSearchState.AddStatusToHistory(status);
@@ -101,7 +103,6 @@ namespace YourEasyRent.Services
                 var productButton = tgButtonCallback.GetProductButton();
                 if (productButton.StartsWith("Brand_"))
                 {
-                    UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
 
                     MenuStatus status = MenuStatus.BrandChosen;
                     userSearchState.AddStatusToHistory(status);
@@ -118,7 +119,7 @@ namespace YourEasyRent.Services
 
                     return;
                 };
-                if (productButton.StartsWith("Category_"))
+                if (    productButton.StartsWith("Category_"))
                 {
                     UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
 
@@ -128,17 +129,30 @@ namespace YourEasyRent.Services
                      var category = tgButtonCallback.GetProductButton();
                     userSearchState.SetCategory(category);
 
-                    userSearchState.ToMongoRepresintation();
+                     
                     await _userStateRepository.UpdateAsync(userSearchState);
                     //  проверка, что все поля заполнены, если все заполенно то вызвать метод SendResult, 
                     // если нет, то вызов другого меню
-                    await _telegramSender.SendCategoryMenu(chatId);
+                    // await _telegramSender.SendCategoryMenu(chatId);
+
+            if(userSearchStatus.IsReadyForSearch)
+            {
+                // {ProductId: 13, Brand: Lol, Price" kek}
+                List<Product> searchResult = await _productRepository.GetProductsByBrandAndCategory(userSearchStatus.Brand, userSearchStatus.Category);
+
+                await _tgSenders.SendResults(userid, searchResult);
+
+            } else {
+                _tgSenderShowMenu(next)
+            }
 
                     return;
                 };
+                
+
+            
 
 
-            }
 
         }
     }

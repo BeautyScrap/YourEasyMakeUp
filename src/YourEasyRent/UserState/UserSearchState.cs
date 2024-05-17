@@ -84,6 +84,15 @@ namespace YourEasyRent.UserState
             throw new NotImplementedException();
         }
 
+        public bool IsReadyForSearch()
+        {
+            if(UserId == null || Brand = null || Category == null)
+            {
+                return false; 
+            }
+            return true;
+        }
+
         public UserSearchStateDTO ToMongoRepresintation() //  вызываем этот метод когда  любое поле уже заполнено и их можно передавать в репозиторий??
         {
             var userSearchStateDTO = new UserSearchStateDTO()
