@@ -12,6 +12,7 @@ namespace YourEasyRent.DataBase.Interfaces
 
         Task<bool> UpdateAsync(UserSearchState userSearchState);
         Task<MenuStatus> GetCurrentStateForUser(string userId);
-        Task<List<string>> GetFilteredProducts(string userId);  
+        Task<bool> CheckFieldsFilledForUser(string userId);
+        Task<List<string>> GetFilteredProducts(string userId);
     }
 }

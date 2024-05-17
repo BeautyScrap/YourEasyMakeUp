@@ -1,7 +1,10 @@
 ﻿using MongoDB.Driver;
+using System.Collections.Generic;
 using Telegram.Bot.Types;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Entities;
+using YourEasyRent.Services.Buttons;
+using YourEasyRent.TelegramMenu.ButtonHandler;
 using YourEasyRent.UserState;
 
 namespace YourEasyRent.DataBase
@@ -58,12 +61,40 @@ namespace YourEasyRent.DataBase
 
         }
 
-        public async Task<List<string>> GetFilteredProducts(string userId)
+        public async Task<bool> CheckFieldsFilledForUser(string userId) // проверяет заполнены ли нужные поля у юзера
         {
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
-            var projection = Builders<UserSearchState>.Projection.Include(u =>u.Brand).Include(u =>u.Category);
-            var listResult = await _collectionOfUserSearchState.Find(filter).Project(projection).FirstOrDefaultAsync();
 
+            var dto = await _collectionOfUserSearchState.Find(filter).FirstOrDefaultAsync();
+
+            if (dto == null)
+            {
+                return false;
+            }
+            var requiredFields = new List<string> {"UserId", "Brand", "Category" };
+            foreach(var field in requiredFields)
+            {
+                var property = typeof(UserSearchStateDTO).GetProperty(field);
+                if (property == null || property.GetValue(dto) == null || string.IsNullOrWhiteSpace(property.GetValue(dto)?.ToString()))
+                {
+                    return false;
+                }
+            }
+            return true;
+
+        }
+
+        public async Task<List<string>> GetFilteredProducts(string userId )// должен быть коллекцией List, а не просто типом string,  чтобы возвращать несколько элементов
+        {
+            var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
+            var projection = Builders<UserSearchStateDTO>.Projection.Include(u =>u.Brand).Include(u => u.Category);
+            var brandAndCategoryResult = await _collectionOfUserSearchState.Find(filter).Project(projection).FirstOrDefaultAsync();
+
+            var listWithResult = new List<string>
+            {
+                brandAndCategoryResult.AsString
+            };
+            return listWithResult;          
         }
     }
 }

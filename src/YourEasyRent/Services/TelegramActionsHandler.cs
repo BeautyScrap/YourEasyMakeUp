@@ -13,7 +13,7 @@ namespace YourEasyRent.Services
             _productRepository = productRepository;
         }
 
-        public async Task<IEnumerable<string>> GetFilteredProductsMessage(string brand, string category)
+        public async Task<IEnumerable<string>> GetFilteredProductsMessage(string brand, string category) // возможно сюда можно будет передать UserId  и resultForSearch  из ROS
         {
             var products = await _productRepository.GetProductsByBrandAndCategory(brand, category);
             {
