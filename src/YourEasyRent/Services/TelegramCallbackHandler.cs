@@ -18,8 +18,7 @@ namespace YourEasyRent.Services
 {
     public class TelegramCallbackHandler : ITelegramCallbackHandler
     {
-        private readonly ITelegramBotClient _botClient;
-        private readonly IProductRepository _productRepository;
+
         private readonly IUserStateRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
@@ -27,16 +26,14 @@ namespace YourEasyRent.Services
 
         public TelegramCallbackHandler
             (
-            ITelegramBotClient botClient,
-            IProductRepository productRepository,
+
             ILogger<TelegramCallbackHandler> logger,
             IUserStateRepository userStateRepository,
             ITelegramSender telegramSender
 
             )
         {
-            _botClient = botClient;
-            _productRepository = productRepository;
+
             _logger = logger;
             _userStateRepository = userStateRepository;
             _telegramSender = telegramSender;

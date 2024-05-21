@@ -106,7 +106,7 @@ namespace YourEasyRent.Services
         {
             var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            return messageText == null messageText == null && nameOfButton.StartsWith("Category_");
+            return messageText == null && ( nameOfButton.StartsWith("Brand_") || nameOfButton.StartsWith("Category_"));
         }
 
 
