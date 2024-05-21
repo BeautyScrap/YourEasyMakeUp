@@ -16,6 +16,7 @@ namespace YourEasyRent.UserState
             get { return _historyOfMenuStatuses; }
             private set { _historyOfMenuStatuses = (List<MenuStatus>)value; }
         }
+        public bool IsFinished => IsReadyForSearch();
 
         private List<MenuStatus> _historyOfMenuStatuses = new List<MenuStatus>();
 
@@ -33,7 +34,7 @@ namespace YourEasyRent.UserState
             HistoryOfMenuStatuses = dto.HistoryOfMenuStatuses;
 
         }
-        public static UserSearchState CreateNewUserSearchState(string userId) // factory
+        public static UserSearchState CreateNewUserSearchState(string userId) 
         {
             UserSearchState userSearchState = new UserSearchState
             {
@@ -79,13 +80,17 @@ namespace YourEasyRent.UserState
             // те мы передаем сюда аргумент со статусом , который потом будем сопоставлять с словарем и присылать в ответ нужное меню
         }
 
-        public void IsFiniShed()//
+        public bool IsReadyForSearch()
         {
-            throw new NotImplementedException();
+            if(UserId == null || Brand == null || Category == null)
+            {
+                return false;
+            }
+            return true;
         }
 
-        public UserSearchStateDTO ToMongoRepresintation() //  вызываем этот метод когда  любое поле уже заполнено и их можно передавать в репозиторий??
-        {
+        public UserSearchStateDTO ToMongoRepresintation()
+        { 
             var userSearchStateDTO = new UserSearchStateDTO()
             {
                 UserId = UserId,

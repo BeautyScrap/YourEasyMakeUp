@@ -1,6 +1,7 @@
 ﻿using Amazon.Runtime.Internal.Transform;
 using System.Security.Cryptography.X509Certificates;
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using YourEasyRent.DataBase;
 using YourEasyRent.DataBase.Interfaces;
@@ -15,15 +16,16 @@ namespace YourEasyRent.TelegramMenu
     {
         private readonly ITelegramBotClient _botClient;
         private Dictionary<MenuStatus, IButtonHandler> _menus;
-       // private readonly IProductRepository _productRepository;
+        private readonly IProductRepository _productRepository;
 
         public TelegramSender(ITelegramBotClient botClient, IProductRepository productRepository)
         {
             _botClient = botClient;
+            _productRepository = productRepository;
             _menus = new Dictionary<MenuStatus, IButtonHandler>()
             {
                 { MenuStatus.MainMenu, new MainMenuButtonHandler() },
-                { MenuStatus.BrandMenu, new BrandButtonHandler(productRepository) },
+                { MenuStatus.BrandMenu, new BrandButtonHandler(_productRepository) },
                 { MenuStatus.CategoryMenu, new CategoryButtonHandler() },
                 { MenuStatus.MenuAfterReceivingRresult, new ReturnToMMButtonHandler() }
             };
@@ -51,10 +53,30 @@ namespace YourEasyRent.TelegramMenu
             var menu = await _menus[MenuStatus.MenuAfterReceivingRresult].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "What do you want to do next?", replyMarkup: menu);
         }
-        public async Task SendResults(string chatId, List<string> listWithResult)// ActionHandler Сюда пробросить, чтобы тут формировал ответ
+        public  async Task<IEnumerable<string>> SendResults(string chatId, List<string> listWithResult)
         {
-            throw new NotImplementedException();
+            var resultsOfSearch = await GetFilteredProductsMessage(listWithResult);
 
+            foreach (var result in resultsOfSearch)
+            {
+               await _botClient.SendTextMessageAsync(chatId, result, parseMode: ParseMode.Markdown); 
+            }
+            return resultsOfSearch;
+        }
+
+        public async Task<IEnumerable<string>> GetFilteredProductsMessage(List<string> listWithResult) 
+        {
+            var products = await _productRepository.GetProductsByBrandAndCategory(listWithResult);
+            {
+                var productStrings = products.Select(p =>
+            $"*{p.Brand}*\n" +
+            $"{p.Name}\n" +
+            $"{p.Category}\n" +
+            $"{p.Price}\n" +
+            $"[.]({p.ImageUrl})\n" +
+            $"[Ссылка на продукт]({p.Url})");
+                return productStrings;
+            }
         }
 
     }

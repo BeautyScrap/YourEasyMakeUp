@@ -14,7 +14,7 @@ namespace YourEasyRent.DataBase.Interfaces
         Task<IEnumerable<string>> CreateMany(IEnumerable<Product> products); 
         Task<bool> Update(Product updateproduct); 
         Task<bool> Delete(string id);
-        Task<IEnumerable<Product>> GetProductsByBrandAndCategory(string brand, string category);
+        Task<IEnumerable<Product>> GetProductsByBrandAndCategory(List<string> listWithResult);
         Task UpsertProduct(Product product);
         Task UpsertManyProducts(IEnumerable<Product> products);
         Task<List<string>> GetBrandForMenu(int limit);

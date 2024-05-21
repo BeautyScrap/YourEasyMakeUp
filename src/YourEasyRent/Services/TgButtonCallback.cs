@@ -12,9 +12,11 @@ namespace YourEasyRent.Services
         public bool IsStart => IsBotStart();
         public bool IsValidMessage => IsValidMsg();
         public bool IsValueMenuMessage  => IsMenuButton();
-        public bool IsBrandMenu { get; set; }//  не знаю как мне сделать проверку для разных меню, чтобы потом воспользоваться этими свойствами в Handlder
-        public bool IsCategoryMenu { get; set; }
+        public bool IsBrandMenu => IsBrandMenuButton();
+        public bool IsCategoryMenu => IsCategoryMenuButton();
         public bool IsValueProductButton => IsProductButton();
+        public bool IsProductBrand=> IsProductBrandButton();
+        public bool IsProductCategory=> IsProductCategoryButton();
 
 
         public TgButtonCallback(Update update)
@@ -50,7 +52,7 @@ namespace YourEasyRent.Services
             return chatId;
         }
 
-        public bool IsValidMsg() 
+        public bool IsValidMsg()  //  может в меню бота внутрь этого метода поместить все дргие кроме isStart?
         {
             var nameOfButton = _update.CallbackQuery?.Data ?? _update.Message?.Text ?? throw new Exception("The user did not send a message");
 
@@ -66,20 +68,40 @@ namespace YourEasyRent.Services
         
         }
 
-        public string GetMenuButton()
+        public bool IsBrandMenuButton()
         {
             var menuButton = _update.CallbackQuery.Data;
-
-            if ( menuButton == "BrandMenu")
+            if (menuButton == "BrandMenu")
             {
-                return menuButton;
+                return true;
             }
+            return false;
+        }
+
+        public bool IsCategoryMenuButton()
+        {
+            var menuButton = _update.CallbackQuery.Data;
             if (menuButton == "CategoryMenu")
             {
-                return menuButton;
+                return true;
             }
-            return menuButton;
+            return false;
+
         }
+        //public string GetMenuButton()
+        //{
+        //    var menuButton = _update.CallbackQuery.Data;
+
+        //    if ( menuButton == "BrandMenu")
+        //    {
+        //        return menuButton;
+        //    }
+        //    if (menuButton == "CategoryMenu")
+        //    {
+        //        return menuButton;
+        //    }
+        //    return menuButton;
+        //}
         public bool IsProductButton()
         {
             var messageText = _update.Message?.Text;
@@ -87,9 +109,30 @@ namespace YourEasyRent.Services
             return messageText == null && nameOfButton.StartsWith("Brand_") || messageText == null && nameOfButton.StartsWith("Category_");
         }
 
+
+        public bool IsProductBrandButton()
+        {
+            var productButton = _update.CallbackQuery.Data;
+            if (productButton.StartsWith("Brand_"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsProductCategoryButton()
+        {
+            var productButton = _update.CallbackQuery.Data;
+            if (productButton.StartsWith("Category_"))
+            {
+                return true;
+            }
+            return false;
+        }
+
         public string GetProductButton()
         {
-            
+
             var productButton = _update.CallbackQuery.Data;
             if (productButton.StartsWith("Brand_"))
             {
@@ -99,8 +142,8 @@ namespace YourEasyRent.Services
             {
                 return productButton.Replace("Category_", "");
             }
-            return productButton;   
-            
+            return productButton;
+
         }
     }
 }

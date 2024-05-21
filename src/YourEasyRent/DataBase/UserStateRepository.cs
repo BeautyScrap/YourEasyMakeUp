@@ -71,30 +71,19 @@ namespace YourEasyRent.DataBase
             {
                 return false;
             }
-            var requiredFields = new List<string> {"UserId", "Brand", "Category" };
-            foreach(var field in requiredFields)
-            {
-                var property = typeof(UserSearchStateDTO).GetProperty(field);
-                if (property == null || property.GetValue(dto) == null || string.IsNullOrWhiteSpace(property.GetValue(dto)?.ToString()))
-                {
-                    return false;
-                }
-            }
+
             return true;
 
         }
 
-        public async Task<List<string>> GetFilteredProducts(string userId )// должен быть коллекцией List, а не просто типом string,  чтобы возвращать несколько элементов
+        public async Task<(string Brand, string Category)> GetFilteredProductsForSearch(string userId)
         {
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
             var projection = Builders<UserSearchStateDTO>.Projection.Include(u =>u.Brand).Include(u => u.Category);
-            var brandAndCategoryResult = await _collectionOfUserSearchState.Find(filter).Project(projection).FirstOrDefaultAsync();
+            var brandAndCategoryResult = await _collectionOfUserSearchState.Find(filter).Project(u =>new { u.Brand, u.Category} ).FirstOrDefaultAsync();
 
-            var listWithResult = new List<string>
-            {
-                brandAndCategoryResult.AsString
-            };
-            return listWithResult;          
+            return (brandAndCategoryResult.Brand, brandAndCategoryResult.Category);
+
         }
     }
 }

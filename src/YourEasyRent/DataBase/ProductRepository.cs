@@ -70,11 +70,11 @@ namespace YourEasyRent.DataBase
             return deleteProduct.IsAcknowledged && deleteProduct.DeletedCount > 0;
         }
 
-        public async Task<IEnumerable<Product>> GetProductsByBrandAndCategory(string brand, string category)
+        public async Task<IEnumerable<Product>> GetProductsByBrandAndCategory(List<string> listWithResult)
         {
             var filter = Builders<Product>.Filter.And
-                (Builders<Product>.Filter.Eq(_ => _.Brand, brand),
-                 Builders<Product>.Filter.Eq(_ => _.Category, category));
+                (Builders<Product>.Filter.Eq(_ => _.Brand, listWithResult[0]),
+                 Builders<Product>.Filter.Eq(_ => _.Category, listWithResult[1]));
 
             var products = await _productCollection.Find(filter).ToListAsync();
             return products;
