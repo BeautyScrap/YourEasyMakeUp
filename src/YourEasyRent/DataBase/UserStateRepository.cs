@@ -20,7 +20,6 @@ namespace YourEasyRent.DataBase
 
         public async Task<UserSearchState> GetForUser(string userId)
         {
-            
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
 
             var dto = await _collectionOfUserSearchState.Find(filter).FirstOrDefaultAsync();

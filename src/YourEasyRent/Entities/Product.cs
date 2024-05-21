@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace YourEasyRent.Entities
 {
-    public class Product
+    public class ProductDTO
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]   
