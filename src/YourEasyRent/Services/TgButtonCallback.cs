@@ -54,17 +54,24 @@ namespace YourEasyRent.Services
 
         public bool IsValidMsg()  //  может в меню бота внутрь этого метода поместить все дргие кроме isStart?
         {
-            var nameOfButton = _update.CallbackQuery?.Data ?? _update.Message?.Text ?? throw new Exception("The user did not send a message");
+            try
+            {
+                var nameOfButton = _update.CallbackQuery?.Data;
 
-            return nameOfButton.All(c => char.IsLetter(c) || c == '_' || c == '/');
-            
+                return nameOfButton.All(c => char.IsLetter(c) || c == '_' || c == '/'  || c == ' ');
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("The user did not send a message", ex);
+            }
+                        
         }
 
         public bool IsMenuButton()
         {
-            var messageText = _update.Message?.Text;
+           // var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            return messageText == null && (nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu");
+            return nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu";
         
         }
 
@@ -104,9 +111,13 @@ namespace YourEasyRent.Services
         //}
         public bool IsProductButton()
         {
-            var messageText = _update.Message?.Text;
-            var nameOfButton = _update.CallbackQuery?.Data;
-            return messageText == null && ( nameOfButton.StartsWith("Brand_") || nameOfButton.StartsWith("Category_"));
+            //var messageText = _update.Message?.Text;
+            var nameOfButton = _update.CallbackQuery.Data;
+            if( nameOfButton.StartsWith("Brand_") || nameOfButton.StartsWith("Category_"))
+            {
+                return true;
+            }
+            return false;
         }
 
 

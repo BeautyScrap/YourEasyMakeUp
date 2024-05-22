@@ -53,6 +53,7 @@ namespace YourEasyRent.TelegramMenu
             var menu = await _menus[MenuStatus.MenuAfterReceivingRresult].SendMenuToTelegramHandle();
             await _botClient.SendTextMessageAsync(chatId, "What do you want to do next?", replyMarkup: menu);
         }
+
         public  async Task<IEnumerable<string>> SendResults(string chatId, List<string> listWithResult)
         {
             var resultsOfSearch = await GetFilteredProductsMessage(listWithResult);

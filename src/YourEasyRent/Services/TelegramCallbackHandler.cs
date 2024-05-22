@@ -51,9 +51,7 @@ namespace YourEasyRent.Services
                 var userSearchState = UserSearchState.CreateNewUserSearchState(userId);
 
                 userSearchState.SetChatId(chatId);
-                MenuStatus status = MenuStatus.MainMenu;
-                userSearchState.AddStatusToHistory(status);
-                userSearchState.ToMongoRepresintation();
+                userSearchState.AddStatusToHistory(MenuStatus.MainMenu);
                 await _userStateRepository.CreateAsync(userSearchState);
                 await _telegramSender.SendMainMenu(chatId);
                 return;
@@ -69,19 +67,15 @@ namespace YourEasyRent.Services
 
                     if (tgButtonCallback.IsBrandMenu)
                     {
-                        MenuStatus status = MenuStatus.BrandMenu;
-                        userSearchState.AddStatusToHistory(status);
-                        userSearchState.ToMongoRepresintation();
+                        userSearchState.AddStatusToHistory(MenuStatus.BrandMenu);
                         await _userStateRepository.UpdateAsync(userSearchState);
                         await _telegramSender.SendBrandMenu(chatId);
                         return;
                     }
 
                     if (tgButtonCallback.IsCategoryMenu)
-                    {
-                        MenuStatus status = MenuStatus.CategoryMenu;
-                        userSearchState.AddStatusToHistory(status);
-                        userSearchState.ToMongoRepresintation();
+                    {                        
+                        userSearchState.AddStatusToHistory(MenuStatus.CategoryMenu);
                         await _userStateRepository.UpdateAsync(userSearchState);
                         await _telegramSender.SendCategoryMenu(chatId);
                         return;
@@ -94,9 +88,7 @@ namespace YourEasyRent.Services
 
                     if (tgButtonCallback.IsProductBrand)
                     {
-                        MenuStatus status = MenuStatus.BrandChosen;
-                        userSearchState.AddStatusToHistory(status);
-
+                        userSearchState.AddStatusToHistory(MenuStatus.BrandChosen);
                         var brand = tgButtonCallback.GetProductButton();
                         userSearchState.SetBrand(brand);
                         await _userStateRepository.UpdateAsync(userSearchState);
@@ -106,16 +98,17 @@ namespace YourEasyRent.Services
                             var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); // метод, который вернет резултат для переменной
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
                             await _telegramSender.SendResults(chatId, listWithResult);
+                            // Сюда еще можно вставить метод  после получения результата  SendMenuAfterResult
+                            
                             return;
                         }
                         await _telegramSender.SendCategoryMenu(chatId); 
                         return;
                     };
-                    if (tgButtonCallback.IsProductBrand)
-                    {
-                        MenuStatus status = MenuStatus.CategoryChosen;
-                        userSearchState.AddStatusToHistory(status);
 
+                    if (tgButtonCallback.IsProductCategory)
+                    {
+                        userSearchState.AddStatusToHistory(MenuStatus.CategoryChosen);//  можно этот метод перенести внуть метода GetProductButton
                         var category = tgButtonCallback.GetProductButton();
                         userSearchState.SetCategory(category);
                         await _userStateRepository.UpdateAsync(userSearchState);
@@ -127,8 +120,6 @@ namespace YourEasyRent.Services
                             await _telegramSender.SendResults(chatId, listWithResult);
                             return;
                         }
-                        //  проверка, что все поля заполнены, если все заполенно то вызвать метод SendResult, 
-                        // если нет, то вызов другого меню
                         await _telegramSender.SendCategoryMenu(chatId);
                         return;
                     };

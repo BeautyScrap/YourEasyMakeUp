@@ -53,14 +53,14 @@ namespace YourEasyRent.UserState
         {
             Brand = brand;
             CurrentMenuStatus = MenuStatus.BrandChosen;
-            _historyOfMenuStatuses.Add(MenuStatus.BrandChosen);
+            //_historyOfMenuStatuses.Add(MenuStatus.BrandChosen);
         }
 
         public void SetCategory(string category)
         {
             Category = category;
             CurrentMenuStatus = MenuStatus.CategoryChosen;
-            _historyOfMenuStatuses.Add(MenuStatus.CategoryChosen);
+            //_historyOfMenuStatuses.Add(MenuStatus.CategoryChosen);
         }
 
         public void AddStatusToHistory(MenuStatus status)
@@ -82,7 +82,7 @@ namespace YourEasyRent.UserState
 
         public bool IsReadyForSearch()
         {
-            if(UserId == null || Brand == null || Category == null)
+            if (UserId == null || Brand == null || Category == null)
             {
                 return false;
             }
