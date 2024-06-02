@@ -12,9 +12,11 @@ namespace YourEasyRent.Services
         public bool IsStart => IsBotStart();
         public bool IsValidMessage => IsValidMsg();
         public bool IsValueMenuMessage  => IsMenuButton();
-        public bool IsBrandMenu { get; set; }
-        public bool IsCategoryMenu { get; set; }
+        public bool IsBrandMenu => IsBrandMenuButton();
+        public bool IsCategoryMenu => IsCategoryMenuButton();
         public bool IsValueProductButton => IsProductButton();
+        public bool IsProductBrand=> IsProductBrandButton();
+        public bool IsProductCategory=> IsProductCategoryButton();
 
 
         public TgButtonCallback(Update update)
@@ -50,41 +52,109 @@ namespace YourEasyRent.Services
             return chatId;
         }
 
-        public bool IsValidMsg() 
+        public bool IsValidMsg()  //  может в меню бота внутрь этого метода поместить все дргие кроме isStart?
         {
-            var nameOfButton = _update.CallbackQuery?.Data ?? _update.Message?.Text ?? throw new Exception("The user did not send a message");
+            try
+            {
+                var nameOfButton = _update.CallbackQuery?.Data;
 
-            return nameOfButton.All(c => char.IsLetter(c) || c == '_' || c == '/');
-            
+                return nameOfButton.All(c => char.IsLetter(c) || c == '_' || c == '/'  || c == ' ');
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("The user did not send a message", ex);
+            }
+                        
         }
 
         public bool IsMenuButton()
         {
-            var messageText = _update.Message?.Text;
+           // var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            return messageText == null && (nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu");
+            return nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu";
         
         }
 
-        public string GetMenuButton()
+        public bool IsBrandMenuButton()
         {
             var menuButton = _update.CallbackQuery.Data;
-
-            if ( menuButton == "BrandMenu")
+            if (menuButton == "BrandMenu")
             {
-                return menuButton;
+                return true;
             }
+            return false;
+        }
+
+        public bool IsCategoryMenuButton()
+        {
+            var menuButton = _update.CallbackQuery.Data;
             if (menuButton == "CategoryMenu")
             {
-                return menuButton;
+                return true;
             }
-            return menuButton;
+            return false;
+
         }
+        //public string GetMenuButton()
+        //{
+        //    var menuButton = _update.CallbackQuery.Data;
+
+        //    if ( menuButton == "BrandMenu")
+        //    {
+        //        return menuButton;
+        //    }
+        //    if (menuButton == "CategoryMenu")
+        //    {
+        //        return menuButton;
+        //    }
+        //    return menuButton;
+        //}
         public bool IsProductButton()
         {
-            var messageText = _update.Message?.Text;
-            var nameOfButton = _update.CallbackQuery?.Data;
-            return messageText == null && nameOfButton.StartsWith("Brand_") || messageText == null && nameOfButton.StartsWith("Category_"); 
-        }        
+            //var messageText = _update.Message?.Text;
+            var nameOfButton = _update.CallbackQuery.Data;
+            if( nameOfButton.StartsWith("Brand_") || nameOfButton.StartsWith("Category_"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+
+        public bool IsProductBrandButton()
+        {
+            var productButton = _update.CallbackQuery.Data;
+            if (productButton.StartsWith("Brand_"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool IsProductCategoryButton()
+        {
+            var productButton = _update.CallbackQuery.Data;
+            if (productButton.StartsWith("Category_"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public string GetProductButton()
+        {
+
+            var productButton = _update.CallbackQuery.Data;
+            if (productButton.StartsWith("Brand_"))
+            {
+                return productButton.Replace("Brand_", "");
+            }
+            if (productButton.StartsWith("Category_"))
+            {
+                return productButton.Replace("Category_", "");
+            }
+            return productButton;
+
+        }
     }
 }

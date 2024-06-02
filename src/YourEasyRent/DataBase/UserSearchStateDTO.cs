@@ -5,7 +5,7 @@ using YourEasyRent.Entities;
 namespace YourEasyRent.UserState
 {
 
-    public class UserSearchStateDTO // шаблон с данными, которые должны храниться в бд
+    public class UserSearchStateDTO 
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]     

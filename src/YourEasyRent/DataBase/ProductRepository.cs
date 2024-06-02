@@ -4,6 +4,8 @@ using MongoDB.Driver;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Entities;
 using MongoDB.Driver.Linq;
+using YourEasyRent.TelegramMenu;
+using YourEasyRent.UserState;
 
 
 
@@ -17,7 +19,7 @@ namespace YourEasyRent.DataBase
         public ProductRepository(DataBaseConfig configuration, IMongoClient client) //вводим конструктор класса CatalogContext. Конструктор принимает два аргумента: DataBaseConfig configuration и IMongoClient client. Класс DataBaseConfig используется для передачи конфигурационных данных, а IMongoClient представляет клиент MongoDB, который используется для установления соединения с базой данных.
         {
             var database = client.GetDatabase(configuration.DataBaseName); //переменная database инициализируется с помощью метода GetDatabase, вызываемого из объекта client, и передается имя базы данных из объекта configuration.
-            _productCollection = database.GetCollection<Product>("Products"); // GetCollection<Product> - это метод, который возвращает коллекцию объектов типа Product.
+            _productCollection = database.GetCollection<Product>("Products") ??  throw new ArgumentNullException(nameof(_productCollection)); ; // GetCollection<Product> - это метод, который возвращает коллекцию объектов типа Product.
         }
 
         public async Task<IEnumerable<Product>> GetProducts()
@@ -68,11 +70,11 @@ namespace YourEasyRent.DataBase
             return deleteProduct.IsAcknowledged && deleteProduct.DeletedCount > 0;
         }
 
-        public async Task<IEnumerable<Product>> GetProductsByBrandAndCategory(string brand, string category)
+        public async Task<IEnumerable<Product>> GetProductsByBrandAndCategory(List<string> listWithResult)
         {
             var filter = Builders<Product>.Filter.And
-                (Builders<Product>.Filter.Eq(_ => _.Brand, brand),
-                 Builders<Product>.Filter.Eq(_ => _.Category, category));
+                (Builders<Product>.Filter.Eq(_ => _.Brand, listWithResult[0]),
+                 Builders<Product>.Filter.Eq(_ => _.Category, listWithResult[1]));
 
             var products = await _productCollection.Find(filter).ToListAsync();
             return products;

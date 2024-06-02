@@ -41,8 +41,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));
 builder.Services.AddHttpClient<IProductsSiteClient, SephoraClient>();
 builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
-builder.Services.AddSingleton<IProductRepository, ProductRepository>();
-builder.Services.AddSingleton<ITelegramActionsHandler,TelegramActionsHandler>();      
+builder.Services.AddSingleton<IProductRepository, ProductRepository>();     
 builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
 builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
 

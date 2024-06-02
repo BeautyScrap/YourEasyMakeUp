@@ -5,6 +5,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Entities;
+using YourEasyRent.TelegramMenu.ButtonHandler;
 
 
 namespace YourEasyRent.TelegramMenu.ButtonHandler
@@ -15,7 +16,7 @@ namespace YourEasyRent.TelegramMenu.ButtonHandler
 
         public BrandButtonHandler(IProductRepository productRepository)
         {
-            _productRepository = productRepository;
+            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         }
 
         public async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
@@ -30,8 +31,7 @@ namespace YourEasyRent.TelegramMenu.ButtonHandler
         {
             var InlineKeyboardButtons = brandsMenu.Select(brand =>
             {
-                var buttone = InlineKeyboardButton.WithCallbackData(text: brand, callbackData: $"Brand_{brand}");//  возможно так можно будет
-                // распознать какой коллбек из какого меню пришел
+                var buttone = InlineKeyboardButton.WithCallbackData(text: brand, callbackData: $"Brand_{brand}");
                 return new List<InlineKeyboardButton> { buttone };
             }).ToList();
 
