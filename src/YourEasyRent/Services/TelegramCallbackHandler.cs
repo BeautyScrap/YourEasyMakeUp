@@ -77,6 +77,7 @@ namespace YourEasyRent.Services
                         await _telegramSender.SendCategoryMenu(chatId);
                         return;
                     }
+
                 }
 
                 if (tgButtonCallback.IsValueProductButton)
