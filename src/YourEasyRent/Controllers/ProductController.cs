@@ -41,6 +41,8 @@ namespace YourEasyRent.Controllers
         }
 
         [HttpGet("{id:length(24)}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Product))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Product>> Get(string id)
         {
             try
@@ -63,6 +65,8 @@ namespace YourEasyRent.Controllers
 
         [Route("[action]/{brand}", Name = "GetProductByBrand")]
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<Product>>> GetProductByBrand(string brand)
         {
             try
@@ -79,12 +83,14 @@ namespace YourEasyRent.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[GetProductByBrand]: Brand of Product is not found in the database");
-                return StatusCode(500, "Internal Server Error. Brand not found");
+                return StatusCode(404, "Brand not found");
             }
         }
 
         [Route("[action]/{name}", Name = "GetProductByName")]
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Product>> GetProductByName(string name)
         {
             try
@@ -101,13 +107,22 @@ namespace YourEasyRent.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
         public async Task<IActionResult> Post([FromBody] Product newProduct)
         {
             try
             {
                 await _repository.Create(newProduct);
-                _logger.LogInformation("ActionResult = {@newProduct}", newProduct);
-                return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
+                if (newProduct != null)
+                {
+                    _logger.LogInformation("ActionResult = {@newProduct}", newProduct);
+                    return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
+                }
+
+                return BadRequest();
             }
             catch (Exception ex)
             {
@@ -117,6 +132,9 @@ namespace YourEasyRent.Controllers
         }
 
         [HttpPut("{id:length(24)}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateProduct(string id, Product updateProduct)
         {
             try
@@ -142,6 +160,9 @@ namespace YourEasyRent.Controllers
         }
 
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteProduct(string id)
         {
             try
