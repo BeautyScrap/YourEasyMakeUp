@@ -49,14 +49,11 @@ namespace YourEasyRent.Services
             if (tgButtonCallback.IsStart)
             {
                 var userSearchState = UserSearchState.CreateNewUserSearchState(userId);
-
                 userSearchState.SetChatId(chatId);
                 userSearchState.AddStatusToHistory(MenuStatus.MainMenu);
                 await _userStateRepository.CreateAsync(userSearchState);
                 await _telegramSender.SendMainMenu(chatId);
                 return;
-
-
             };
 
             if (tgButtonCallback.IsValidMessage)
@@ -80,6 +77,7 @@ namespace YourEasyRent.Services
                         await _telegramSender.SendCategoryMenu(chatId);
                         return;
                     }
+
                 }
 
                 if (tgButtonCallback.IsValueProductButton)
