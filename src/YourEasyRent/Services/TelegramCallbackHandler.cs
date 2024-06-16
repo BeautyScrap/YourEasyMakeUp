@@ -22,22 +22,22 @@ namespace YourEasyRent.Services
         private readonly IUserStateRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
+        private readonly ISubscribersRepository _subscribersRepository;
 
 
         public TelegramCallbackHandler
             (
-
             ILogger<TelegramCallbackHandler> logger,
             IUserStateRepository userStateRepository,
-            ITelegramSender telegramSender
+            ITelegramSender telegramSender,
+            ISubscribersRepository subscribersRepository
 
             )
         {
-
             _logger = logger;
             _userStateRepository = userStateRepository;
             _telegramSender = telegramSender;
-
+            _subscribersRepository = subscribersRepository;
         }
 
         public async Task HandleUpdateAsync(TgButtonCallback tgButtonCallback)
@@ -96,6 +96,8 @@ namespace YourEasyRent.Services
                             var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); // метод, который вернет резултат для переменной
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
                             await _telegramSender.SendResults(chatId, listWithResult);
+                            await _telegramSender.SendMenuAfterResult(chatId);
+
                             // Сюда еще можно вставить метод  после получения результата  SendMenuAfterResult
                             
                             return;
@@ -116,12 +118,26 @@ namespace YourEasyRent.Services
                             var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); 
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
                             await _telegramSender.SendResults(chatId, listWithResult);
+                            await _telegramSender.SendMenuAfterResult(chatId);
                             return;
                         }
                         await _telegramSender.SendCategoryMenu(chatId);
                         return;
                     };
                 }
+                if (tgButtonCallback.IsSubscribeToProduct)
+                { 
+                    UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
+                    userSearchState.AddStatusToHistory(MenuStatus.SubscribedToTheProduct);
+                    await _userStateRepository.UpdateAsync(userSearchState);                  
+                    var subscriber = Subscriber.TransferDataToSubscriber(userSearchState);
+                    await _subscribersRepository.CreateSubscriberAsync(subscriber);
+                    
+                    await _telegramSender.SendConfirmOfSubscriprion(chatId);
+                    return;
+
+                }
+
             }
         }
     }

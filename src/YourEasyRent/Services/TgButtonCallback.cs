@@ -17,6 +17,7 @@ namespace YourEasyRent.Services
         public bool IsValueProductButton => IsProductButton();
         public bool IsProductBrand=> IsProductBrandButton();
         public bool IsProductCategory=> IsProductCategoryButton();
+        public bool IsSubscribeToProduct => IsSubscribeButton();
 
 
         public TgButtonCallback(Update update)
@@ -24,6 +25,16 @@ namespace YourEasyRent.Services
             _update = update;
         }
 
+        private bool IsSubscribeButton()
+        {
+            var nameOfButton = _update.CallbackQuery?.Data;
+            if(nameOfButton == "Subscribe")
+            {
+                return true;
+            }
+            return false;
+
+        }
         public bool IsBotStart()
         {
             var messageText = _update.Message?.Text;
@@ -95,20 +106,7 @@ namespace YourEasyRent.Services
             return false;
 
         }
-        //public string GetMenuButton()
-        //{
-        //    var menuButton = _update.CallbackQuery.Data;
-
-        //    if ( menuButton == "BrandMenu")
-        //    {
-        //        return menuButton;
-        //    }
-        //    if (menuButton == "CategoryMenu")
-        //    {
-        //        return menuButton;
-        //    }
-        //    return menuButton;
-        //}
+  
         public bool IsProductButton()
         {
             //var messageText = _update.Message?.Text;

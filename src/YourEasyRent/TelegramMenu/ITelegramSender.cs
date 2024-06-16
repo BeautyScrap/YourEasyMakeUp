@@ -9,5 +9,7 @@ namespace YourEasyRent.TelegramMenu
         Task SendBrandMenu(string chatId);
         Task<IEnumerable<string>> SendResults(string chatId, List<string> listWithResult);
         Task SendMenuAfterResult(string chatId);
+        Task SendConfirmOfSubscriprion(string chatId);
+        
     }
 }

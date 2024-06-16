@@ -18,7 +18,7 @@ namespace YourEasyRent.Services.Buttons
                     new []
                     {
                         InlineKeyboardButton.WithCallbackData(text: "Start a New Search",callbackData: "StartNewSearch"),
-                        InlineKeyboardButton.WithCallbackData(text: "Monitor the price",callbackData: "StartNewSearch"),
+                        InlineKeyboardButton.WithCallbackData(text: "Subscribe to the product",callbackData: "Subscribe"),
                     },
                 };
 

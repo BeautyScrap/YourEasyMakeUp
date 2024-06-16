@@ -27,7 +27,8 @@ namespace YourEasyRent.TelegramMenu
                 { MenuStatus.MainMenu, new MainMenuButtonHandler() },
                 { MenuStatus.BrandMenu, new BrandButtonHandler(_productRepository) },
                 { MenuStatus.CategoryMenu, new CategoryButtonHandler() },
-                { MenuStatus.MenuAfterReceivingRresult, new ReturnToMMButtonHandler() }
+                { MenuStatus.MenuAfterReceivingRresult, new ReturnToMMButtonHandler() },
+                {MenuStatus.SubscribedToTheProduct, new SubscriptionButtonHandler() }
             };
         }
         public async Task SendMainMenu(string chatId)
@@ -58,9 +59,12 @@ namespace YourEasyRent.TelegramMenu
         {
             var resultsOfSearch = await GetFilteredProductsMessage(listWithResult);
 
-            foreach (var result in resultsOfSearch)
+            foreach (var result in resultsOfSearch)// здесть у нас еже есть несколько результатов поиска и мы можем их преобразовать в Dto
+                                                   // и положить их в отдельную таблицу
             {
-               await _botClient.SendTextMessageAsync(chatId, result, parseMode: ParseMode.Markdown); 
+               await _botClient.SendTextMessageAsync(chatId, result, parseMode: ParseMode.Markdown); // только тут мы  вместо оправки результата в телегу я перекладываю полученные рещзультаты в новую бд
+                                                                                                     // через новый перозиторий с методом Create
+                                                                                                     // и присылает ответ "Ты подписался на этот продукт, начнем поиск заново"
             }
             return resultsOfSearch;
         }
@@ -70,7 +74,7 @@ namespace YourEasyRent.TelegramMenu
             var products = await _productRepository.GetProductsByBrandAndCategory(listWithResult);
             {
                 var productStrings = products.Select(p =>
-            $"*{p.Brand}*\n" +
+            $"*{p.Brand}*\n" +// мне нужно получить только Brand  and Name, чтобы передать эти данные в новую базу подписчиков
             $"{p.Name}\n" +
             $"{p.Category}\n" +
             $"{p.Price}\n" +
@@ -80,6 +84,13 @@ namespace YourEasyRent.TelegramMenu
             }
         }
 
+        public async Task SendConfirmOfSubscriprion(string chatId)
+        {
+            var menu = await _menus[MenuStatus.SubscribedToTheProduct].SendMenuToTelegramHandle();
+            await _botClient.SendTextMessageAsync(chatId, "Go to main menu", replyMarkup: menu);
+        }
+
+        
     }
     
 }
