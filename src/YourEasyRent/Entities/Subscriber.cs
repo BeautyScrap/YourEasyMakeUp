@@ -11,7 +11,7 @@ namespace YourEasyRent.Entities
         public string? ChatId { get; private set; }
         public string? Category { get; private set; }
         public string? Brand { get; private set; }
-
+        public string? Name {  get; private set; }
         public Subscriber() { }
         public Subscriber (SubscribersDto subDto)
         {
@@ -19,11 +19,12 @@ namespace YourEasyRent.Entities
             ChatId = subDto.ChatId;
             Category = subDto.Category;
             Brand = subDto.Brand;
+            Name = subDto.Name;//  возможно потом нужно будет добавить цену, чтобы отслежиывать снижение и ссылку на продукт
         }
 
 
         public static Subscriber TransferDataToSubscriber(UserSearchState userSearchState) // переносим одни данные в оъбект Subscriber
-        { 
+        { // а вгрумент передать UserSearchState UserId
             Subscriber subscriber = new Subscriber()
             {
                 UserId = userSearchState.UserId,
@@ -42,7 +43,8 @@ namespace YourEasyRent.Entities
                 UserId = UserId,
                 ChatId = ChatId,
                 Category = Category,
-                Brand = Brand
+                Brand = Brand,
+                Name = Name,
             };
             return subscribersDto;
             

@@ -12,7 +12,9 @@ namespace YourEasyRent.Entities
         [BsonRepresentation(BsonType.String)]
         public string UserId { get;  set; }
         public string? ChatId { get;  set; }
-        public string? Category { get; set; }
+        public string? Category { get; set; } // категорию заменить на name
         public string? Brand { get; set; }
+        public string? Name { get; set; }   
+
     }
 }

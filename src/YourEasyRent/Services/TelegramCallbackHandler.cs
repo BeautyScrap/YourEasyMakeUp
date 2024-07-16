@@ -132,7 +132,10 @@ namespace YourEasyRent.Services
                     await _userStateRepository.UpdateAsync(userSearchState);                  
                     var subscriber = Subscriber.TransferDataToSubscriber(userSearchState);
                     await _subscribersRepository.CreateSubscriberAsync(subscriber);
-                    
+
+                    var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); 
+                    var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
+
                     await _telegramSender.SendConfirmOfSubscriprion(chatId);
                     return;
 
