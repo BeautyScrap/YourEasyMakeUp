@@ -13,6 +13,7 @@ using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.UserState;
 using YourEasyRent.TelegramMenu;
 using System.Collections.Generic;
+using YourEasyRent.DataBase;
 
 namespace YourEasyRent.Services
 {
@@ -23,6 +24,7 @@ namespace YourEasyRent.Services
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
         private readonly ISubscribersRepository _subscribersRepository;
+        private readonly IProductRepository _productRepository;
 
 
         public TelegramCallbackHandler
@@ -30,14 +32,16 @@ namespace YourEasyRent.Services
             ILogger<TelegramCallbackHandler> logger,
             IUserStateRepository userStateRepository,
             ITelegramSender telegramSender,
-            ISubscribersRepository subscribersRepository
-
+            ISubscribersRepository subscribersRepository,
+            IProductRepository productRepository
+           
             )
         {
             _logger = logger;
             _userStateRepository = userStateRepository;
             _telegramSender = telegramSender;
             _subscribersRepository = subscribersRepository;
+            _productRepository = productRepository;
         }
 
         public async Task HandleUpdateAsync(TgButtonCallback tgButtonCallback)
@@ -141,6 +145,19 @@ namespace YourEasyRent.Services
 
                 }
 
+            }
+        }
+
+        public async Task<(string? Brand, string? Name, decimal? Price, string? Url)> GetFilteredProductsFromProductRepository(List<string> listWithResult)
+        {
+            var products = await _productRepository.GetProductsByBrandAndCategory(listWithResult);
+            {
+                var firstProduct = products.FirstOrDefault();
+                if (firstProduct == null)
+                {
+                    return (null, null, 0, null);
+                }
+                return (firstProduct.Brand, firstProduct.Name, firstProduct.Price, firstProduct.Url);
             }
         }
     }
