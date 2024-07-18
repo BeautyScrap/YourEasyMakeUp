@@ -61,7 +61,7 @@ namespace YourEasyRent.TelegramMenu
 
             foreach (var result in resultsOfSearch)// этот результат который состоят только из строки Name и потом результат как то передавать агрументом в метод TransferDataToSubscriber
             {
-               await _botClient.SendTextMessageAsync(chatId, result, parseMode: ParseMode.Markdown); // только тут мы  вместо оправки результата в телегу я перекладываю полученные рещзультаты в новую бд
+               await _botClient.SendTextMessageAsync(chatId, $"Подписаться на {result} ", parseMode: ParseMode.Markdown); // только тут мы  вместо оправки результата в телегу я перекладываю полученные рещзультаты в новую бд
                                                          //идея заменить result на тест  $"Подписаться на {result} " - надо протестировать как будет выглядеть ответ                                                     
                                                                                                     
             }
@@ -85,20 +85,6 @@ namespace YourEasyRent.TelegramMenu
             }
         }
 
-
-
-        public async Task<(string? Brand, string? Name, decimal? Price, string? Url)> GetFilteredProductsFromProductRepository(List<string> listWithResult)
-        {
-            var products = await _productRepository.GetProductsByBrandAndCategory(listWithResult);
-            {
-                var firstProduct = products.FirstOrDefault();
-                if (firstProduct == null)
-                { 
-                    return (null, null, 0, null);
-                }
-                return(firstProduct.Brand, firstProduct.Name, firstProduct.Price, firstProduct.Url);
-            }
-        }
 
         public async Task SendConfirmOfSubscriprion(string chatId)
         {

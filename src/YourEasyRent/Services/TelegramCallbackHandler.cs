@@ -100,10 +100,7 @@ namespace YourEasyRent.Services
                             var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); // метод, который вернет резултат для переменной
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
                             await _telegramSender.SendResults(chatId, listWithResult);
-                            await _telegramSender.SendMenuAfterResult(chatId);
-
-                            // Сюда еще можно вставить метод  после получения результата  SendMenuAfterResult
-                            
+                            await _telegramSender.SendMenuAfterResult(chatId);  
                             return;
                         }
                         await _telegramSender.SendCategoryMenu(chatId); 
@@ -133,12 +130,23 @@ namespace YourEasyRent.Services
                 { 
                     UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
                     userSearchState.AddStatusToHistory(MenuStatus.SubscribedToTheProduct);
-                    await _userStateRepository.UpdateAsync(userSearchState);                  
-                    var subscriber = Subscriber.TransferDataToSubscriber(userSearchState);
+                    await _userStateRepository.UpdateAsync(userSearchState);
+                    
+                    var tupleWithResultFromUSR = await _userStateRepository.GetFilteredProductsForSearch(userId); 
+                    var listWithResult = new List<string> { tupleWithResultFromUSR.Brand, tupleWithResultFromUSR.Category }.ToList();
+
+                    var intermediateResult = await GetFilteredProductsFromProductRepository(listWithResult);
+                    var intermadiateResultList = new List<string>
+                    {
+                        intermediateResult.Brand,
+                        intermediateResult.Name,
+                        intermediateResult.Price.ToString(),
+                        intermediateResult.Url
+                    }.ToList();
+
+                    var subscriber = Subscriber.TransferDataToSubscriber(userSearchState, intermadiateResultList);
                     await _subscribersRepository.CreateSubscriberAsync(subscriber);
 
-                    var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); 
-                    var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
 
                     await _telegramSender.SendConfirmOfSubscriprion(chatId);
                     return;

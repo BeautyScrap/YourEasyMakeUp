@@ -12,6 +12,9 @@ namespace YourEasyRent.Entities
         public string? Category { get; private set; }
         public string? Brand { get; private set; }
         public string? Name {  get; private set; }
+
+        public decimal? Price { get; private set; }
+        public string? Url { get; private set; }
         public Subscriber() { }
         public Subscriber (SubscribersDto subDto)
         {
@@ -20,17 +23,22 @@ namespace YourEasyRent.Entities
             Category = subDto.Category;
             Brand = subDto.Brand;
             Name = subDto.Name;//  возможно потом нужно будет добавить цену, чтобы отслежиывать снижение и ссылку на продукт
+            Price = subDto.Price;
+            Url = subDto.Url;
         }
 
 
-        public static Subscriber TransferDataToSubscriber(UserSearchState userSearchState) // переносим одни данные в оъбект Subscriber
+        public static Subscriber TransferDataToSubscriber(UserSearchState userSearchState, List<string> intermadiateResultList) // переносим одни данные в оъбект Subscriber
         { // а вгрумент передать UserSearchState UserId
             Subscriber subscriber = new Subscriber()
             {
                 UserId = userSearchState.UserId,
                 ChatId = userSearchState.ChatId,
                 Category = userSearchState.Category,
-                Brand = userSearchState.Brand,
+                Brand = intermadiateResultList[0],
+                Name = intermadiateResultList[1],
+                Price = decimal.Parse(intermadiateResultList[2]),
+                Url = intermadiateResultList[3]
             };
             return subscriber;
 
@@ -45,6 +53,8 @@ namespace YourEasyRent.Entities
                 Category = Category,
                 Brand = Brand,
                 Name = Name,
+                Price = Price,
+                Url = Url
             };
             return subscribersDto;
             
