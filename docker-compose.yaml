@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  postgres:
+    profiles: [infra, all]
+    container_name: postgres
+    image: postgres
+    environment:
+      POSTGRES_DB: scrapper
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword123!
+    ports:
+      - 5432:5432
+    volumes:
+      - ./sql-migrations:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+
+  rabbit:
+    profiles: [infra, all]
+    container_name: rabbit-mq
+    image: rabbitmq:3.6.10-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: rmq
+      RABBITMQ_DEFAULT_PASS: pass
+    depends_on:
+      - postgres
+    ports:
+     - 4369:4369 
+     - 5671:5671
+     - 5672:5672
+     - 25672:25672
+     - 15671:15671
+     - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+      
+  scrapper-api:
+    profiles: [all]
+    container_name: scrapper-api
+    build:
+      context: src 
+      dockerfile: YourEasyRent/Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+      - rabbit
+
+volumes:
+  postgres-data:
