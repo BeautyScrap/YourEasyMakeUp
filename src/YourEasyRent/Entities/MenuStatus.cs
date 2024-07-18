@@ -10,6 +10,7 @@
         CategoryChosen,
         BackOnOneStep,
         ReadyToResult,
+        SubscribedToTheProduct,
         MenuAfterReceivingRresult
     }
 

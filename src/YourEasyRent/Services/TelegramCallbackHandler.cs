@@ -13,6 +13,7 @@ using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.UserState;
 using YourEasyRent.TelegramMenu;
 using System.Collections.Generic;
+using YourEasyRent.DataBase;
 
 namespace YourEasyRent.Services
 {
@@ -22,22 +23,25 @@ namespace YourEasyRent.Services
         private readonly IUserStateRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
+        private readonly ISubscribersRepository _subscribersRepository;
+        private readonly IProductRepository _productRepository;
 
 
         public TelegramCallbackHandler
             (
-
             ILogger<TelegramCallbackHandler> logger,
             IUserStateRepository userStateRepository,
-            ITelegramSender telegramSender
-
+            ITelegramSender telegramSender,
+            ISubscribersRepository subscribersRepository,
+            IProductRepository productRepository
+           
             )
         {
-
             _logger = logger;
             _userStateRepository = userStateRepository;
             _telegramSender = telegramSender;
-
+            _subscribersRepository = subscribersRepository;
+            _productRepository = productRepository;
         }
 
         public async Task HandleUpdateAsync(TgButtonCallback tgButtonCallback)
@@ -96,8 +100,7 @@ namespace YourEasyRent.Services
                             var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); // метод, который вернет резултат для переменной
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
                             await _telegramSender.SendResults(chatId, listWithResult);
-                            // Сюда еще можно вставить метод  после получения результата  SendMenuAfterResult
-                            
+                            await _telegramSender.SendMenuAfterResult(chatId);  
                             return;
                         }
                         await _telegramSender.SendCategoryMenu(chatId); 
@@ -116,12 +119,53 @@ namespace YourEasyRent.Services
                             var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); 
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
                             await _telegramSender.SendResults(chatId, listWithResult);
+                            await _telegramSender.SendMenuAfterResult(chatId);
                             return;
                         }
                         await _telegramSender.SendCategoryMenu(chatId);
                         return;
                     };
                 }
+                if (tgButtonCallback.IsSubscribeToProduct)
+                { 
+                    UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
+                    userSearchState.AddStatusToHistory(MenuStatus.SubscribedToTheProduct);
+                    await _userStateRepository.UpdateAsync(userSearchState);
+                    
+                    var tupleWithResultFromUSR = await _userStateRepository.GetFilteredProductsForSearch(userId); 
+                    var listWithResult = new List<string> { tupleWithResultFromUSR.Brand, tupleWithResultFromUSR.Category }.ToList();
+
+                    var intermediateResult = await GetFilteredProductsFromProductRepository(listWithResult);
+                    var intermadiateResultList = new List<string>
+                    {
+                        intermediateResult.Brand,
+                        intermediateResult.Name,
+                        intermediateResult.Price.ToString(),
+                        intermediateResult.Url
+                    }.ToList();
+
+                    var subscriber = Subscriber.TransferDataToSubscriber(userSearchState, intermadiateResultList);
+                    await _subscribersRepository.CreateSubscriberAsync(subscriber);
+
+
+                    await _telegramSender.SendConfirmOfSubscriprion(chatId);
+                    return;
+
+                }
+
+            }
+        }
+
+        public async Task<(string? Brand, string? Name, decimal? Price, string? Url)> GetFilteredProductsFromProductRepository(List<string> listWithResult)
+        {
+            var products = await _productRepository.GetProductsByBrandAndCategory(listWithResult);
+            {
+                var firstProduct = products.FirstOrDefault();
+                if (firstProduct == null)
+                {
+                    return (null, null, 0, null);
+                }
+                return (firstProduct.Brand, firstProduct.Name, firstProduct.Price, firstProduct.Url);
             }
         }
     }

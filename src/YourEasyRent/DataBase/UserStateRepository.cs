@@ -73,7 +73,8 @@ namespace YourEasyRent.DataBase
 
         }
 
-        public async Task<(string Brand, string Category)> GetFilteredProductsForSearch(string userId)
+        public async Task<(string Brand, string Category)> GetFilteredProductsForSearch(string userId)// этот метод остается как есть тк нам нужна категория и бренд,
+                                                                                                      // чтобы найти продукт в другой базе
         {
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
             var projection = Builders<UserSearchStateDTO>.Projection.Include(u =>u.Brand).Include(u => u.Category);
