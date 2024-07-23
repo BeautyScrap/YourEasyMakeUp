@@ -29,7 +29,7 @@ namespace YourEasyRent.Entities
 
 
         public static Subscriber TransferDataToSubscriber(UserSearchState userSearchState, List<string> intermadiateResultList) // переносим одни данные в оъбект Subscriber
-        { // а вгрумент передать UserSearchState UserId
+        { // а в аргумент передать UserSearchState UserId
             Subscriber subscriber = new Subscriber()
             {
                 UserId = userSearchState.UserId,
