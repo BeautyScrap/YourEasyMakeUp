@@ -7,7 +7,7 @@ namespace YourEasyRent.Entities
     public class Subscriber
     {
         
-        public string UserId { get; private set; }
+        public string? UserId { get; private set; }
         public string? ChatId { get; private set; }
         public string? Category { get; private set; }
         public string? Brand { get; private set; }

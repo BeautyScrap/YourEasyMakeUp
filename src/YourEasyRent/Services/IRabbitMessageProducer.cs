@@ -2,6 +2,6 @@
 {
     public interface IRabbitMessageProducer
     {
-        public void SendMessage<T>(T message);
+        public void SendMessagAboutSubscriber<T>(T message);
     }
 }

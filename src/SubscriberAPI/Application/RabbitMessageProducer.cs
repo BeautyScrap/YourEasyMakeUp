@@ -7,19 +7,22 @@ namespace SubscriberAPI.Application
 {
     public class RabbitMessageProducer : IRabbitMessageProducer
     {
-        public void SendMessage<T>(T message)
+        public void ConsumingMessage<T>(T message)
         {
             var factory = new ConnectionFactory
             {
                 HostName = "localhost",
                 UserName = "rmq",
-                Password = "pass"
+                Password = "pass",
+                VirtualHost = "/"
             };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
             channel.QueueDeclare("creating_subscriber",
                      durable: true,
-                     exclusive: true);
+                     exclusive: false,
+                     autoDelete: false,
+                     arguments: null);
             var consumer = new EventingBasicConsumer(channel);
             consumer.Received += (model, eventArgs) =>
                 {

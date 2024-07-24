@@ -20,11 +20,13 @@ namespace YourEasyRent.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateSubscriber(Subscriber newSubscriber)
+        [Route("subscriber/")]
+        public IActionResult SendSubscriber([FromBody] Subscriber newSubscriber)
         {
             if (!ModelState.IsValid) return BadRequest();
             _subscribers.Add(newSubscriber);
-            _messageProducer.SendMessage<Subscriber>(newSubscriber);
+            _messageProducer.SendMessagAboutSubscriber(newSubscriber);
+            Console.WriteLine("The message was sending(post)");
             return Ok();
         }
     }

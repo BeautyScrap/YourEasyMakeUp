@@ -1,33 +1,31 @@
 using Microsoft.AspNetCore.Mvc;
+using SubscriberAPI.Application;
+using SubscriberAPI.Domain;
 
 namespace SubscriberAPI.Presentanion
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("")]
     public class SubscribersController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
+        private readonly IRabbitMessageProducer _messageProducer;
         private readonly ILogger<SubscribersController> _logger;
+        public static readonly List<Subscriber> _subscribers = new();
 
-        public SubscribersController(ILogger<SubscribersController> logger)
+        public SubscribersController(IRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger)
         {
+            _messageProducer = messageProducer;
             _logger = logger;
         }
+        [HttpGet]
+        public IActionResult Post(Subscriber subscriber)
+        {
+            _messageProducer.ConsumingMessage(subscriber);
+            _subscribers.Add(subscriber);
+            Console.WriteLine($" The subscriber has been received to controller(get) {subscriber}");
+            return Ok();
+      
+        }
 
-    //    [HttpGet(Name = "GetWeatherForecast")]
-    //    public IEnumerable<WeatherForecast> Get()
-    //    {
-    //        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-    //        {
-    //            Date = DateTime.Now.AddDays(index),
-    //            TemperatureC = Random.Shared.Next(-20, 55),
-    //            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-    //        })
-    //        .ToArray();
-    //    }
     }
 }
