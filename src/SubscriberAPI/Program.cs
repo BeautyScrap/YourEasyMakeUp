@@ -1,4 +1,5 @@
 using SubscriberAPI.Application;
+using SubscriberAPI.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IRabbitMessageProducer, RabbitMessageProducer>();
+builder.Services.AddScoped<ISubscribersRepository, SubscribersRepository>();
 
 var app = builder.Build();
 

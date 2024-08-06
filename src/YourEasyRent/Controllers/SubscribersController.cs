@@ -7,26 +7,25 @@ namespace YourEasyRent.Controllers
 {
     [Route("")] // api/[controller]
     [ApiController]
-    public class CreatingSubscriberController : ControllerBase
+    public class SubscribersController : ControllerBase
     {
         private readonly IRabbitMessageProducer _messageProducer;
-        private readonly ILogger<CreatingSubscriberController> _logger;
+        private readonly ILogger<SubscribersController> _logger;
         public static readonly List<Subscriber> _subscribers = new();
 
-        public CreatingSubscriberController(IRabbitMessageProducer messageProducer, ILogger<CreatingSubscriberController> logger)
+        public SubscribersController(IRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger)
         {
             _messageProducer = messageProducer;
             _logger = logger;
         }
 
-        [HttpPost]
-        [Route("subscriber/")]
+        [HttpPost]        
         public IActionResult SendSubscriber([FromBody] Subscriber newSubscriber)
         {
             if (!ModelState.IsValid) return BadRequest();
             _subscribers.Add(newSubscriber);
             _messageProducer.SendMessagAboutSubscriber(newSubscriber);
-            Console.WriteLine("The message was sending(post)");
+            _logger.LogInformation("The message was sending(post)");
             return Ok();
         }
     }
