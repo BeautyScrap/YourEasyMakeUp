@@ -1,6 +1,7 @@
 ﻿namespace SubscriberAPI.Application
 {
-    public interface ISubscribersRepository
+    public class SubscriberHandler
     {
+
     }
 }

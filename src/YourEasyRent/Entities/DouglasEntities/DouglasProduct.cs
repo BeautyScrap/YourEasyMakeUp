@@ -2,11 +2,11 @@
 
 namespace YourEasyRent.Entities.Douglas
 {
-    public class DouglasProduct // брать названия из Json формата и потом сопоставлять их с названиями из Entities/product (которые универсальны для всех)
+    public class DouglasProduct 
     {
         public string Code { get; set; }
 
-        public string Url { get; set; } // было public string Url { get; set; }
+        public string Url { get; set; } 
 
         [JsonProperty("images")]
         public List<DouglasImages> Images { get; set; }
@@ -20,7 +20,7 @@ namespace YourEasyRent.Entities.Douglas
 
 
         [JsonProperty("brand")]
-        public DouglasBrand Brand { get; set; } // "brand":{"code":"b7867","name":"Charlotte Tilbury" -  мы смотрим на класс brand  и в нем ищем переменную, которая называется name
+        public DouglasBrand Brand { get; set; } 
 
 
         public string BaseProductName { get; set; }
