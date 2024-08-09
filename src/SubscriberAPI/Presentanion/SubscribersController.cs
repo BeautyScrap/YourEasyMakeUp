@@ -3,6 +3,7 @@ using SubscriberAPI.Application;
 using SubscriberAPI.Domain;
 using SubscriberAPI.Infrastructure;
 using System.Reflection.Metadata;
+using System.Text.Json;
 
 namespace SubscriberAPI.Presentanion
 {
@@ -26,15 +27,16 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Post([FromBody] Subscriber subscriber)
+        public async Task<IActionResult> Post([FromBody] SudscriberDto subscriberDto)
         {
-            try
-            {
-                if (subscriber == null)
+            if (subscriberDto == null)
                 {
                     _logger.LogInformation("The subscriber is null");
                     return BadRequest();
                 }
+            try
+            {
+                var subscriber = new Subscriber(subscriberDto); 
                 _messageProducer.ConsumingMessage(subscriber);
                 await _subscribersRepository.Create(subscriber);// после получения результата перекинуть его в хендлер для обработки этого подписчика, типо TgButtonCallback tgButtonCallback = new TgButtonCallback(update);await _handler.HandleUpdateAsync(tgButtonCallback); И тут влепить проверку на создавшийся экземпляр в бд
                 Console.WriteLine($" The subscriber has been received to controller(get) {subscriber}");

@@ -1,21 +1,29 @@
-﻿namespace SubscriberAPI.Domain
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace SubscriberAPI.Domain
 {
     public class Subscriber
     {
-        public string? UserId { get; private set; }
-        public string? ChatId { get; private set; }
-        public string? Category { get; private set; }
-        public string? Brand { get; private set; }
+        public string Id { get; set; }
+
+        [JsonPropertyName("userId")]
+        public string UserId { get;  set; }
+
+        public string ChatId { get; private set; }
+        //public string? Category { get; private set; }
+        public string? Brand { get;  set; }
         public string? Name { get; private set; }
 
         public decimal? Price { get; private set; }
         public string? Url { get; private set; }
+
         public Subscriber() { }
         public Subscriber(SudscriberDto subDto)
         {
             UserId = subDto.UserId;
             ChatId = subDto.ChatId;
-            Category = subDto.Category;
+            //Category = subDto.Category;
             Brand = subDto.Brand;
             Name = subDto.Name;
             Price = subDto.Price;
@@ -39,13 +47,13 @@
 
         //}
 
-        public SudscriberDto ToMongoRepresentationSubscriber()
+        public SudscriberDto RepresentationSubscriber()
         {
             SudscriberDto subscribersDto = new SudscriberDto()
             {
                 UserId = UserId,
                 ChatId = ChatId,
-                Category = Category,
+               // Category = Category,
                 Brand = Brand,
                 Name = Name,
                 Price = Price,

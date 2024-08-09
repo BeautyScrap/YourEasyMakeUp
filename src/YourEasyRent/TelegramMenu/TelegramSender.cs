@@ -61,7 +61,7 @@ namespace YourEasyRent.TelegramMenu
 
             foreach (var result in resultsOfSearch)// этот результат который состоят только из строки Name и потом результат как то передавать агрументом в метод TransferDataToSubscriber
             {
-               await _botClient.SendTextMessageAsync(chatId, $"Подписаться на {result} ", parseMode: ParseMode.Markdown); // только тут мы  вместо оправки результата в телегу я перекладываю полученные рещзультаты в новую бд
+               await _botClient.SendTextMessageAsync(chatId, result, parseMode: ParseMode.Markdown); // только тут мы  вместо оправки результата в телегу я перекладываю полученные рещзультаты в новую бд
                                                          //идея заменить result на тест  $"Подписаться на {result} " - надо протестировать как будет выглядеть ответ                                                     
                                                                                                     
             }

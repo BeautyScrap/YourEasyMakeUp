@@ -21,8 +21,8 @@ namespace SubscriberAPI.Infrastructure
             {
                 await connection.OpenAsync();
                 string query = 
-                    @"INSERT INTO Subscribers (UserId, ChatId, Category, Brand, Name, Price, Url)
-                    VALUES (@UserId, @ChatId, @Category, @Brand, @Name, @Price, @Url)";
+                    @"INSERT INTO Subscribers (user_id, chat_id, brand_product, name_product, price, url)
+                    VALUES (@UserId, @ChatId, @Brand, @Name, @Price, @Url)";
                await connection.ExecuteAsync(query, newSubscriber);
             }
         }
