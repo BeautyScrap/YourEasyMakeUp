@@ -1,4 +1,4 @@
-using SubscriberAPI.Application;
+using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Infrastructure;
 using System.Text.Json;
 

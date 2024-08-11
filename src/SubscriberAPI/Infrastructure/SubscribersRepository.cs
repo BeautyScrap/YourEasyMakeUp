@@ -27,13 +27,17 @@ namespace SubscriberAPI.Infrastructure
             }
         }
 
-
-        public Task<Subscriber> GetSubscriberAsync(string userId)
+        public async Task<IEnumerable<Subscriber>> GetSubscribersAsync()
         {
-            throw new NotImplementedException();
+            using (var connection = new NpgsqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                string query =
+                    @"SELECT * From Subscribers";
+                return await connection.QueryAsync<Subscriber>(query);
+            }
         }
-
-        public Task<IEnumerable<Subscriber>> GetSubscribersAsync()
+        public async Task<Subscriber> GetSubscriberAsync(string userId)
         {
             throw new NotImplementedException();
         }

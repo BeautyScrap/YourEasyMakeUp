@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SubscriberAPI.Application;
+using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Domain;
 using SubscriberAPI.Infrastructure;
 using System.Reflection.Metadata;
@@ -13,14 +14,13 @@ namespace SubscriberAPI.Presentanion
     {
         private readonly IRabbitMessageProducer _messageProducer;
         private readonly ILogger<SubscribersController> _logger;
-        //public static readonly List<Subscriber> _subscribers = new();
-        public readonly ISubscribersRepository _subscribersRepository;
+        public readonly ISubscrieberService _sudscriberService;
 
-        public SubscribersController(IRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger, ISubscribersRepository subscribersRepository)
+        public SubscribersController(IRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger, ISubscrieberService subscrieberService)
         {
             _messageProducer = messageProducer;
             _logger = logger;
-            _subscribersRepository = subscribersRepository;
+            _sudscriberService  = subscrieberService;
         }
 
         [HttpPost]
@@ -30,16 +30,15 @@ namespace SubscriberAPI.Presentanion
         public async Task<IActionResult> Post([FromBody] SudscriberDto subscriberDto)
         {
             if (subscriberDto == null)
-                {
-                    _logger.LogInformation("The subscriber is null");
-                    return BadRequest();
-                }
+            {
+                _logger.LogInformation("The subscriber is null");
+                return BadRequest();
+            }
             try
             {
-                var subscriber = new Subscriber(subscriberDto); 
+                var subscriber = new Subscriber(subscriberDto);
                 _messageProducer.ConsumingMessage(subscriber);
-                await _subscribersRepository.Create(subscriber);// после получения результата перекинуть его в хендлер для обработки этого подписчика, типо TgButtonCallback tgButtonCallback = new TgButtonCallback(update);await _handler.HandleUpdateAsync(tgButtonCallback); И тут влепить проверку на создавшийся экземпляр в бд
-                Console.WriteLine($" The subscriber has been received to controller(get) {subscriber}");
+                await _sudscriberService.Create(subscriber);
                 return Ok();
 
             }
@@ -51,5 +50,22 @@ namespace SubscriberAPI.Presentanion
 
         }
 
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IEnumerable<Subscriber>>> Get()
+        {
+            var allSubscribers = await _sudscriberService.GetAllAsync();
+            if (allSubscribers == null)
+            {
+                return BadRequest(); 
+            }
+            return Ok(allSubscribers);
+        }
+
     }
+
+
 }

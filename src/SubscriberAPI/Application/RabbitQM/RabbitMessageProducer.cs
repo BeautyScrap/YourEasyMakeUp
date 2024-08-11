@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text;
 using RabbitMQ.Client.Events;
 
-namespace SubscriberAPI.Application
+namespace SubscriberAPI.Application.RabbitQM
 {
     public class RabbitMessageProducer : IRabbitMessageProducer
     {
@@ -30,7 +30,7 @@ namespace SubscriberAPI.Application
                     var message = Encoding.UTF8.GetString(body);
                     Console.WriteLine($" The message has been received {message}");
                 };
-            channel.BasicConsume(queue: "creating_subscriber",autoAck: true, consumer: consumer);
+            channel.BasicConsume(queue: "creating_subscriber", autoAck: true, consumer: consumer);
 
 
 
