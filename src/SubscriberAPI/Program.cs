@@ -1,3 +1,4 @@
+using SubscriberAPI.Application;
 using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Infrastructure;
 using System.Text.Json;
@@ -21,6 +22,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IRabbitMessageProducer, RabbitMessageProducer>();
 builder.Services.AddScoped<ISubscribersRepository, SubscribersRepository>();
+builder.Services.AddScoped<ISubscrieberService, SubscriberService>();
+
 
 var app = builder.Build();
 

@@ -5,9 +5,10 @@ namespace SubscriberAPI.Infrastructure
 {
     public interface ISubscribersRepository
     {
-        Task<IEnumerable<Subscriber>> GetSubscribersAsync();
+        Task<IEnumerable<Subscriber>> GetAllSubscribersAsync();
         Task<Subscriber> GetSubscriberAsync(string userId);
-        Task Create(Subscriber newSubscriber);
-        Task<bool> Delete(Subscriber newSubscriber);
+        Task CreateAsync(Subscriber newSubscriber);
+        Task<int> UpdateAsync(Subscriber newSubscriber);
+        Task<int> DeleteAsync(string userId);
     }
 }

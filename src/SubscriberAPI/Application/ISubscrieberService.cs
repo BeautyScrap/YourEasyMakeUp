@@ -8,6 +8,6 @@ namespace SubscriberAPI.Application
         Task<Subscriber> GetById(string userId);
         Task Create(Subscriber newSubscriber);
         Task<bool> Update(string userId, Subscriber newSubscriber);
-        Task<bool> Delete(Subscriber newSubscriber);
+        Task<bool> Delete(string userId);
     }
 }

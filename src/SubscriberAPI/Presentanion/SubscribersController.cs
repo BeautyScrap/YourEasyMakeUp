@@ -20,14 +20,14 @@ namespace SubscriberAPI.Presentanion
         {
             _messageProducer = messageProducer;
             _logger = logger;
-            _sudscriberService  = subscrieberService;
+            _sudscriberService = subscrieberService;
         }
 
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Post([FromBody] SudscriberDto subscriberDto)
+        public async Task<IActionResult> Post([FromBody] SubscriberDto subscriberDto)
         {
             if (subscriberDto == null)
             {
@@ -40,7 +40,6 @@ namespace SubscriberAPI.Presentanion
                 _messageProducer.ConsumingMessage(subscriber);
                 await _sudscriberService.Create(subscriber);
                 return Ok();
-
             }
             catch (Exception ex)
             {
@@ -55,16 +54,58 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IEnumerable<Subscriber>>> Get()
+        public async Task<IActionResult> Get()
         {
-            var allSubscribers = await _sudscriberService.GetAllAsync();
+            var allSubscribers = await _sudscriberService.GetAllAsync();//  получаем по основным полям null, хотя данные в базе есть
             if (allSubscribers == null)
             {
-                return BadRequest(); 
+                return BadRequest();
             }
             return Ok(allSubscribers);
         }
 
+        [Route("[action]/{userId}")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetById(string userId)
+        {
+            var subscriber = await _sudscriberService.GetById(userId);
+            if (subscriber == null)
+            {
+                return NotFound();
+            }
+            return Ok(subscriber);
+        }
+
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Update([FromBody] Subscriber subscriber, string userId)
+        {
+            var result = await _sudscriberService.Update(userId, subscriber);
+            if(result ==  false)
+            {
+                return NotFound();
+            }
+            return Ok(result);        
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Delete(string userId)
+        {
+            var result = await _sudscriberService.Delete(userId);
+            if (result == false)
+            {
+                return NotFound();
+            }
+            return Ok(result);
+        }
     }
 
 
