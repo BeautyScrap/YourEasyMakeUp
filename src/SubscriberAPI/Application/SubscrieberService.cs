@@ -16,9 +16,9 @@ namespace SubscriberAPI.Application
             await _subscribersRepository.CreateAsync(newSubscriber);
         }
 
-        public async Task<IEnumerable<Subscriber>> GetAllAsync()
+        public async Task<IEnumerable<SubscriberDto>> GetAllAsync()
         {
-            //List<Subscriber> subscribers = new List<Subscriber>();          
+        
             var subscribers = (await _subscribersRepository.GetAllSubscribersAsync()).ToList();
             var subDtos = new List<SubscriberDto>();
             subscribers.ForEach(subscriber =>
@@ -34,14 +34,14 @@ namespace SubscriberAPI.Application
                 };
                 subDtos.Add(subDto);
             });
-            return subscribers;// return sybDtos;
+            return subDtos;  
         }
 
-        public async Task<Subscriber> GetById(string userId)
+        public async Task<SubscriberDto> GetById(string userId)
         {
             Subscriber subscriber = await _subscribersRepository.GetSubscriberAsync(userId);// при получении данных все поля кроме
-                                                                                            // price и Url становятся null, нужел ли automapping?
-            return subscriber;
+            var subDto = subscriber.CreateSubscriberDtoObject();                                                                                // price и Url становятся null, нужел ли automapping?
+            return subDto;
         }
 
         public async Task<bool> Update(string userId, Subscriber newSubscriber)
@@ -63,6 +63,24 @@ namespace SubscriberAPI.Application
             }
             var updateResult = await _subscribersRepository.DeleteAsync(userId);
             return updateResult > 0;
+        }
+
+        public async Task<List<SubscriberDto>> GetFieldsForSearchById()
+        {
+            var subscribers = (await _subscribersRepository.GetFieldsForSearchAsync()).ToList();
+            var subDtos = new List<SubscriberDto>();
+            subscribers.ForEach(subscriber =>
+            {
+                var subDto = new SubscriberDto
+                {
+                    UserId = subscriber.UserId,
+                    Brand = subscriber.Brand,
+                    Name = subscriber.Name,
+                    Price = subscriber.Price,
+                };
+                subDtos.Add(subDto);
+            });
+            return subDtos;
         }
     }
 }

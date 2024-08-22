@@ -7,7 +7,7 @@ namespace SubscriberAPI.Infrastructure
 {
     public class SubscribersRepository : ISubscribersRepository
     {
-        private readonly string _connectionString; 
+        private readonly string _connectionString;
 
         public SubscribersRepository(string connectonString)
         {
@@ -15,15 +15,15 @@ namespace SubscriberAPI.Infrastructure
         }
 
         public async Task CreateAsync(Subscriber newSubscriber)// метод ничего не возвращает,а мог бы быть bool, чтобы сделать проверку,
-                                                          // что пользователь создался в бд и все ок и прокинуть этот ответ в контроллер.
+                                                               // что пользователь создался в бд и все ок и прокинуть этот ответ в контроллер.
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                string query = 
+                string query =
                     @"INSERT INTO Subscribers (user_id, chat_id, brand_product, name_product, price, url)
                     VALUES (@UserId, @ChatId, @Brand, @Name, @Price, @Url)";
-               await connection.ExecuteAsync(query, newSubscriber);
+                await connection.ExecuteAsync(query, newSubscriber);
             }
         }
 
@@ -32,18 +32,33 @@ namespace SubscriberAPI.Infrastructure
             using (var connection = new NpgsqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                string query =
-                    @"SELECT * From Subscribers";
-                return await connection.QueryAsync<Subscriber>(query, new { });// добавила тут еще new { }) 
+                string query = @"
+            SELECT 
+                ""user_id"" AS UserId,
+                ""chat_id"" AS ChatId,
+                ""brand_product"" AS Brand,
+                ""name_product"" AS Name,
+                ""price"" AS Price,
+                ""url"" AS Url
+            FROM Subscribers";
+                return await connection.QueryAsync<Subscriber>(query); 
             }
         }
         public async Task<Subscriber> GetSubscriberAsync(string userId)
         {
-            using ( var connection = new NpgsqlConnection(_connectionString))
+            using (var connection = new NpgsqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
                 string query =
-                    @"SELECT * FROM public.subscribers WHERE user_id = @userId";
+                    @"SELECT
+                ""user_id"" AS UserId,
+                ""chat_id"" AS ChatId,
+                ""brand_product"" AS Brand,
+                ""name_product"" AS Name,
+                ""price"" AS Price,
+                ""url"" AS Url
+                FROM public.subscribers
+                WHERE user_id = @userId";
                 return await connection.QuerySingleOrDefaultAsync<Subscriber>(query, new { userId });
             }
         }
@@ -61,7 +76,7 @@ namespace SubscriberAPI.Infrastructure
                             price = @Price, 
                             url = @Url 
                       WHERE user_id = @userId";
-               return await connection.ExecuteAsync(query, newSubscriber);               
+                return await connection.ExecuteAsync(query, newSubscriber);
             }
         }
         public async Task<int> DeleteAsync(string userId)
@@ -74,6 +89,22 @@ namespace SubscriberAPI.Infrastructure
                       FROM public.Subscribers  
                       WHERE user_id = @userId";
                 return await connection.ExecuteAsync(query, new { userId });
+            }
+        }
+
+        public  async Task<IEnumerable<Subscriber>> GetFieldsForSearchAsync()
+        {
+            using (var connection = new NpgsqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                string query = @"
+            SELECT 
+                ""user_id"" AS UserId,
+                ""brand_product"" AS Brand,
+                ""name_product"" AS Name,
+                ""price"" AS Price
+            FROM public.Subscribers";
+                return await connection.QueryAsync<Subscriber>(query);
             }
         }
     }

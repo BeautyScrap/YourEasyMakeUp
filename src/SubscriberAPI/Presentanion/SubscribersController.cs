@@ -49,19 +49,19 @@ namespace SubscriberAPI.Presentanion
 
         }
 
-
+        [Route("GetAllSubscribers")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            var allSubscribers = await _sudscriberService.GetAllAsync();//  получаем по основным полям null, хотя данные в базе есть
-            if (allSubscribers == null)
+            var allSubscribersDto = await _sudscriberService.GetAllAsync();
+            if (allSubscribersDto == null)
             {
                 return BadRequest();
             }
-            return Ok(allSubscribers);
+            return Ok(allSubscribersDto);
         }
 
         [Route("[action]/{userId}")]
@@ -105,6 +105,22 @@ namespace SubscriberAPI.Presentanion
                 return NotFound();
             }
             return Ok(result);
+        }
+
+        [Route("GetFieldsForSearch")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<SubscriberDto>>> GetFieldsForSearch()
+        {
+            var listWithFields = await _sudscriberService.GetFieldsForSearchById();
+
+            if (listWithFields == null)
+            {
+                return BadRequest();
+            }
+            return listWithFields.ToList();
         }
     }
 

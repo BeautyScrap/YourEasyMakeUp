@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SubscriberAPI.Domain
@@ -8,13 +9,13 @@ namespace SubscriberAPI.Domain
         public string? Id { get; set; }
 
         [JsonPropertyName("userId")]
-        public string UserId { get;  set; }
-        public string? ChatId { get; set; }
-        public string? Brand { get;  set; }
-        public string? Name { get;  set; }
+        public string UserId { get; private set; }
+        public string? ChatId { get; private set; }
+        public string? Brand { get; private set; }
+        public string? Name { get; private set; }
 
-        public decimal? Price { get; set; }
-        public string? Url { get; set; }
+        public decimal? Price { get; private set; }
+        public string? Url { get; private set; }
 
         public Subscriber() { }
         public Subscriber(SubscriberDto subDto)
@@ -28,7 +29,7 @@ namespace SubscriberAPI.Domain
         }
 
 
-        public SubscriberDto RepresentationSubscriber()
+        public SubscriberDto CreateSubscriberDtoObject()
         {
             SubscriberDto subscribersDto = new SubscriberDto()
             {

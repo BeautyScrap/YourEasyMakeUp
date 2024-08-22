@@ -10,5 +10,6 @@ namespace SubscriberAPI.Infrastructure
         Task CreateAsync(Subscriber newSubscriber);
         Task<int> UpdateAsync(Subscriber newSubscriber);
         Task<int> DeleteAsync(string userId);
+        Task<IEnumerable<Subscriber>> GetFieldsForSearchAsync();
     }
 }
