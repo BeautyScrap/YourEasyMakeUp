@@ -11,19 +11,20 @@ namespace SubscriberAPI.Application
         {
             _subscribersRepository = subscribersRepository ?? throw new ArgumentNullException(nameof(subscribersRepository));
         }
-        public async Task Create(Subscriber newSubscriber)
+        public async Task Create(Subscription subscription)
         {
-            await _subscribersRepository.CreateAsync(newSubscriber);
+            var subscriptionDto = subscription.ToDBRepresentation();
+            await _subscribersRepository.CreateAsync(subscriptionDto);//  получаем подписчика и тут переделываем этот объект в дто
         }
 
-        public async Task<IEnumerable<SubscriberDto>> GetAllAsync()
+        public async Task<IEnumerable<SubscriptionDto>> GetAllAsync()
         {
         
             var subscribers = (await _subscribersRepository.GetAllSubscribersAsync()).ToList();
-            var subDtos = new List<SubscriberDto>();
+            var subDtos = new List<SubscriptionDto>();
             subscribers.ForEach(subscriber =>
             {
-                var subDto = new SubscriberDto
+                var subDto = new SubscriptionDto
                 {
                     UserId = subscriber.UserId,
                     ChatId = subscriber.ChatId,
@@ -37,14 +38,14 @@ namespace SubscriberAPI.Application
             return subDtos;  
         }
 
-        public async Task<SubscriberDto> GetById(string userId)
+        public async Task<SubscriptionDto> GetById(string userId)
         {
-            Subscriber subscriber = await _subscribersRepository.GetSubscriberAsync(userId);// при получении данных все поля кроме
-            var subDto = subscriber.CreateSubscriberDtoObject();                                                                                // price и Url становятся null, нужел ли automapping?
+            Subscription subscriber = await _subscribersRepository.GetSubscriberAsync(userId);// при получении данных все поля кроме
+            var subDto = subscriber.ToDBRepresentation();                                                                                // price и Url становятся null, нужел ли automapping?
             return subDto;
         }
 
-        public async Task<bool> Update(string userId, Subscriber newSubscriber)
+        public async Task<bool> Update(string userId, Subscription newSubscriber)
         {
             //Subscriber subscriber = await _subscribersRepository.GetSubscriberAsync(userId);
             //if (subscriber == null)
@@ -56,7 +57,7 @@ namespace SubscriberAPI.Application
         }
         public async Task<bool> Delete(string userId)
         {
-            Subscriber subscriber = await _subscribersRepository.GetSubscriberAsync(userId);
+            Subscription subscriber = await _subscribersRepository.GetSubscriberAsync(userId);
             if (subscriber == null)
             {
                 return false;
@@ -65,22 +66,29 @@ namespace SubscriberAPI.Application
             return updateResult > 0;
         }
 
-        public async Task<List<SubscriberDto>> GetFieldsForSearchById()
+        public async Task<List<Subscription>> GetFieldsForSearchById()
         {
             var subscribers = (await _subscribersRepository.GetFieldsForSearchAsync()).ToList();
-            var subDtos = new List<SubscriberDto>();
-            subscribers.ForEach(subscriber =>
+            var listSubscriprions= new List<Subscription>();
+
+            foreach (var subscriber in subscribers)
             {
-                var subDto = new SubscriberDto
-                {
-                    UserId = subscriber.UserId,
-                    Brand = subscriber.Brand,
-                    Name = subscriber.Name,
-                    Price = subscriber.Price,
-                };
-                subDtos.Add(subDto);
-            });
-            return subDtos;
+                listSubscriprions.Add(subscriber);
+            }
+            return listSubscriprions;
+
+            //subscribers.ForEach(subscriber =>
+            //{
+            //    var subDto = new Subs
+            //    {
+            //        UserId = subscriber.UserId,
+            //        Brand = subscriber.Brand,
+            //        Name = subscriber.Name,
+            //        Price = subscriber.Price,
+            //    };
+            //    subDtos.Add(subDto);
+            //});
+            //return subDtos;
         }
     }
 }

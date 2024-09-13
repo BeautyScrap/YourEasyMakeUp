@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using SubscriberAPI.Application;
 using SubscriberAPI.Application.RabbitQM;
+using SubscriberAPI.Contracts;
 using SubscriberAPI.Domain;
 using SubscriberAPI.Infrastructure;
 using System.Reflection.Metadata;
@@ -27,18 +29,25 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Post([FromBody] SubscriberDto subscriberDto)
+        public async Task<IActionResult> Post([FromBody] SubscriptionRequest request)
         {
-            if (subscriberDto == null)
+            if (request == null)
             {
                 _logger.LogInformation("The subscriber is null");
                 return BadRequest();
             }
             try
             {
-                var subscriber = new Subscriber(subscriberDto);
-                _messageProducer.ConsumingMessage(subscriber);
-                await _sudscriberService.Create(subscriber);
+                _messageProducer.ConsumingSubscriberMessag(request);
+                var subscribtion = Subscription.CreateNewSubscription(
+                    request.UserId, 
+                    request.ChatId,
+                    request.Name,
+                    request.Brand,
+                    request.Price,
+                    request.Url);
+
+                await _sudscriberService.Create(subscribtion);
                 return Ok();
             }
             catch (Exception ex)
@@ -83,10 +92,10 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] Subscriber subscriber, string userId)
+        public async Task<IActionResult> Update([FromBody] Subscription subscriber, string userId) // переделать на subscriptionRequest
         {
-            var result = await _sudscriberService.Update(userId, subscriber);
-            if(result ==  false)
+            var result = await _sudscriberService.Update(userId, subscriber);// добавть  request и response  и через них проделываем маппинг к subscription
+            if (result ==  false)
             {
                 return NotFound();
             }
@@ -112,7 +121,7 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<SubscriberDto>>> GetFieldsForSearch()
+        public async Task<ActionResult<List<SubscriptionResponse>>> GetFieldsForSearch()
         {
             var listWithFields = await _sudscriberService.GetFieldsForSearchById();
 
@@ -120,7 +129,15 @@ namespace SubscriberAPI.Presentanion
             {
                 return BadRequest();
             }
-            return listWithFields.ToList();
+            var response = listWithFields.Select(s => new SubscriptionResponse
+            {
+                UserId = s.UserId,
+                Name = s.Name,
+                Brand = s.Brand,
+                Price = s.Price
+            });
+
+            return Ok(response);
         }
     }
 

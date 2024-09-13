@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 namespace SubscriberAPI.Domain
 {
-    public class SubscriberDto
+    public class SubscriptionDto // переименовать в  SubscriberRow 
     {
         public string? UserId { get; set; }
         public string? ChatId { get; set; }

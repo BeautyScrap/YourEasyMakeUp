@@ -5,11 +5,11 @@ namespace SubscriberAPI.Infrastructure
 {
     public interface ISubscribersRepository
     {
-        Task<IEnumerable<Subscriber>> GetAllSubscribersAsync();
-        Task<Subscriber> GetSubscriberAsync(string userId);
-        Task CreateAsync(Subscriber newSubscriber);
-        Task<int> UpdateAsync(Subscriber newSubscriber);
+        Task<IEnumerable<Subscription>> GetAllSubscribersAsync();
+        Task<Subscription> GetSubscriberAsync(string userId);
+        Task CreateAsync(SubscriptionDto subscriptionDto);
+        Task<int> UpdateAsync(Subscription newSubscriber);
         Task<int> DeleteAsync(string userId);
-        Task<IEnumerable<Subscriber>> GetFieldsForSearchAsync();
+        Task<IEnumerable<Subscription>> GetFieldsForSearchAsync();
     }
 }

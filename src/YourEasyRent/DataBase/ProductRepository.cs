@@ -117,5 +117,15 @@ namespace YourEasyRent.DataBase
 
             return res;
         }
+
+        public async Task<Product> GetProductsToSearchForPriceBrandName(Product productForSearch)
+        {
+            var filter = Builders<Product>.Filter.And(
+                Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),
+                Builders<Product>.Filter.Eq(_ => _.Name, productForSearch.Name),
+                Builders<Product>.Filter.Lt(_ => _.Price, productForSearch.Price));
+            var product = await _productCollection.Find<Product>(filter).FirstOrDefaultAsync();
+            return product;
+        }
     }
 }
