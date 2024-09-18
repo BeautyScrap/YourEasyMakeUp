@@ -7,6 +7,7 @@ using SubscriberAPI.Domain;
 using SubscriberAPI.Infrastructure;
 using System.Reflection.Metadata;
 using System.Text.Json;
+using System.Xml.Linq;
 
 namespace SubscriberAPI.Presentanion
 {
@@ -39,13 +40,15 @@ namespace SubscriberAPI.Presentanion
             try
             {
                 _messageProducer.ConsumingSubscriberMessag(request);
-                var subscribtion = Subscription.CreateNewSubscription(
+                var subscribtion = Subscription.CreateNewSubscription
+                    (
                     request.UserId, 
                     request.ChatId,
                     request.Name,
                     request.Brand,
                     request.Price,
-                    request.Url);
+                    request.Url
+                    );
 
                 await _sudscriberService.Create(subscribtion);
                 return Ok();
@@ -65,12 +68,21 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Get()
         {
-            var allSubscribersDto = await _sudscriberService.GetAllAsync();
-            if (allSubscribersDto == null)
+            var allSubscriptions = await _sudscriberService.GetAllAsync();
+            if (allSubscriptions == null)
             {
-                return BadRequest();
+                return NotFound();
             }
-            return Ok(allSubscribersDto);
+            var response = allSubscriptions.Select(s => new SubscriptionResponse
+            {
+                UserId = s.UserId,
+                ChatId = s.ChatId,
+                Name = s.Name,
+                Brand = s.Brand,
+                Price = s.Price,
+                Url = s.Url
+            });  
+            return Ok(response);
         }
 
         [Route("[action]/{userId}")]
@@ -80,26 +92,48 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetById(string userId)
         {
-            var subscriber = await _sudscriberService.GetById(userId);
-            if (subscriber == null)
+            var subscription= await _sudscriberService.GetById(userId);
+            if (subscription == null)
             {
                 return NotFound();
             }
-            return Ok(subscriber);
+            var response =  new SubscriptionResponse
+            {
+                UserId = subscription.UserId,
+                ChatId = subscription.ChatId,
+                Brand = subscription.Brand,
+                Name = subscription.Name,
+                Price = subscription.Price,
+                Url = subscription.Url
+            };
+            return Ok(response);
         }
 
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] Subscription subscriber, string userId) // переделать на subscriptionRequest
+        public async Task<IActionResult> Update([FromBody] SubscriptionRequest subscriptionRequest, string userId)
         {
-            var result = await _sudscriberService.Update(userId, subscriber);// добавть  request и response  и через них проделываем маппинг к subscription
-            if (result ==  false)
+            if (subscriptionRequest is null)
+            {
+                return BadRequest();
+            }
+            var subscription = Subscription.CreateNewSubscription
+                (
+                    subscriptionRequest.UserId,
+                    subscriptionRequest.ChatId,
+                    subscriptionRequest.Brand,
+                    subscriptionRequest.Name,
+                    subscriptionRequest.Price,
+                    subscriptionRequest.Url
+                );
+            var updatedSubscription = await _sudscriberService.Update(userId, subscription);
+            if (updatedSubscription ==  false)
             {
                 return NotFound();
             }
-            return Ok(result);        
+            return Ok(updatedSubscription);        
         }
 
         [HttpDelete]
@@ -123,23 +157,21 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<List<SubscriptionResponse>>> GetFieldsForSearch()
         {
-            var listWithFields = await _sudscriberService.GetFieldsForSearchById();
+            var ListWithfSubscriptions = await _sudscriberService.GetFieldsForSearchById();
 
-            if (listWithFields == null)
+            if (ListWithfSubscriptions == null)
             {
                 return BadRequest();
             }
-            var response = listWithFields.Select(s => new SubscriptionResponse
+            var response = ListWithfSubscriptions.Select(s => new SubscriptionResponse
             {
                 UserId = s.UserId,
                 Name = s.Name,
                 Brand = s.Brand,
                 Price = s.Price
-            });
-
+            }).ToList();
             return Ok(response);
         }
     }
-
-
+    //  проверить точно ли возвращает лист с отдельными подписчиками и их продуктами
 }

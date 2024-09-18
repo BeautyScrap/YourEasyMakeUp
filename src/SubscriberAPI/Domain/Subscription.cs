@@ -35,7 +35,7 @@ namespace SubscriberAPI.Domain
             return subscription;
         }
 
-        public SubscriptionDto ToDBRepresentation()
+        public SubscriptionDto ToDto()
         {
             SubscriptionDto subscribersDto = new SubscriptionDto()
             {

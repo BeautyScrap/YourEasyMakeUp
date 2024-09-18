@@ -3,7 +3,7 @@ using SubscriberAPI.Infrastructure;
 
 namespace SubscriberAPI.Application
 {
-    public class SubscriberService : ISubscrieberService
+    public class SubscriberService : ISubscrieberService // по идеи тут я возвращаю именно Subscription, а в репозитории именно SubscriptionDto
     {
         private readonly ISubscribersRepository _subscribersRepository;
 
@@ -13,82 +13,76 @@ namespace SubscriberAPI.Application
         }
         public async Task Create(Subscription subscription)
         {
-            var subscriptionDto = subscription.ToDBRepresentation();
+            var subscriptionDto = subscription.ToDto();
             await _subscribersRepository.CreateAsync(subscriptionDto);//  получаем подписчика и тут переделываем этот объект в дто
         }
 
-        public async Task<IEnumerable<SubscriptionDto>> GetAllAsync()
+        public async Task<IEnumerable<Subscription>> GetAllAsync()
         {
-        
-            var subscribers = (await _subscribersRepository.GetAllSubscribersAsync()).ToList();
-            var subDtos = new List<SubscriptionDto>();
-            subscribers.ForEach(subscriber =>
+            var subscribersDtos = (await _subscribersRepository.GetAllSubscribersAsync()).ToList();
+            var subscriptions = subscribersDtos.Select(dto => Subscription.CreateNewSubscription(
+                dto.UserId,
+                dto.ChatId,
+                dto.Brand,
+                dto.Name,
+                dto.Price,
+                dto.Url
+                )).ToList();
+            return subscriptions;
+        }
+
+        public async Task<Subscription> GetById(string userId)
+        {
+            var subscriberDto = await _subscribersRepository.GetSubscriberAsync(userId);
+            var subscription = Subscription.CreateNewSubscription(
+                subscriberDto.UserId,
+                subscriberDto.ChatId,
+                subscriberDto.Brand,
+                subscriberDto.Name,
+                subscriberDto.Price,
+                subscriberDto.Url
+                );
+            return subscription;
+        }
+
+        public async Task<bool> Update(string userId, Subscription subscription)
+        {
+            var subscriptionDto = subscription.ToDto();
+            var subscriberByUserId = await _subscribersRepository.GetSubscriberAsync(userId);
+            if (subscriberByUserId == null)
             {
-                var subDto = new SubscriptionDto
-                {
-                    UserId = subscriber.UserId,
-                    ChatId = subscriber.ChatId,
-                    Brand = subscriber.Brand,
-                    Name = subscriber.Name,
-                    Price = subscriber.Price,
-                    Url = subscriber.Url
-                };
-                subDtos.Add(subDto);
-            });
-            return subDtos;  
-        }
-
-        public async Task<SubscriptionDto> GetById(string userId)
-        {
-            Subscription subscriber = await _subscribersRepository.GetSubscriberAsync(userId);// при получении данных все поля кроме
-            var subDto = subscriber.ToDBRepresentation();                                                                                // price и Url становятся null, нужел ли automapping?
-            return subDto;
-        }
-
-        public async Task<bool> Update(string userId, Subscription newSubscriber)
-        {
-            //Subscriber subscriber = await _subscribersRepository.GetSubscriberAsync(userId);
-            //if (subscriber == null)
-            //{
-            //    return false;
-            //}
-            var updateResult = await _subscribersRepository.UpdateAsync(newSubscriber);
+                return false;
+            }
+            var updateResult = await _subscribersRepository.UpdateAsync(subscriptionDto);
             return updateResult > 0;
         }
         public async Task<bool> Delete(string userId)
         {
-            Subscription subscriber = await _subscribersRepository.GetSubscriberAsync(userId);
-            if (subscriber == null)
-            {
-                return false;
-            }
             var updateResult = await _subscribersRepository.DeleteAsync(userId);
             return updateResult > 0;
         }
 
         public async Task<List<Subscription>> GetFieldsForSearchById()
         {
-            var subscribers = (await _subscribersRepository.GetFieldsForSearchAsync()).ToList();
-            var listSubscriprions= new List<Subscription>();
+            var subscribersDtos = (await _subscribersRepository.GetFieldsForSearchAsync()).ToList();
+            var listOfSubscription = subscribersDtos.Select(dto => Subscription.CreateNewSubscription(
+                dto.UserId,
+                dto.ChatId,
+                dto.Brand,
+                dto.Name,
+                dto.Price,
+                dto.Url
+                )).ToList();
+            return listOfSubscription;
 
-            foreach (var subscriber in subscribers)
-            {
-                listSubscriprions.Add(subscriber);
-            }
-            return listSubscriprions;
+            //var listSubscriprions= new List<Subscription>();
 
-            //subscribers.ForEach(subscriber =>
+            //foreach (var subscriber in subscribers)
             //{
-            //    var subDto = new Subs
-            //    {
-            //        UserId = subscriber.UserId,
-            //        Brand = subscriber.Brand,
-            //        Name = subscriber.Name,
-            //        Price = subscriber.Price,
-            //    };
-            //    subDtos.Add(subDto);
-            //});
-            //return subDtos;
+            //    listSubscriprions.Add(subscriber);
+            //}
+            //return listSubscriprions;
+
         }
     }
 }
