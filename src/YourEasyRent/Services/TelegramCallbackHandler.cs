@@ -25,6 +25,7 @@ namespace YourEasyRent.Services
         private readonly ILogger<TelegramCallbackHandler> _logger;
         private readonly ISubscribersRepository _subscribersRepository;
         private readonly IProductRepository _productRepository;
+        private readonly IRabbitMessageProducer _rabbitMessageProducer;
 
 
         public TelegramCallbackHandler
@@ -33,7 +34,8 @@ namespace YourEasyRent.Services
             IUserStateRepository userStateRepository,
             ITelegramSender telegramSender,
             ISubscribersRepository subscribersRepository,
-            IProductRepository productRepository
+            IProductRepository productRepository,
+            IRabbitMessageProducer rabbitMessageProducer
            
             )
         {
@@ -42,6 +44,7 @@ namespace YourEasyRent.Services
             _telegramSender = telegramSender;
             _subscribersRepository = subscribersRepository;
             _productRepository = productRepository;
+            _rabbitMessageProducer = rabbitMessageProducer ?? throw new ArgumentNullException(nameof(rabbitMessageProducer));
         }
 
         public async Task HandleUpdateAsync(TgButtonCallback tgButtonCallback)
@@ -145,8 +148,8 @@ namespace YourEasyRent.Services
                     }.ToList();
 
                     var subscriber = Subscriber.TransferDataToSubscriber(userSearchState, intermadiateResultList);
-                    await _subscribersRepository.CreateSubscriberAsync(subscriber);
-
+                    await _subscribersRepository.CreateSubscriberAsync(subscriber); //  потом удалить этот метод, тк мы не сохраняем подписчика в этом приложении( удалить еще репозиторий для него)
+                    _rabbitMessageProducer.SendMessagAboutSubscriber(subscriber);
 
                     await _telegramSender.SendConfirmOfSubscriprion(chatId);
                     return;
