@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using SubscriberAPI.Application;
@@ -6,6 +7,7 @@ using SubscriberAPI.Contracts;
 using SubscriberAPI.Domain;
 using SubscriberAPI.Infrastructure;
 using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
 using System.Xml.Linq;
 
@@ -18,12 +20,14 @@ namespace SubscriberAPI.Presentanion
         private readonly IRabbitMessageProducer _messageProducer;
         private readonly ILogger<SubscribersController> _logger;
         public readonly ISubscrieberService _sudscriberService;
+        public readonly IValidator<SubscriptionRequest> _validator;
 
-        public SubscribersController(IRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger, ISubscrieberService subscrieberService)
+        public SubscribersController(IRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger, ISubscrieberService subscrieberService, IValidator<SubscriptionRequest> validator)
         {
             _messageProducer = messageProducer;
             _logger = logger;
             _sudscriberService = subscrieberService;
+            _validator = validator;
         }
 
         [HttpPost]
@@ -40,6 +44,11 @@ namespace SubscriberAPI.Presentanion
             try
             {
                 _messageProducer.ConsumingSubscriberMessag(request);
+                var validationResult = _validator.Validate(request);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(validationResult.Errors);
+                }
                 var subscribtion = Subscription.CreateNewSubscription
                     (
                     request.UserId, 

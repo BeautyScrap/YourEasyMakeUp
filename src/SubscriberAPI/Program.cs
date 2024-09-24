@@ -2,6 +2,9 @@ using SubscriberAPI.Application;
 using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Infrastructure;
 using System.Text.Json;
+using FluentValidation;
+using SubscriberAPI.Contracts;
+using SubscriberAPI.Presentanion;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +26,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IRabbitMessageProducer, RabbitMessageProducer>();
 builder.Services.AddScoped<ISubscribersRepository, SubscribersRepository>();
 builder.Services.AddScoped<ISubscrieberService, SubscriberService>();
+builder.Services.AddScoped<IValidator<SubscriptionRequest>, CreateSubscriptionRequestValidator>();  
 
 
 var app = builder.Build();
