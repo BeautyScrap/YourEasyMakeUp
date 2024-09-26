@@ -104,16 +104,16 @@ namespace SubscriberAPI.Presentanion
             var subscription= await _sudscriberService.GetById(userId);
             if (subscription == null)
             {
-                return NotFound();
+                return NotFound(subscription.Error.Message); 
             }
             var response =  new SubscriptionResponse
             {
-                UserId = subscription.UserId,
-                ChatId = subscription.ChatId,
-                Brand = subscription.Brand,
-                Name = subscription.Name,
-                Price = subscription.Price,
-                Url = subscription.Url
+                UserId = subscription.Value.UserId,
+                ChatId = subscription.Value.ChatId,
+                Brand = subscription.Value.Brand,
+                Name = subscription.Value.Name,
+                Price = subscription.Value.Price,
+                Url = subscription.Value.Url
             };
             return Ok(response);
         }

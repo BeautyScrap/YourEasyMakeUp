@@ -1,4 +1,5 @@
-﻿using SubscriberAPI.Domain;
+﻿using Microsoft.AspNetCore.Mvc;
+using SubscriberAPI.Domain;
 using SubscriberAPI.Infrastructure;
 
 namespace SubscriberAPI.Application
@@ -31,9 +32,14 @@ namespace SubscriberAPI.Application
             return subscriptions;
         }
 
-        public async Task<Subscription> GetById(string userId)
+        public async Task<Result<Subscription>> GetById(string userId)
         {
             var subscriberDto = await _subscribersRepository.GetSubscriberAsync(userId);
+            if( subscriberDto is null ) 
+            {
+                var message = $"The subscription with userId {userId} is not found";
+                return Result<Subscription>.Failure(Error.NotFound(message));            
+            }
             var subscription = Subscription.CreateNewSubscription(
                 subscriberDto.UserId,
                 subscriberDto.ChatId,
@@ -42,7 +48,7 @@ namespace SubscriberAPI.Application
                 subscriberDto.Price,
                 subscriberDto.Url
                 );
-            return subscription;
+            return Result<Subscription>.Success(subscription);
         }
 
         public async Task<bool> Update(string userId, Subscription subscription)
