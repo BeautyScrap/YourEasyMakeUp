@@ -6,8 +6,8 @@ using YourEasyRent.Entities;
 using MongoDB.Driver.Linq;
 using YourEasyRent.TelegramMenu;
 using YourEasyRent.UserState;
-
-
+using YourEasyRent.Entities.ProductForSubscription;
+using MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders;
 
 namespace YourEasyRent.DataBase
 {
@@ -126,6 +126,22 @@ namespace YourEasyRent.DataBase
                 Builders<Product>.Filter.Lt(_ => _.Price, productForSearch.Price));
             var product = await _productCollection.Find<Product>(filter).FirstOrDefaultAsync();
             return product;
+        }
+
+        public async Task<IEnumerable<ProductForSubscriptionDto>> GetProductForSubcribers(IEnumerable<ProductForSubscriptionDto> productForSearch)
+        {
+            var filters = new List<FilterDefinition<Product>>();
+            foreach (var product in productForSearch) {
+                var filter = Builders<Product>.Filter.And(
+                    Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),// AK TO DO  после получения дто оъекта ошибку должна уйти
+                    Builders<Product>.Filter.Eq(_ => _.Name, productForSearch.Name),
+                    Builders<Product>.Filter.Lt(_ => _.Price, productForSearch.Price));
+                filters.Add(filter);
+            }
+            var combinedFilter = Builders<Product>.Filter.Or(filters);
+
+            var products = await _productCollection.Find(combinedFilter).ToListAsync();
+            return products;
         }
     }
 }

@@ -33,7 +33,7 @@ namespace YourEasyRentTest.Controllers
         public async Task SendSubscriber_ReturnOk()
         {
             //Arrange
-            var subscriber = new Subscriber();
+            var subscriber = new ProductForSubscription();
             _controller.ModelState.Clear();
 
             //Act
@@ -48,7 +48,7 @@ namespace YourEasyRentTest.Controllers
         public async Task SendSubscriber_IsNotValid_ReturnBadRequest()
         {
             //Arange
-            var subscriber = new Subscriber();
+            var subscriber = new ProductForSubscription();
             _controller.ModelState.AddModelError("Error", "ModelState is invalid");
             //Act
             var result = _controller.SendSubscriber(subscriber);

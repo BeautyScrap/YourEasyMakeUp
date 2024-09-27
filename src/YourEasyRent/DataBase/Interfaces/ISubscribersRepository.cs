@@ -1,11 +1,11 @@
-﻿using YourEasyRent.Entities;
+﻿using YourEasyRent.Entities.ProductForSubscription;
 
 namespace YourEasyRent.DataBase.Interfaces
 {
     public interface ISubscribersRepository
     {
-        Task<Subscriber> GetSubscriberAsync(string UserId);
-        Task CreateSubscriberAsync(Subscriber subscribers);
+        Task<ProductForSubscription> GetSubscriberAsync(string UserId);
+        Task CreateSubscriberAsync(ProductForSubscription subscribers);
 
     }
 }

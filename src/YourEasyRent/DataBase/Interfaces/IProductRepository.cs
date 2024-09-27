@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using YourEasyRent.Entities;
+using YourEasyRent.Entities.ProductForSubscription;
 
 namespace YourEasyRent.DataBase.Interfaces
 {
@@ -19,6 +20,7 @@ namespace YourEasyRent.DataBase.Interfaces
         Task UpsertManyProducts(IEnumerable<Product> products);
         Task<List<string>> GetBrandForMenu(int limit);
         Task<Product> GetProductsToSearchForPriceBrandName(Product productForSearch);
+        Task<IEnumerable<ProductForSubscriptionDto>> GetProductForSubcribers(IEnumerable<ProductForSubscriptionDto> productForSearch);
 
     }
 }

@@ -14,6 +14,7 @@ using YourEasyRent.UserState;
 using YourEasyRent.TelegramMenu;
 using System.Collections.Generic;
 using YourEasyRent.DataBase;
+using YourEasyRent.Entities.ProductForSubscription;
 
 namespace YourEasyRent.Services
 {
@@ -23,9 +24,10 @@ namespace YourEasyRent.Services
         private readonly IUserStateRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
-        private readonly ISubscribersRepository _subscribersRepository;
         private readonly IProductRepository _productRepository;
+        private readonly ISubscribersRepository _subscribersRepository;
         private readonly IRabbitMessageProducer _rabbitMessageProducer;
+
 
 
         public TelegramCallbackHandler
@@ -147,13 +149,11 @@ namespace YourEasyRent.Services
                         intermediateResult.Url
                     }.ToList();
 
-                    var subscriber = Subscriber.TransferDataToSubscriber(userSearchState, intermadiateResultList);
-                    await _subscribersRepository.CreateSubscriberAsync(subscriber); //  потом удалить этот метод, тк мы не сохраняем подписчика в этом приложении( удалить еще репозиторий для него)
-                    _rabbitMessageProducer.SendMessagAboutSubscriber(subscriber);
-
+                    var subscriber = ProductForSubscription.TransferDataToSubscriber(userSearchState, intermadiateResultList);
+                    //await _subscribersRepository.CreateSubscriberAsync(subscriber); //  потом удалить этот метод, тк мы не сохраняем подписчика в этом приложении( удалить еще репозиторий для него)
+                    _rabbitMessageProducer.SendMessagAboutSubscriber(subscriber); // отправляю сообщение в другой сервис
                     await _telegramSender.SendConfirmOfSubscriprion(chatId);
                     return;
-
                 }
 
             }

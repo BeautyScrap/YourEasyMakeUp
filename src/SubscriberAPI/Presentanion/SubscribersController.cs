@@ -36,15 +36,15 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Post([FromBody] SubscriptionRequest request)
         {
+            _messageProducer.ConsumingSubscriberMessag(request);
             if (request == null)
             {
                 _logger.LogInformation("The subscriber is null");
                 return BadRequest();
             }
             try
-            {
-                _messageProducer.ConsumingSubscriberMessag(request);
-                var validationResult = _validator.Validate(request);
+            {                
+                var validationResult =  _validator.Validate(request);
                 if (!validationResult.IsValid)
                 {
                     return BadRequest(validationResult.Errors);
@@ -101,10 +101,10 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetById(string userId)
         {
-            var subscription= await _sudscriberService.GetById(userId);
-            if (subscription == null)
+            var subscription = await _sudscriberService.GetById(userId);
+            if (subscription.IsFailure)// 
             {
-                return NotFound(subscription.Error.Message); 
+                return NotFound(subscription.Error.Message);   
             }
             var response =  new SubscriptionResponse
             {
@@ -179,8 +179,9 @@ namespace SubscriberAPI.Presentanion
                 Brand = s.Brand,
                 Price = s.Price
             }).ToList();
+
+            _messageProducer.SendProductSearchMessage(response);
             return Ok(response);
         }
     }
-    //  проверить точно ли возвращает лист с отдельными подписчиками и их продуктами
 }
