@@ -80,15 +80,6 @@ namespace SubscriberAPI.Application
                 dto.Url
                 )).ToList();
             return listOfSubscription;
-
-            //var listSubscriprions= new List<Subscription>();
-
-            //foreach (var subscriber in subscribers)
-            //{
-            //    listSubscriprions.Add(subscriber);
-            //}
-            //return listSubscriprions;
-
         }
     }
 }

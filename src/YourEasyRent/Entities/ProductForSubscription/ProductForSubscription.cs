@@ -15,16 +15,6 @@ namespace YourEasyRent.Entities.ProductForSubscription
         public decimal Price { get; private set; }
         public string? Url { get; private set; }
         public ProductForSubscription() { }
-        //public ProductForSubscription(ProductForSubscriptionDto subDto)
-        //{
-        //    UserId = subDto.UserId;
-        //    ChatId = subDto.ChatId;
-        //    Brand = subDto.Brand;
-        //    Name = subDto.Name;
-        //    Price = subDto.Price;
-        //    Url = subDto.Url;
-        //}
-
 
         public static ProductForSubscription TransferDataToSubscriber(UserSearchState userSearchState, List<string> intermadiateResultList) // переносим одни данные в оъбект Subscriber
         { 
@@ -39,6 +29,19 @@ namespace YourEasyRent.Entities.ProductForSubscription
             };
             return subscriber;
         }
+        public static ProductForSubscription GlueResultOfSearch(string userId, string chatId, ProductForSubscriptionDto dto)
+        {
+            ProductForSubscription product = new ProductForSubscription()
+            {
+                UserId = userId,
+                ChatId = chatId,
+                Brand = dto.Brand,
+                Name = dto.Name,
+                Price = dto.Price,
+                Url = dto.Url
+            };
+            return product;
+        }
 
         public static ProductForSubscription CreateProductForSearch(string userId, string brand, string name, decimal price)
         {
@@ -47,10 +50,16 @@ namespace YourEasyRent.Entities.ProductForSubscription
                 UserId = userId,
                 Brand = brand,
                 Name = name,
-                Price = price
+                Price = price,
             };
             return product;
         }
+
+        public override string ToString() 
+        {
+            return $"Brand: {Brand}, Name: {Name}, Price: {Price}, Url: {Url ?? "N/A"}";
+        }
+ 
 
         public ProductForSubscriptionDto ToDto()
         {

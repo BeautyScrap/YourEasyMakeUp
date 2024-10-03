@@ -149,8 +149,8 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(string userId)
-        {
+        public async Task<IActionResult> Delete(string userId) // AK TODO  могу я в этот контроллер получит  request  с листом из подписчиков, которых мне нужно удалить из базы , а не через метод post
+        { // возможно для этого мне понадобится название для новой очереди в ребите?
             var result = await _sudscriberService.Delete(userId);
             if (result == false)
             {

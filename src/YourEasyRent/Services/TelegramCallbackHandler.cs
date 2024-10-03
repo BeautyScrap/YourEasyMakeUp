@@ -101,7 +101,7 @@ namespace YourEasyRent.Services
                         await _userStateRepository.UpdateAsync(userSearchState);
 
                         if (userSearchState.IsFinished)
-                        {
+                        { 
                             var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); // метод, который вернет резултат для переменной
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
                             await _telegramSender.SendResults(chatId, listWithResult);
@@ -149,13 +149,11 @@ namespace YourEasyRent.Services
                         intermediateResult.Url
                     }.ToList();
 
-                    var subscriber = ProductForSubscription.TransferDataToSubscriber(userSearchState, intermadiateResultList);
-                    //await _subscribersRepository.CreateSubscriberAsync(subscriber); //  потом удалить этот метод, тк мы не сохраняем подписчика в этом приложении( удалить еще репозиторий для него)
-                    _rabbitMessageProducer.SendMessagAboutSubscriber(subscriber); // отправляю сообщение в другой сервис
+                    var subscriber = ProductForSubscription.TransferDataToSubscriber(userSearchState, intermadiateResultList); 
+                    _rabbitMessageProducer.SendMessagAboutSubscriber(subscriber);
                     await _telegramSender.SendConfirmOfSubscriprion(chatId);
                     return;
                 }
-
             }
         }
 

@@ -13,30 +13,34 @@ namespace YourEasyRent.Controllers
     {
         private readonly IRabbitMessageProducer _messageProducer;
         private readonly ILogger<SubscriptionController> _logger;
+        private readonly ProductForSubscriptionService _service;
 
 
-        public SubscriptionController(IRabbitMessageProducer messageProducer, ILogger<SubscriptionController> logger)
+        public SubscriptionController(IRabbitMessageProducer messageProducer, ILogger<SubscriptionController> logger, ProductForSubscriptionService service)
         {
             _messageProducer = messageProducer;
             _logger = logger;
+            _service = service;
         }
 
-        [HttpPost] 
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public Task<ActionResult<List<ProductForSubscription>>> Search([FromBody] SubscribersProductRequest request) 
+        public async Task<IActionResult> Search([FromBody] SubscribersProductRequest request) 
         {
              _messageProducer.ConsumingSubscriberMessag(request);
             var products = new List<ProductForSubscription>();
-
-            {
-                var product = ProductForSubscription.CreateProductForSearch
+            var product = ProductForSubscription.CreateProductForSearch
                         (request.UserId,
                          request.Name,
                          request.Brand,
                          request.Price);
+
                 products.Add(product);
-            } // тут вызываем сервис, который берет этот лист и отправляет его в базу
-            return Task.FromResult<ActionResult<List<ProductForSubscription>>>(Ok(products)); //  такой длинный result потому что пока нет обращения в базу
+            await _service.ProductHandler(products);
+            return Ok();
+             // тут вызываем сервис, который берет этот лист и отправляет его в базу,  поэтому передаем в него аргумент products 
+           //  такой длинный result потому что пока нет обращения в базу
         }
 
     }

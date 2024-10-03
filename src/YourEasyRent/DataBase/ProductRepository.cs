@@ -118,7 +118,7 @@ namespace YourEasyRent.DataBase
             return res;
         }
 
-        public async Task<Product> GetProductsToSearchForPriceBrandName(Product productForSearch)
+        public async Task<Product> GetProductsToSearchForPriceBrandName(Product productForSearch)// потом  можно будет этот метод удалить?
         {
             var filter = Builders<Product>.Filter.And(
                 Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),
@@ -128,20 +128,44 @@ namespace YourEasyRent.DataBase
             return product;
         }
 
-        public async Task<IEnumerable<ProductForSubscriptionDto>> GetProductForSubcribers(IEnumerable<ProductForSubscriptionDto> productForSearch)
+        public async Task<IEnumerable<ProductForSubscriptionDto>> GetProductForSubcribers(IEnumerable<ProductForSubscriptionDto> productForSearchDto)
         {
             var filters = new List<FilterDefinition<Product>>();
-            foreach (var product in productForSearch) {
+            foreach (var product in productForSearchDto)
+            {
                 var filter = Builders<Product>.Filter.And(
-                    Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),// AK TO DO  после получения дто оъекта ошибку должна уйти
-                    Builders<Product>.Filter.Eq(_ => _.Name, productForSearch.Name),
-                    Builders<Product>.Filter.Lt(_ => _.Price, productForSearch.Price));
+                    Builders<Product>.Filter.Eq(_ => _.Brand, product.Brand),
+                    Builders<Product>.Filter.Eq(_ => _.Name, product.Name),
+                    Builders<Product>.Filter.Lt(_ => _.Price, product.Price));
                 filters.Add(filter);
             }
             var combinedFilter = Builders<Product>.Filter.Or(filters);
-
             var products = await _productCollection.Find(combinedFilter).ToListAsync();
-            return products;
+            var productDtos = products.Select(p => new ProductForSubscriptionDto()
+            {
+                Brand = p.Brand,
+                Name = p.Name,
+                Price = p.Price,
+                Url = p.Url
+            }).ToList();
+            return productDtos;
+        }
+
+        public async Task<ProductForSubscriptionDto> GetProductForOneSubscriber(ProductForSubscriptionDto productForSearch)
+        {
+            var filter = Builders<Product>.Filter.And(
+                Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),
+                Builders<Product>.Filter.Eq(_ => _.Name, productForSearch.Name),
+                Builders<Product>.Filter.Lt(_ => _.Price, productForSearch.Price));
+            var product = await _productCollection.Find<Product>(filter).FirstOrDefaultAsync();
+            var result = new ProductForSubscriptionDto() 
+            {
+                Brand =  product.Brand, 
+                Name=  product.Name, 
+                Price = product.Price,
+                Url = product.Url
+            };
+            return result;// AK TODO  тут остановилась, теперь надо понять как получившуюся отдельно дто приклеить к его UserId и слепить целый объект ProductForSubscription через метод GlueResultOfSearch
         }
     }
 }
