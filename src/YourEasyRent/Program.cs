@@ -50,6 +50,7 @@ var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
 builder.Services.AddSingleton<IRabbitMessageProducer, RabbitMessageProducer>();
 builder.Services.AddSingleton<ITelegramCallbackHandler, TelegramCallbackHandler>();
+builder.Services.AddScoped<IProductForSubscriptionService, ProductForSubscriptionService>();
 
 
 

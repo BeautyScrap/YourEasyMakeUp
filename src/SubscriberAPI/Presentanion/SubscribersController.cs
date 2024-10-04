@@ -175,6 +175,7 @@ namespace SubscriberAPI.Presentanion
             var response = ListWithfSubscriptions.Select(s => new SubscriptionResponse
             {
                 UserId = s.UserId,
+                ChatId = s.ChatId,
                 Name = s.Name,
                 Brand = s.Brand,
                 Price = s.Price

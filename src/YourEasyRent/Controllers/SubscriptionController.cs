@@ -13,10 +13,10 @@ namespace YourEasyRent.Controllers
     {
         private readonly IRabbitMessageProducer _messageProducer;
         private readonly ILogger<SubscriptionController> _logger;
-        private readonly ProductForSubscriptionService _service;
+        private readonly IProductForSubscriptionService _service;
 
 
-        public SubscriptionController(IRabbitMessageProducer messageProducer, ILogger<SubscriptionController> logger, ProductForSubscriptionService service)
+        public SubscriptionController(IRabbitMessageProducer messageProducer, ILogger<SubscriptionController> logger, IProductForSubscriptionService service)
         {
             _messageProducer = messageProducer;
             _logger = logger;
@@ -26,21 +26,34 @@ namespace YourEasyRent.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Search([FromBody] SubscribersProductRequest request) 
+        public async Task<IActionResult> Search([FromBody] List<SubscribersProductRequest> productRequest) // AK TODO  не уверена, что принимать лист из request это прям хорошо, хотя вроде норм
         {
-             _messageProducer.ConsumingSubscriberMessag(request);
-            var products = new List<ProductForSubscription>();
-            var product = ProductForSubscription.CreateProductForSearch
-                        (request.UserId,
-                         request.Name,
-                         request.Brand,
-                         request.Price);
+            try
+            {
+                _messageProducer.ConsumingSubscriberMessag(productRequest);
+                if (productRequest is null)
+                {
+                    return BadRequest();
+                }
+                var products = new List<ProductForSubscription>();
+                foreach (var product in productRequest)
+                {
+                    var productForSubscription = ProductForSubscription.CreateProductForSearch(
+                        product.UserId,
+                        product.Name,
+                        product.Brand,
+                        product.Price);
 
-                products.Add(product);
-            await _service.ProductHandler(products);
-            return Ok();
-             // тут вызываем сервис, который берет этот лист и отправляет его в базу,  поэтому передаем в него аргумент products 
-           //  такой длинный result потому что пока нет обращения в базу
+                    products.Add(productForSubscription);
+                }
+                await _service.ProductHandler(products);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[Post]: Failed to check the SubscribersProductRequest");
+                return StatusCode(500, "Failed to check the SubscribersProductRequest");
+            }
         }
 
     }

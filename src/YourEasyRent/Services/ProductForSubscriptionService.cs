@@ -6,7 +6,7 @@ using YourEasyRent.TelegramMenu;
 
 namespace YourEasyRent.Services
 {
-    public class ProductForSubscriptionService
+    public class ProductForSubscriptionService: IProductForSubscriptionService
     {
         private readonly ILogger<ProductForSubscriptionService> _logger;
         private readonly IProductRepository _productRepository;
