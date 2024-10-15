@@ -22,7 +22,7 @@ namespace YourEasyRent.DataBase.Interfaces
         Task<Product> GetProductsToSearchForPriceBrandName(Product productForSearch);
         Task<IEnumerable<ProductForSubscriptionDto>> GetProductForSubcribers(IEnumerable<ProductForSubscriptionDto> productForSearch);
 
-        Task<ProductForSubscriptionDto> GetProductForOneSubscriber(ProductForSubscriptionDto productForSearch);
+        Task<ProductForSubscriptionDto?> GetProductForOneSubscriber(ProductForSubscriptionDto productForSearch);
 
     }
 }

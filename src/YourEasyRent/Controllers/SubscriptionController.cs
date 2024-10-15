@@ -26,7 +26,7 @@ namespace YourEasyRent.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Search([FromBody] List<SubscribersProductRequest> productRequest) // AK TODO  не уверена, что принимать лист из request это прям хорошо, хотя вроде норм
+        public async Task<IActionResult> Search([FromBody] List<SubscribersProductRequest> productRequest) 
         {
             try
             {
@@ -40,8 +40,9 @@ namespace YourEasyRent.Controllers
                 {
                     var productForSubscription = ProductForSubscription.CreateProductForSearch(
                         product.UserId,
-                        product.Name,
+                        product.ChatId,
                         product.Brand,
+                        product.Name,
                         product.Price);
 
                     products.Add(productForSubscription);

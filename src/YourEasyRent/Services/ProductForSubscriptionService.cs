@@ -1,4 +1,5 @@
-﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
+﻿using Amazon.Runtime.Internal;
+using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
 using Microsoft.AspNetCore.Http.HttpResults;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Entities.ProductForSubscription;
@@ -25,7 +26,6 @@ namespace YourEasyRent.Services
             var listWithFoundProducts = new List<ProductForSubscription>();  
             foreach (var product in products)
             {
-                 // var userId= product.UserId; -   не преобразовывая его в дто?
                 var productDto = product.ToDto(); 
                 var userId = productDto.UserId;
                 var chatId = productDto.ChatId;
@@ -33,7 +33,7 @@ namespace YourEasyRent.Services
                 var resultProductDto = await _productRepository.GetProductForOneSubscriber(productDto);
                 if (resultProductDto == null)
                 {
-                    continue;
+                    continue; 
                 } 
                 ProductForSubscription productForSubscription = ProductForSubscription.GlueResultOfSearch(userId, chatId, resultProductDto);
                 await _telegramSender.SendSubscriberProduct(chatId, productForSubscription);

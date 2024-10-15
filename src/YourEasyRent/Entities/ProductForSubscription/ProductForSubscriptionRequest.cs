@@ -1,4 +1,7 @@
-﻿namespace YourEasyRent.Entities.ProductForSubscription
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace YourEasyRent.Entities.ProductForSubscription
 {
     public record ProductForSubscriptionRequest(
         string UserId,

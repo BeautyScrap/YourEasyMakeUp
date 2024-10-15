@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using YourEasyRent.UserState;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -6,7 +7,6 @@ namespace YourEasyRent.Entities.ProductForSubscription
 {
     public class ProductForSubscription
     {
-
         public string UserId { get; private set; }
         public string? ChatId { get; private set; }
         public string Brand { get; private set; }
@@ -37,17 +37,18 @@ namespace YourEasyRent.Entities.ProductForSubscription
                 ChatId = chatId,
                 Brand = dto.Brand,
                 Name = dto.Name,
-                Price = dto.Price,
+                Price = (decimal)dto.Price,
                 Url = dto.Url
             };
             return product;
         }
 
-        public static ProductForSubscription CreateProductForSearch(string userId, string brand, string name, decimal price)
+        public static ProductForSubscription CreateProductForSearch(string userId,string chatId, string brand, string name, decimal price)
         {
             ProductForSubscription product = new ProductForSubscription()
             {
                 UserId = userId,
+                ChatId= chatId,
                 Brand = brand,
                 Name = name,
                 Price = price,
@@ -57,9 +58,8 @@ namespace YourEasyRent.Entities.ProductForSubscription
 
         public override string ToString() 
         {
-            return $"Brand: {Brand}, Name: {Name}, Price: {Price}, Url: {Url ?? "N/A"}";
+            return $"{Brand}\n{Name}\n{Price}\n[Ссылка на продукт] {Url}";
         }
- 
 
         public ProductForSubscriptionDto ToDto()
         {

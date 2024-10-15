@@ -7,13 +7,15 @@ namespace YourEasyRent.Entities.ProductForSubscription
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string id { get; set; }
+        public string? id { get; set; }
 
         [BsonRepresentation(BsonType.String)]
         public string? UserId { get; set; }
         public string? ChatId { get; set; }
-        public string Brand { get; set; }
-        public string Name { get; set; }
+        public string? Brand { get; set; }
+        public string? Name { get; set; }
+
+        [BsonRepresentation(BsonType.Decimal128)]
         public decimal Price { get; set; }
         public string? Url { get; set; }
 

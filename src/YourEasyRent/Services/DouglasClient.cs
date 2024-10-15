@@ -36,7 +36,7 @@ namespace YourEasyRent.Services
 
             var douglasRawJsonString = await douglasHTTPResponce.Content.ReadAsStringAsync();
 
-            var douglasProducts = JsonSerializer.Deserialize<DouglasResponse>(douglasRawJsonString, _options); // тут  выдает ошибку
+            var douglasProducts = JsonSerializer.Deserialize<DouglasResponse>(douglasRawJsonString, _options); 
 
             var products = douglasProducts.Products.Select(p => ToProduct(p));
 

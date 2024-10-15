@@ -8,18 +8,20 @@ using YourEasyRent.TelegramMenu;
 using YourEasyRent.UserState;
 using YourEasyRent.Entities.ProductForSubscription;
 using MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders;
+using YourEasyRent.Controllers;
 
 namespace YourEasyRent.DataBase
 {
-    public class ProductRepository : IProductRepository  
+    public class ProductRepository : IProductRepository
 
     {
         private readonly IMongoCollection<Product> _productCollection;//  вводим экземпляр  _productCollection класса IMongoCollection дла работы с базой данных
-
-        public ProductRepository(DataBaseConfig configuration, IMongoClient client) //вводим конструктор класса CatalogContext. Конструктор принимает два аргумента: DataBaseConfig configuration и IMongoClient client. Класс DataBaseConfig используется для передачи конфигурационных данных, а IMongoClient представляет клиент MongoDB, который используется для установления соединения с базой данных.
+        private readonly ILogger<ProductRepository> _logger;
+        public ProductRepository(DataBaseConfig configuration, IMongoClient client, ILogger<ProductRepository> logger) //вводим конструктор класса CatalogContext. Конструктор принимает два аргумента: DataBaseConfig configuration и IMongoClient client. Класс DataBaseConfig используется для передачи конфигурационных данных, а IMongoClient представляет клиент MongoDB, который используется для установления соединения с базой данных.
         {
             var database = client.GetDatabase(configuration.DataBaseName); //переменная database инициализируется с помощью метода GetDatabase, вызываемого из объекта client, и передается имя базы данных из объекта configuration.
-            _productCollection = database.GetCollection<Product>("Products") ??  throw new ArgumentNullException(nameof(_productCollection)); ; // GetCollection<Product> - это метод, который возвращает коллекцию объектов типа Product.
+            _productCollection = database.GetCollection<Product>("Products") ?? throw new ArgumentNullException(nameof(_productCollection)); ; // GetCollection<Product> - это метод, который возвращает коллекцию объектов типа Product.
+            _logger = logger;
         }
 
         public async Task<IEnumerable<Product>> GetProducts()
@@ -34,7 +36,7 @@ namespace YourEasyRent.DataBase
 
         public async Task<IEnumerable<Product>> GetByBrand(string brand)
         {
-            return await _productCollection.Find(_ => _.Brand == brand).ToListAsync(); // обращеемся к объекту _ и используем его своейство Brand, где свойство нашего объекта Brand будет равно параметру Brand
+            return await _productCollection.Find(_ => _.Brand == brand).ToListAsync();
         }
 
         public async Task<Product> GetByName(string name)
@@ -50,7 +52,7 @@ namespace YourEasyRent.DataBase
         public async Task<IEnumerable<string>> CreateMany(IEnumerable<Product> products)
         {
             await _productCollection.InsertManyAsync(products);
-            var createdIds = products.Select(p => p.Id); // - Здесь создается коллекция идентификаторов продуктов, используя LINQ-запрос.
+            var createdIds = products.Select(p => p.Id);
             return createdIds;
         }
 
@@ -100,9 +102,9 @@ namespace YourEasyRent.DataBase
 
         public async Task UpsertManyProducts(IEnumerable<Product> products)
         {
-            foreach(var product in products) 
-            { 
-                await UpsertProduct(product);  
+            foreach (var product in products)
+            {
+                await UpsertProduct(product);
             }
         }
 
@@ -118,7 +120,7 @@ namespace YourEasyRent.DataBase
             return res;
         }
 
-        public async Task<Product> GetProductsToSearchForPriceBrandName(Product productForSearch)// потом  можно будет этот метод удалить?
+        public async Task<Product> GetProductsToSearchForPriceBrandName(Product productForSearch)
         {
             var filter = Builders<Product>.Filter.And(
                 Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),
@@ -151,21 +153,26 @@ namespace YourEasyRent.DataBase
             return productDtos;
         }
 
-        public async Task<ProductForSubscriptionDto> GetProductForOneSubscriber(ProductForSubscriptionDto productForSearch)
+        public async Task<ProductForSubscriptionDto?> GetProductForOneSubscriber(ProductForSubscriptionDto productForSearch)
         {
+            double roundedPrice = Math.Round((double)productForSearch.Price, 2);
             var filter = Builders<Product>.Filter.And(
-                Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),
-                Builders<Product>.Filter.Eq(_ => _.Name, productForSearch.Name),
-                Builders<Product>.Filter.Lt(_ => _.Price, productForSearch.Price));
-            var product = await _productCollection.Find<Product>(filter).FirstOrDefaultAsync();
-            var result = new ProductForSubscriptionDto() 
+                    Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),
+                    Builders<Product>.Filter.Eq(_ => _.Name, productForSearch.Name),
+                    Builders<Product>.Filter.Lt(_ => (double)_.Price, roundedPrice));
+            var product = await _productCollection.Find(filter).FirstOrDefaultAsync();
+            if (product == null)
             {
-                Brand =  product.Brand, 
-                Name=  product.Name, 
+                return null;
+            }
+            var result = new ProductForSubscriptionDto()
+            {
+                Brand = product.Brand,
+                Name = product.Name,
                 Price = product.Price,
                 Url = product.Url
             };
-            return result;// AK TODO  тут остановилась, теперь надо понять как получившуюся отдельно дто приклеить к его UserId и слепить целый объект ProductForSubscription через метод GlueResultOfSearch
+            return result;
         }
     }
 }
