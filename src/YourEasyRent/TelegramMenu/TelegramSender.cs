@@ -93,7 +93,7 @@ namespace YourEasyRent.TelegramMenu
         public async Task SendSubscriberProduct(string chatId, ProductForSubscription product)
         {
             var result = product.ToString(); 
-            await _botClient.SendTextMessageAsync(chatId, result, parseMode: ParseMode.Markdown); // AK TODO добавить какое то сообщение типо "цена на продукт снизилась"           
+            await _botClient.SendTextMessageAsync(chatId, $"WOW!The price of your product has become lower {result}", parseMode: ParseMode.Markdown);      
         }
     }
     
