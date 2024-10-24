@@ -21,7 +21,7 @@ namespace YourEasyRent.Services
             _telegramSender = telegramSender;
             _messageProducer = messageProducer;
         }
-        public async Task ProductHandler(List<ProductForSubscription> products)
+        public async Task<List<ProductForSubscription>> ProductHandler(List<ProductForSubscription> products)
         {
             var listWithFoundProducts = new List<ProductForSubscription>();  
             foreach (var product in products)
@@ -36,11 +36,10 @@ namespace YourEasyRent.Services
                     continue; 
                 } 
                 ProductForSubscription productForSubscription = ProductForSubscription.GlueResultOfSearch(userId, chatId, resultProductDto);
-                await _telegramSender.SendSubscriberProduct(chatId, productForSubscription);
+               // await _telegramSender.SendSubscriberProduct(chatId, productForSubscription); // AK TODO  правильно, что я передаю сообщение пользаку из этого сервиса, наверно нет? Тогда я должна передавать новую ифу с новой ценой и ссылкой на продукт через userId  отбатно в SubscriberAPI, а в самом контроллере SubscriberAPI принять эту инфу и образобать информацию или для этого нужен другой контроллер?
                 listWithFoundProducts.Add(productForSubscription);
             }
-            _messageProducer.SendMessagAboutSubscriber(listWithFoundProducts);// - AK TODO  нужна наверно правильная очередь с отределенным назыанием или нет, достаточно знать в какой микросервис послать?
-
+            return listWithFoundProducts;
         }
     }
 }

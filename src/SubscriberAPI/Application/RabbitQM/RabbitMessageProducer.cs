@@ -18,7 +18,7 @@ namespace SubscriberAPI.Application.RabbitQM
             };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-            channel.QueueDeclare("creating_subscriber",
+            channel.QueueDeclare("SubscriberApi",
                      durable: true,
                      exclusive: false,
                      autoDelete: false,
@@ -30,7 +30,7 @@ namespace SubscriberAPI.Application.RabbitQM
                 var message = Encoding.UTF8.GetString(body);
                 Console.WriteLine($" The message has been received {message}");
             };
-            channel.BasicConsume(queue: "creating_subscriber", autoAck: true, consumer: consumer);
+            channel.BasicConsume(queue: "SubscriberApi", autoAck: true, consumer: consumer);
         }
 
 
@@ -45,14 +45,14 @@ namespace SubscriberAPI.Application.RabbitQM
             };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-            channel.QueueDeclare("Search_the_product_For_Subscriber",
+            channel.QueueDeclare("Your_Easy_Rent",
                      durable: true,
                      exclusive: false,
                      autoDelete: false,
                      arguments: null);
             var JsonString = JsonSerializer.Serialize(message);
             var body = Encoding.UTF8.GetBytes(JsonString);
-            channel.BasicPublish(exchange: "", routingKey: "Search_the_product_For_Subscriber", body: body);
+            channel.BasicPublish(exchange: "", routingKey: "Your_Easy_Rent", body: body);
         }
     }
 }

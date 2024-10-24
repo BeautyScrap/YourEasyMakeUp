@@ -120,39 +120,6 @@ namespace YourEasyRent.DataBase
             return res;
         }
 
-        public async Task<Product> GetProductsToSearchForPriceBrandName(Product productForSearch)
-        {
-            var filter = Builders<Product>.Filter.And(
-                Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),
-                Builders<Product>.Filter.Eq(_ => _.Name, productForSearch.Name),
-                Builders<Product>.Filter.Lt(_ => _.Price, productForSearch.Price));
-            var product = await _productCollection.Find<Product>(filter).FirstOrDefaultAsync();
-            return product;
-        }
-
-        public async Task<IEnumerable<ProductForSubscriptionDto>> GetProductForSubcribers(IEnumerable<ProductForSubscriptionDto> productForSearchDto)
-        {
-            var filters = new List<FilterDefinition<Product>>();
-            foreach (var product in productForSearchDto)
-            {
-                var filter = Builders<Product>.Filter.And(
-                    Builders<Product>.Filter.Eq(_ => _.Brand, product.Brand),
-                    Builders<Product>.Filter.Eq(_ => _.Name, product.Name),
-                    Builders<Product>.Filter.Lt(_ => _.Price, product.Price));
-                filters.Add(filter);
-            }
-            var combinedFilter = Builders<Product>.Filter.Or(filters);
-            var products = await _productCollection.Find(combinedFilter).ToListAsync();
-            var productDtos = products.Select(p => new ProductForSubscriptionDto()
-            {
-                Brand = p.Brand,
-                Name = p.Name,
-                Price = p.Price,
-                Url = p.Url
-            }).ToList();
-            return productDtos;
-        }
-
         public async Task<ProductForSubscriptionDto?> GetProductForOneSubscriber(ProductForSubscriptionDto productForSearch)
         {
             double roundedPrice = Math.Round((double)productForSearch.Price, 2);

@@ -149,8 +149,8 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(string userId) // AK TODO  могу я в этот контроллер получит  request  с листом из подписчиков, которых мне нужно удалить из базы , а не через метод post
-        { // возможно для этого мне понадобится название для новой очереди в ребите?
+        public async Task<IActionResult> Delete(string userId) // AK TODO  подписчиков не удаляем, а просто делаем пометку, что продукт найден
+        { 
             var result = await _sudscriberService.Delete(userId);
             if (result == false)
             {
@@ -159,13 +159,25 @@ namespace SubscriberAPI.Presentanion
             return Ok(result);
         }
 
+        /// <summary>
+        ///  each 10 minutes
+        /// </summary>
+        /// <returns></returns>
         [Route("GetFieldsForSearch")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<SubscriptionResponse>>> GetFieldsForSearch()
+        public async Task<ActionResult<List<SubscriptionResponse>>> GetFieldsForSearch()// CheckPriceUpdates
         {
+            /// var subscribers = await subsRepo.GetAll()
+            /// var productNames = subscribers.Select(x=>x.ProductName)
+            /// var newPrices = await productsApiClient.GetNewPrices(productNames, DateTime.Now().Days(-1))
+            /// var matchedUsers = matchUsersWithUpdates(subs, newPrices)
+            // var notifictaions = matchedUsers.Select(sub, price => new Notification(sub,price))
+            // notifications.ForEach(n=> await tgClient.Send(n)
+            // AK TODO Сделать такой контроллер и по 2 httpClient для каждого сервиса
+
             var ListWithfSubscriptions = await _sudscriberService.GetFieldsForSearchById();
 
             if (ListWithfSubscriptions == null)

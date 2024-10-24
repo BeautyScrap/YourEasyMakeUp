@@ -12,7 +12,7 @@ namespace SubscriberAPI.Presentanion
             RuleFor(x => x.UserId)
                 .NotEmpty().WithMessage("The UserId is not be Null");
             RuleFor(x => x.ChatId)
-                .NotNull().WithMessage("Th ChatId is not be Null")
+                .NotNull().WithMessage("The ChatId is not be Null")
                 .Length(1, 15);
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("The Name is not be Null");
@@ -24,7 +24,6 @@ namespace SubscriberAPI.Presentanion
                 .InclusiveBetween(0.01m, 10000m);
             RuleFor(x => x.Url)
                 .NotNull().WithMessage("The Url is not be Null");
-
         }
 
     }

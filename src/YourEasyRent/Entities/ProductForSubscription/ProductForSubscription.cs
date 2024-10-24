@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Security.Cryptography.Xml;
 using YourEasyRent.UserState;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -43,7 +44,7 @@ namespace YourEasyRent.Entities.ProductForSubscription
             return product;
         }
 
-        public static ProductForSubscription CreateProductForSearch(string userId,string chatId, string brand, string name, decimal price)
+        public static ProductForSubscription CreateProductForSearch(string userId,string? chatId, string brand, string name, decimal price, string? url)
         {
             ProductForSubscription product = new ProductForSubscription()
             {
@@ -52,13 +53,14 @@ namespace YourEasyRent.Entities.ProductForSubscription
                 Brand = brand,
                 Name = name,
                 Price = price,
+                Url = url,// AK TODO эти поля вроде как здесь и не нужны(ChatId, Url) , поэтому думаю их вообще удалить этом методе
             };
             return product;
         }
 
         public override string ToString() 
         {
-            return $"{Brand}\n{Name}\n{Price}\n[Ссылка на продукт] {Url}";
+            return $"{Brand}\n{Name}\n{Price}\n[Ссылка на продукт] {Url}"; // AK TODO переместить этот метод в ProductForSubscriptionService, здесь он больше не нужен
         }
 
         public ProductForSubscriptionDto ToDto()

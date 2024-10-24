@@ -19,9 +19,6 @@ namespace YourEasyRent.DataBase.Interfaces
         Task UpsertProduct(Product product);
         Task UpsertManyProducts(IEnumerable<Product> products);
         Task<List<string>> GetBrandForMenu(int limit);
-        Task<Product> GetProductsToSearchForPriceBrandName(Product productForSearch);
-        Task<IEnumerable<ProductForSubscriptionDto>> GetProductForSubcribers(IEnumerable<ProductForSubscriptionDto> productForSearch);
-
         Task<ProductForSubscriptionDto?> GetProductForOneSubscriber(ProductForSubscriptionDto productForSearch);
 
     }

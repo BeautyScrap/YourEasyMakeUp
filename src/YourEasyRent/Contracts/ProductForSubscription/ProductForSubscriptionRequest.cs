@@ -1,7 +1,4 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace YourEasyRent.Entities.ProductForSubscription
+﻿namespace YourEasyRent.Contracts.ProductForSubscription
 {
     public record ProductForSubscriptionRequest(
         string UserId,
@@ -9,6 +6,6 @@ namespace YourEasyRent.Entities.ProductForSubscription
         string Brand,
         string Name,
         decimal Price,
-        string Url
-        );
+        string? Url);
+    
 }
