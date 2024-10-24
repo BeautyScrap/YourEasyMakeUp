@@ -25,7 +25,6 @@ namespace YourEasyRent.Services
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
         private readonly IProductRepository _productRepository;
-        private readonly ISubscribersRepository _subscribersRepository;
         private readonly IRabbitMessageProducer _rabbitMessageProducer;
 
 
@@ -35,7 +34,6 @@ namespace YourEasyRent.Services
             ILogger<TelegramCallbackHandler> logger,
             IUserStateRepository userStateRepository,
             ITelegramSender telegramSender,
-            ISubscribersRepository subscribersRepository,
             IProductRepository productRepository,
             IRabbitMessageProducer rabbitMessageProducer
            
@@ -44,7 +42,6 @@ namespace YourEasyRent.Services
             _logger = logger;
             _userStateRepository = userStateRepository;
             _telegramSender = telegramSender;
-            _subscribersRepository = subscribersRepository;
             _productRepository = productRepository;
             _rabbitMessageProducer = rabbitMessageProducer ?? throw new ArgumentNullException(nameof(rabbitMessageProducer));
         }
