@@ -11,7 +11,6 @@ namespace YourEasyRent.UserState
         [BsonRepresentation(BsonType.ObjectId)]     
         public string Id { get; set; }
 
-
         [BsonRepresentation(BsonType.String)]
         public string UserId { get; set; }
 

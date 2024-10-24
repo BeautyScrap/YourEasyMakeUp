@@ -10,12 +10,12 @@ namespace SubscriberAPI.Presentanion
         public CreateSubscriptionRequestValidator() 
         {
             RuleFor(x => x.UserId)
-                .NotNull().WithMessage("The UserId is not be Null");
+                .NotEmpty().WithMessage("The UserId is not be Null");
             RuleFor(x => x.ChatId)
-                .NotNull().WithMessage("Th ChatId is not be Null")
+                .NotNull().WithMessage("The ChatId is not be Null")
                 .Length(1, 15);
-            RuleFor(x => x.Name).
-                NotNull().WithMessage("The Name is not be Null");
+            RuleFor(x => x.Name)
+                .NotEmpty().WithMessage("The Name is not be Null");
             RuleFor(x => x.Brand)
                 .NotNull().WithMessage("The Brand is not be Null");
             RuleFor(x => x.Price)
@@ -24,7 +24,6 @@ namespace SubscriberAPI.Presentanion
                 .InclusiveBetween(0.01m, 10000m);
             RuleFor(x => x.Url)
                 .NotNull().WithMessage("The Url is not be Null");
-
         }
 
     }

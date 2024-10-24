@@ -14,6 +14,7 @@ using YourEasyRent.UserState;
 using YourEasyRent.TelegramMenu;
 using System.Collections.Generic;
 using YourEasyRent.DataBase;
+using YourEasyRent.Entities.ProductForSubscription;
 
 namespace YourEasyRent.Services
 {
@@ -23,9 +24,9 @@ namespace YourEasyRent.Services
         private readonly IUserStateRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
-        private readonly ISubscribersRepository _subscribersRepository;
         private readonly IProductRepository _productRepository;
         private readonly IRabbitMessageProducer _rabbitMessageProducer;
+
 
 
         public TelegramCallbackHandler
@@ -33,7 +34,6 @@ namespace YourEasyRent.Services
             ILogger<TelegramCallbackHandler> logger,
             IUserStateRepository userStateRepository,
             ITelegramSender telegramSender,
-            ISubscribersRepository subscribersRepository,
             IProductRepository productRepository,
             IRabbitMessageProducer rabbitMessageProducer
            
@@ -42,7 +42,6 @@ namespace YourEasyRent.Services
             _logger = logger;
             _userStateRepository = userStateRepository;
             _telegramSender = telegramSender;
-            _subscribersRepository = subscribersRepository;
             _productRepository = productRepository;
             _rabbitMessageProducer = rabbitMessageProducer ?? throw new ArgumentNullException(nameof(rabbitMessageProducer));
         }
@@ -99,7 +98,7 @@ namespace YourEasyRent.Services
                         await _userStateRepository.UpdateAsync(userSearchState);
 
                         if (userSearchState.IsFinished)
-                        {
+                        { 
                             var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); // метод, который вернет резултат для переменной
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
                             await _telegramSender.SendResults(chatId, listWithResult);
@@ -147,15 +146,11 @@ namespace YourEasyRent.Services
                         intermediateResult.Url
                     }.ToList();
 
-                    var subscriber = Subscriber.TransferDataToSubscriber(userSearchState, intermadiateResultList);
-                    await _subscribersRepository.CreateSubscriberAsync(subscriber); //  потом удалить этот метод, тк мы не сохраняем подписчика в этом приложении( удалить еще репозиторий для него)
+                    var subscriber = ProductForSubscription.TransferDataToSubscriber(userSearchState, intermadiateResultList); 
                     _rabbitMessageProducer.SendMessagAboutSubscriber(subscriber);
-
                     await _telegramSender.SendConfirmOfSubscriprion(chatId);
                     return;
-
                 }
-
             }
         }
 

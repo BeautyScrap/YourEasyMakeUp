@@ -1,4 +1,5 @@
 ﻿using YourEasyRent.Entities;
+using YourEasyRent.Entities.ProductForSubscription;
 
 namespace YourEasyRent.TelegramMenu
 {
@@ -10,6 +11,7 @@ namespace YourEasyRent.TelegramMenu
         Task<IEnumerable<string>> SendResults(string chatId, List<string> listWithResult);
         Task SendMenuAfterResult(string chatId);
         Task SendConfirmOfSubscriprion(string chatId);
+        Task SendSubscriberProduct(string chatId, ProductForSubscription product);
         
     }
 }

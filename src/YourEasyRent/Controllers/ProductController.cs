@@ -5,6 +5,9 @@ using YourEasyRent.DataBase.Interfaces;
 using Telegram.Bot.Types;
 using Serilog;
 using System.Xml.Linq;
+using YourEasyRent.Services;
+using YourEasyRent.Contracts.ProductForSubscription;
+using YourEasyRent.Entities.ProductForSubscription;
 
 namespace YourEasyRent.Controllers
 {
@@ -14,11 +17,62 @@ namespace YourEasyRent.Controllers
     {
         private readonly IProductRepository _repository;
         private readonly ILogger<ProductController> _logger;
+        private readonly IRabbitMessageProducer _messageProducer;
+        private readonly IProductForSubscriptionService _service;
 
-        public ProductController(IProductRepository productRepository, ILogger<ProductController> logger)
+        public ProductController(IProductRepository productRepository, ILogger<ProductController> logger,IRabbitMessageProducer rabbitMessage, IProductForSubscriptionService service)
         {
             _repository = productRepository;
             _logger = logger;
+            _messageProducer = rabbitMessage;
+            _service = service;
+        }
+
+        [HttpPost]
+        [Route("SearchProductForSubscriber")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<ProductForSubscriptionResponce>>> Search([FromBody] List<ProductForSubscriptionRequest> productRequest)
+        {
+            try
+            {
+                _messageProducer.ConsumingSubscriberMessage(productRequest);
+                if (productRequest is null)
+                {
+                    return BadRequest();
+                }
+                var products = new List<ProductForSubscription>();
+                foreach (var product in productRequest)
+                {
+                    var productForSubscription = ProductForSubscription.CreateProductForSearch(
+                        product.UserId,
+                        product.ChatId,
+                        product.Brand,
+                        product.Name,
+                        product.Price,
+                        product.Url); //  надо проверить не выдет ли ошибку при создании объекта, те урла тут не передается
+
+                    products.Add(productForSubscription);
+                }
+                var foundProductsList =  await _service.ProductHandler(products);
+                var response = foundProductsList.Select(r => new ProductForSubscriptionResponce
+                { 
+                    UserId = r.UserId,
+                    ChatId = r.ChatId,
+                    Brand = r.Brand,
+                    Name = r.Name,
+                    Price = r.Price,
+                    Url =  r.Url
+                   
+                }).ToList();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[Post]: Failed to check the SubscribersProductRequest");
+                return StatusCode(500, "Failed to check the SubscribersProductRequest");
+            }
         }
 
         [HttpGet]

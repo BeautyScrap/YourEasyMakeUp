@@ -17,6 +17,8 @@ namespace YourEasyRent.Entities
         public string Brand { get; set; }
 
         public string Name { get;  set; }
+
+        [BsonRepresentation(BsonType.Double)]
         public decimal Price { get; set; }
 
         public string Category { get; set; }

@@ -44,12 +44,13 @@ builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();     
 builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
 builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
-builder.Services.AddSingleton<ISubscribersRepository, SubscribersRepository>(); 
+
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
 builder.Services.AddSingleton<IRabbitMessageProducer, RabbitMessageProducer>();
 builder.Services.AddSingleton<ITelegramCallbackHandler, TelegramCallbackHandler>();
+builder.Services.AddScoped<IProductForSubscriptionService, ProductForSubscriptionService>();
 
 
 
