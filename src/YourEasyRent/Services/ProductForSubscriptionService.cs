@@ -35,8 +35,7 @@ namespace YourEasyRent.Services
                 {
                     continue; 
                 } 
-                ProductForSubscription productForSubscription = ProductForSubscription.GlueResultOfSearch(userId, chatId, resultProductDto);
-               // await _telegramSender.SendSubscriberProduct(chatId, productForSubscription); // AK TODO  правильно, что я передаю сообщение пользаку из этого сервиса, наверно нет? Тогда я должна передавать новую ифу с новой ценой и ссылкой на продукт через userId  отбатно в SubscriberAPI, а в самом контроллере SubscriberAPI принять эту инфу и образобать информацию или для этого нужен другой контроллер?
+                ProductForSubscription productForSubscription = ProductForSubscription.GlueResultOfSearch(userId, chatId, resultProductDto);// AK TO DO  тут должен быть создан другой объект, который я уже передам в контроллер для SubscriberAPI                                                                                                                                           
                 listWithFoundProducts.Add(productForSubscription);
             }
             return listWithFoundProducts;

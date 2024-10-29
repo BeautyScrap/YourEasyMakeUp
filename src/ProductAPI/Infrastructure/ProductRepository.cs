@@ -1,20 +1,18 @@
 ﻿using MongoDB.Driver;
-using YourEasyRent.DataBase.Interfaces;
-using YourEasyRent.Entities;
 using MongoDB.Driver.Linq;
-using YourEasyRent.Entities.ProductForSubscription;
+using ProductAPI.Domain.Product;
+using ProductAPI.Domain.ProductForSubscription;
+using ProductAPI.Infrastructure.Persistence;
 
-
-namespace YourEasyRent.DataBase
+namespace ProductAPI.Infrastructure
 {
     public class ProductRepository : IProductRepository
-
     {
         private readonly IMongoCollection<Product> _productCollection;//  вводим экземпляр  _productCollection класса IMongoCollection дла работы с базой данных
         private readonly ILogger<ProductRepository> _logger;
-        public ProductRepository(DataBaseConfig configuration, IMongoClient client, ILogger<ProductRepository> logger) //вводим конструктор класса CatalogContext. Конструктор принимает два аргумента: DataBaseConfig configuration и IMongoClient client. Класс DataBaseConfig используется для передачи конфигурационных данных, а IMongoClient представляет клиент MongoDB, который используется для установления соединения с базой данных.
+        public ProductRepository(MongoDBSettings configuration, IMongoClient client, ILogger<ProductRepository> logger) //вводим конструктор класса CatalogContext. Конструктор принимает два аргумента: DataBaseConfig configuration и IMongoClient client. Класс DataBaseConfig используется для передачи конфигурационных данных, а IMongoClient представляет клиент MongoDB, который используется для установления соединения с базой данных.
         {
-            var database = client.GetDatabase(configuration.DataBaseName); //переменная database инициализируется с помощью метода GetDatabase, вызываемого из объекта client, и передается имя базы данных из объекта configuration.
+            var database = client.GetDatabase(configuration.DatabaseName); //переменная database инициализируется с помощью метода GetDatabase, вызываемого из объекта client, и передается имя базы данных из объекта configuration.
             _productCollection = database.GetCollection<Product>("Products") ?? throw new ArgumentNullException(nameof(_productCollection)); ; // GetCollection<Product> - это метод, который возвращает коллекцию объектов типа Product.
             _logger = logger;
         }
@@ -115,11 +113,10 @@ namespace YourEasyRent.DataBase
             return res;
         }
 
-        public async Task<ProductForSubscriptionDto?> GetProductForOneSubscriber(ProductForSubscriptionDto productForSearch)
+        public async Task<AvaliableProductDto?> GetProductForOneSubscriber(ProductForSubDto productForSearch)
         {
             double roundedPrice = Math.Round((double)productForSearch.Price, 2);
             var filter = Builders<Product>.Filter.And(
-                    Builders<Product>.Filter.Eq(_ => _.Brand, productForSearch.Brand),
                     Builders<Product>.Filter.Eq(_ => _.Name, productForSearch.Name),
                     Builders<Product>.Filter.Lt(_ => (double)_.Price, roundedPrice));
             var product = await _productCollection.Find(filter).FirstOrDefaultAsync();
@@ -127,7 +124,7 @@ namespace YourEasyRent.DataBase
             {
                 return null;
             }
-            var result = new ProductForSubscriptionDto()
+            var result = new AvaliableProductDto()
             {
                 Brand = product.Brand,
                 Name = product.Name,

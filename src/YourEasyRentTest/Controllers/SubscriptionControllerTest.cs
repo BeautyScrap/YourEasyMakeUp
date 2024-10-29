@@ -27,7 +27,7 @@
 //            _mockLogger = new Mock<ILogger<SubscriptionController>>();
 //            _rabbitMessageProducer = new Mock<IRabbitMessageProducer>();
 //            _service = new Mock<IProductForSubscriptionService>();
-//            _subscriptionController = new SubscriptionController(_rabbitMessageProducer.Object, _mockLogger.Object, _service.Object);       
+//            _subscriptionController = new SubscriptionController(_rabbitMessageProducer.Object,_service.Object, _mockLogger.Object);       
 //        }
 
 //        [Fact]
@@ -78,7 +78,7 @@
 //            statusCodeResult.Should().NotBeNull();
 //            statusCodeResult.StatusCode.Should().Be(500);
 //            statusCodeResult.Value.Should().Be("Failed to check the SubscribersProductRequest");
-            
+
 //        }
 
 //    }

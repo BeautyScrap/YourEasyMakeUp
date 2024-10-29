@@ -26,7 +26,7 @@ namespace YourEasyRent.TelegramMenu
             _menus = new Dictionary<MenuStatus, IButtonHandler>()
             {
                 { MenuStatus.MainMenu, new MainMenuButtonHandler() },
-                { MenuStatus.BrandMenu, new BrandButtonHandler(_productRepository) },
+                { MenuStatus.BrandMenu, new BrandButtonHandler(_productRepository) }, // AK TODO этого репозитория тут уже не будет, поэтому надо будет делать запрос в другой сервис при выборе кнопки Brand
                 { MenuStatus.CategoryMenu, new CategoryButtonHandler() },
                 { MenuStatus.MenuAfterReceivingRresult, new ReturnToMMButtonHandler() },
                 {MenuStatus.SubscribedToTheProduct, new SubscriptionButtonHandler() }

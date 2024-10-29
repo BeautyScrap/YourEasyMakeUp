@@ -27,7 +27,7 @@ namespace YourEasyRentTest.Controllers
             var loggerMock = new Mock<ILogger<ProductController>>();
 
             productRepoMock.Setup(repo => repo.GetProducts()).ReturnsAsync(products);
-            var controller = new ProductController(productRepoMock.Object, loggerMock.Object); // Создала экземпляр контроллера ProductsController, передавая фейковый repositoryMock в конструктор.
+            var controller = new ProductController(productRepoMock.Object, loggerMock.Object, _rabbitMessageProducer.Object, _service.Object); // Создала экземпляр контроллера ProductsController, передавая фейковый repositoryMock в конструктор.
 
             // act
             var result = await controller.GetProducts();
