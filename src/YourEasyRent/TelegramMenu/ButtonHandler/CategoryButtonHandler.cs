@@ -12,7 +12,7 @@ namespace YourEasyRent.TelegramMenu.ButtonHandler
         {
 
         }
-        public async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
+        public async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle(string chatId)
         {
             var buttonForCategory = new[]
                 {new[]

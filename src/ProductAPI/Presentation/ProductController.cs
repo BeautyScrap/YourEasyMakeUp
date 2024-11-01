@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using ProductAPI.Application;
 using ProductAPI.Contracts.ProductForSubscription;
+using ProductAPI.Contracts.TelegramContract;
 using ProductAPI.Domain.Product;
 using ProductAPI.Domain.ProductForSubscription;
 using ProductAPI.Infrastructure;
+using ProductAPI.Infrastructure.Client;
 using SubscriberAPI.Application.RabbitQM;
 
 namespace ProductAPI.Controllers
@@ -70,12 +72,12 @@ namespace ProductAPI.Controllers
             }
         }
 
-        [Route("GetAllProducts")]
-        [HttpGet]
+        [Route("UpsertAllProducts")]
+        [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IEnumerable<Product>> GetAllProducts()
+        public async Task<IEnumerable<Product>> PutAllProducts()
         {
             try
             {
@@ -92,6 +94,36 @@ namespace ProductAPI.Controllers
                 await _repository.UpsertManyProducts(allListings);
                 return allListings;
 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[GetProductsListings] : An error occurred while processing the request");
+                return (IEnumerable<Product>)StatusCode(500, "Internal Server Error.");
+
+            }
+        }
+
+        [Route("CreateManyProducts")]
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IEnumerable<Product>> CreateManyProducts() 
+        {
+            try
+            {
+                var section = Section.Makeup;
+                var allListings = new List<Product>();
+                for (var pagenumber = 1; pagenumber < 4; pagenumber++)
+                {
+                    foreach (var client in _siteClient)
+                    {
+                        var products = await client.FetchFromSectionAndPage(section, pagenumber);
+                        allListings.AddRange(products);
+                    }
+                }
+                await _repository.CreateMany(allListings);
+                return allListings;
             }
             catch (Exception ex)
             {
@@ -169,6 +201,30 @@ namespace ProductAPI.Controllers
                 return StatusCode(404, "Brand not found");
             }
         }
+
+        [Route("[action]/{brand}", Name = "SearchBrands")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<FoundBrandForTelegramResponse>>> SearchBrands()
+        {
+            try
+            {
+                var brands = await _repository.GetBrandForMenu();
+                if (brands == null) { return NotFound(); }
+
+                var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b}).ToList();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[SearchBrands]:Failed to found brand");
+                return StatusCode(500, "InternalServerError");
+            }
+        }
+
+
 
         [Route("[action]/{name}", Name = "GetProductByName")]
         [HttpGet]

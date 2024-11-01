@@ -2,6 +2,7 @@
 using System.Text.Json;
 using YourEasyRent.Entities.Douglas;
 using static System.Net.WebRequestMethods;
+using YourEasyRent.Services;
 
 namespace YourEasyRent.Services
 {

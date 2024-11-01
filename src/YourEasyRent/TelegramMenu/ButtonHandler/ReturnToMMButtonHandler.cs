@@ -11,7 +11,7 @@ namespace YourEasyRent.Services.Buttons
         public ReturnToMMButtonHandler ()
         {
         }
-        public  async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
+        public  async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle(string chatId)
         {
             var menuaAterSearchResult = new[]
                 {

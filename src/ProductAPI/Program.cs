@@ -1,6 +1,7 @@
 using MongoDB.Driver;
 using ProductAPI.Application;
 using ProductAPI.Infrastructure;
+using ProductAPI.Infrastructure.Client;
 using ProductAPI.Infrastructure.Persistence;
 using Serilog;
 using SubscriberAPI.Application.RabbitQM;

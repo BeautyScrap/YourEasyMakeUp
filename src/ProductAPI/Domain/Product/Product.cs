@@ -19,8 +19,7 @@ namespace ProductAPI.Domain.Product
 
         [BsonRepresentation(BsonType.Double)]
         public decimal Price { get; set; }
-
-        public string Category { get; set; }
+        public string Category { get; set; } //AK TODO  не все поля передаются в базу почему то, нет категорий и 
         public string Url { get; set; }
         public string ImageUrl { get; set; }
     }

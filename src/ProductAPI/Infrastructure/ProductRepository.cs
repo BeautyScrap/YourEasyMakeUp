@@ -42,11 +42,9 @@ namespace ProductAPI.Infrastructure
             await _productCollection.InsertOneAsync(newproduct);
         }
 
-        public async Task<IEnumerable<string>> CreateMany(IEnumerable<Product> products)
+        public async Task CreateMany(IEnumerable<Product> products)
         {
-            await _productCollection.InsertManyAsync(products);
-            var createdIds = products.Select(p => p.Id);
-            return createdIds;
+            await _productCollection.InsertManyAsync(products);            
         }
 
         public async Task<bool> Update(Product updateProduct)
@@ -90,7 +88,6 @@ namespace ProductAPI.Infrastructure
                 IsUpsert = true
             };
             await _productCollection.UpdateOneAsync(filter, update, options);
-
         }
 
         public async Task UpsertManyProducts(IEnumerable<Product> products)
@@ -101,12 +98,12 @@ namespace ProductAPI.Infrastructure
             }
         }
 
-        public async Task<List<string>> GetBrandForMenu(int limit)
+        public async Task<List<string>> GetBrandForMenu()
         {
             var res = await _productCollection
                 .AsQueryable()
                 .Select(x => x.Brand)
-                .Take(limit)
+                .Take(5)
                 .Distinct()
                 .ToListAsync();
 

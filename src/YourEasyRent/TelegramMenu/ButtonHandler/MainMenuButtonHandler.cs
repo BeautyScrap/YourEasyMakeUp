@@ -12,7 +12,7 @@ namespace YourEasyRent.Services.Buttons
         {
         }
 
-        public async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
+        public async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle(string chatId)
         {
             var buttonForMM = new[]
         {

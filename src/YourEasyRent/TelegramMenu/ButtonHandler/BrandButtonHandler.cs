@@ -1,35 +1,31 @@
-﻿using Microsoft.OpenApi.Extensions;
-using System.Threading;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
-using YourEasyRent.DataBase.Interfaces;
-using YourEasyRent.Entities;
-using YourEasyRent.TelegramMenu.ButtonHandler;
+﻿using Telegram.Bot.Types.ReplyMarkups;
+using TelegramBotAPI.Services;
 
 
 namespace YourEasyRent.TelegramMenu.ButtonHandler
 {
     internal class BrandButtonHandler : IButtonHandler
     {
-        private readonly IProductRepository _productRepository;
+       // AK TODO - наверно неправильно отправлять запрос в другой микросервис прямо от сюда?
+        private readonly IProductApiClient _client;                                                       // надо для него тогда сделать новый контроллер?
 
-        public BrandButtonHandler(IProductRepository productRepository)
+        public BrandButtonHandler(IProductApiClient client)
         {
-            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
+            _client = client;
         }
 
-        public async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle()
+        public async Task<InlineKeyboardMarkup> SendMenuToTelegramHandle(string chatId)
         {
-            var brandsMenu = await _productRepository.GetBrandForMenu(limit: 5);
-            var InlineKeyboardMarkup = CreateInlineKeyboardMarkup(brandsMenu);
+            var brands = await _client.GetBrandForMenu(chatId, limit: 5);
+            //var brandsMenu = await _productRepository.GetBrandForMenu(limit: 5);
+            var InlineKeyboardMarkup = CreateInlineKeyboardMarkup(brands);
             return InlineKeyboardMarkup;
 
         }
 
-        private InlineKeyboardMarkup CreateInlineKeyboardMarkup(List<string> brandsMenu)
+        private InlineKeyboardMarkup CreateInlineKeyboardMarkup(List<string> brands)
         {
-            var InlineKeyboardButtons = brandsMenu.Select(brand =>
+            var InlineKeyboardButtons = brands.Select(brand =>
             {
                 var buttone = InlineKeyboardButton.WithCallbackData(text: brand, callbackData: $"Brand_{brand}");
                 return new List<InlineKeyboardButton> { buttone };

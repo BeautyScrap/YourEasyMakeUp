@@ -1,7 +1,7 @@
 ﻿using HtmlAgilityPack;
 using ProductAPI.Domain.Product;
 
-namespace ProductAPI.Infrastructure
+namespace ProductAPI.Infrastructure.Client
 {
     public class SephoraClient : IProductsSiteClient
     {

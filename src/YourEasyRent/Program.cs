@@ -8,6 +8,7 @@ using Newtonsoft.Json.Serialization;
 using Serilog;
 using YourEasyRent.UserState;
 using YourEasyRent.TelegramMenu;
+using TelegramBotAPI.Services;
 
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -44,6 +45,7 @@ builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();     
 builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
 builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
+builder.Services.AddSingleton<IProductApiClient, ProductApiClient>();
 
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using YourEasyRent.Entities;
-using YourEasyRent.Services;
 using YourEasyRent.DataBase.Interfaces;
 using Section = YourEasyRent.Entities.Section;
+using YourEasyRent.Services;
 
 namespace YourEasyRent.Controllers
 

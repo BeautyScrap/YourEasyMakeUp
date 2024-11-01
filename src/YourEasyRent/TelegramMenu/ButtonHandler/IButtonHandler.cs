@@ -6,6 +6,6 @@ namespace YourEasyRent.TelegramMenu.ButtonHandler
 {
     internal interface IButtonHandler
     {
-        Task<InlineKeyboardMarkup> SendMenuToTelegramHandle();
+        Task<InlineKeyboardMarkup> SendMenuToTelegramHandle(string chatId);
     }
 }
