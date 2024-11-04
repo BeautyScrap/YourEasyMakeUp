@@ -87,7 +87,7 @@ namespace YourEasyRent.UserState
             return true;
         }
 
-        public UserSearchStateDTO ToMongoRepresintation()
+        public UserSearchStateDTO ToDto()
         { 
             var userSearchStateDTO = new UserSearchStateDTO()
             {

@@ -3,6 +3,7 @@ using System.Text.Json;
 using YourEasyRent.Entities.Douglas;
 using static System.Net.WebRequestMethods;
 using YourEasyRent.Services;
+using TelegramBotAPI.Contracts;
 
 namespace YourEasyRent.Services
 {

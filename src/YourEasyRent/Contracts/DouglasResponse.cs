@@ -2,8 +2,9 @@
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using YourEasyRent.Entities.Douglas;
 
-namespace YourEasyRent.Entities.Douglas
+namespace TelegramBotAPI.Contracts
 {
     public class DouglasResponse
 

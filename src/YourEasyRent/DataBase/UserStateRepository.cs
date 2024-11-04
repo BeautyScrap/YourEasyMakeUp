@@ -31,7 +31,7 @@ namespace YourEasyRent.DataBase
 
         public async Task CreateAsync(UserSearchState userSearchState)
         {
-            var dto = userSearchState.ToMongoRepresintation();
+            var dto = userSearchState.ToDto();
             await _collectionOfUserSearchState.InsertOneAsync(dto);
         }
 

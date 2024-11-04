@@ -1,5 +1,6 @@
 ﻿using ProductAPI.Domain.Product;
 using ProductAPI.Domain.ProductForSubscription;
+using ProductAPI.Domain.ProductForUser;
 
 namespace ProductAPI.Infrastructure
 {
@@ -19,5 +20,7 @@ namespace ProductAPI.Infrastructure
         Task<List<string>> GetBrandForMenu();// AK TODO Не знаю тут нужна какая то прослойка ввиде сервиса,
                                              // перед тем как сделать запрос в базу? по идеи да. тк я хочу в базу для телеграма 2 раза  и вроде как надо возвращать Dto
         Task<AvaliableProductDto> GetProductForOneSubscriber(ProductForSubDto productForSearch);
+
+        Task <IEnumerable<AvaliableResultForUserDto>> GetProductResultForUser(ProductResultForUserDto productForUser);
     }
 }

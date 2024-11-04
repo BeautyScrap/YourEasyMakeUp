@@ -2,6 +2,7 @@
 using MongoDB.Driver.Linq;
 using ProductAPI.Domain.Product;
 using ProductAPI.Domain.ProductForSubscription;
+using ProductAPI.Domain.ProductForUser;
 using ProductAPI.Infrastructure.Persistence;
 
 namespace ProductAPI.Infrastructure
@@ -103,7 +104,7 @@ namespace ProductAPI.Infrastructure
             var res = await _productCollection
                 .AsQueryable()
                 .Select(x => x.Brand)
-                .Take(5)
+                .Take(10)
                 .Distinct()
                 .ToListAsync();
 
@@ -129,6 +130,29 @@ namespace ProductAPI.Infrastructure
                 Url = product.Url
             };
             return result;
+        }
+
+        public async Task<IEnumerable<AvaliableResultForUserDto>> GetProductResultForUser(ProductResultForUserDto productForUser)
+        {
+            var filter = Builders<Product>.Filter.And(
+                Builders<Product>.Filter.Eq(_ => _.Brand, productForUser.Brand),
+                Builders<Product>.Filter.Eq(_ => _.Category, productForUser.Category));
+            var products = await _productCollection.Find(filter).ToListAsync();
+            var results = new List<AvaliableResultForUserDto>();
+            foreach(var product in products)
+            {
+                var productResult = new AvaliableResultForUserDto()
+                {
+                    Brand = product.Brand,
+                    Name = product.Name,
+                    Category = product.Category,
+                    Price = product.Price,
+                    ImageUrl = product.ImageUrl,
+                    Url = product.Url
+                };
+                results.Add(productResult);
+            }
+            return results;
         }
     }
 }

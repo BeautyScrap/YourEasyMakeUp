@@ -4,6 +4,7 @@ using ProductAPI.Contracts.ProductForSubscription;
 using ProductAPI.Contracts.TelegramContract;
 using ProductAPI.Domain.Product;
 using ProductAPI.Domain.ProductForSubscription;
+using ProductAPI.Domain.ProductForUser;
 using ProductAPI.Infrastructure;
 using ProductAPI.Infrastructure.Client;
 using SubscriberAPI.Application.RabbitQM;
@@ -17,17 +18,69 @@ namespace ProductAPI.Controllers
         private readonly IProductRepository _repository;
         private readonly ILogger<ProductController> _logger;
         private readonly IRabbitMessageProducer _messageProducer;
-        private readonly IProductForSubService _service;
+        private readonly IProductForSubService _serviceForSub;
         private readonly IEnumerable<IProductsSiteClient> _siteClient;
-
-        public ProductController(IProductRepository productRepository, ILogger<ProductController> logger, IRabbitMessageProducer rabbitMessage, IProductForSubService service, IEnumerable<IProductsSiteClient> siteClient)
+        private readonly ProductForUserService _serviceForUse;
+        public ProductController(
+            IProductRepository productRepository, 
+            ILogger<ProductController> logger,
+            IRabbitMessageProducer rabbitMessage, 
+            IProductForSubService serviceSub,
+            IEnumerable<IProductsSiteClient> siteClient,
+            ProductForUserService serviceProduct)
         {
             _repository = productRepository;
             _logger = logger;
             _messageProducer = rabbitMessage;
-            _service = service;
+            _serviceForSub = serviceSub;
             _siteClient = siteClient;
+            _serviceForUse = serviceProduct;
         }
+
+
+        [HttpPost]
+        [Route("SearchProductsResultForUser")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<FoundProductResultResponse>>> Search([FromBody] SearchProductResultRequest request)
+        {
+            try 
+            {
+                if(request == null) 
+                {
+                    return BadRequest();
+                }
+                var searchProducts = ProductResultForUser.CreateProductForSearch(
+                    request.Brand, 
+                    request.Category);
+                var foundProductList = await _serviceForUse.Handler(searchProducts);
+                if(foundProductList != null) 
+                { 
+                    return NotFound(); 
+                }
+                var response = foundProductList.Select(r => new FoundProductResultResponse
+                {
+                    Brand = r.Brand,
+                    Name = r.Name,
+                    Category = r.Category,
+                    Price = r.Price,
+                    ImageUrl = r.ImageUrl,
+                    Url = r.Url
+
+                }).ToList();
+                return Ok(response);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[Post]: Failed to check the SearchProductsResultForUser");
+                return StatusCode(500, "Failed to check the SearchProductResultRequest");
+            }
+            
+        }
+        
 
         [HttpPost]
         [Route("SearchProductForSubscriber")]
@@ -53,7 +106,7 @@ namespace ProductAPI.Controllers
 
                     products.Add(productForSubscription);
                 }
-                var foundProductsList = await _service.ProductHandler(products);
+                var foundProductsList = await _serviceForSub.ProductHandler(products);
                 var response = foundProductsList.Select(r => new FoundProductForSubResponse
                 {
                     UserId = r.UserId,
@@ -67,7 +120,7 @@ namespace ProductAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[Post]: Failed to check the SubscribersProductRequest");
+                _logger.LogError(ex, "[Post]: Failed to check the SearchProductForSubscriber");
                 return StatusCode(500, "Failed to check the SubscribersProductRequest");
             }
         }
@@ -202,7 +255,7 @@ namespace ProductAPI.Controllers
             }
         }
 
-        [Route("[action]/{brand}", Name = "SearchBrands")]
+        [Route("SearchBrands", Name = "SearchBrands")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -323,5 +376,4 @@ namespace ProductAPI.Controllers
             }
         }
     }
-
 }

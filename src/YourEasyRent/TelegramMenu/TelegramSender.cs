@@ -56,31 +56,29 @@ namespace YourEasyRent.TelegramMenu
 
         public  async Task<IEnumerable<string>> SendResults(string chatId, List<string> listWithResult)
         {
-            var resultsOfSearch = await GetFilteredProductsMessage(listWithResult);
+            var resultsOfSearch = await _client.GetProductsResultForUser(listWithResult);
 
             foreach (var result in resultsOfSearch)
             {
-               await _botClient.SendTextMessageAsync(chatId, result, parseMode: ParseMode.Markdown); // только тут мы  вместо оправки результата в телегу я перекладываю полученные рещзультаты в новую бд
-                                                                                                            
-                                                                                                    
+               await _botClient.SendTextMessageAsync(chatId, result, parseMode: ParseMode.Markdown); // только тут мы  вместо оправки результата в телегу я перекладываю полученные результаты в новую бд                                                                                     
             }
             return resultsOfSearch;
         }
 
-        public async Task<IEnumerable<string>> GetFilteredProductsMessage(List<string> listWithResult) 
-        {
-            var products = await _productRepository.GetProductsByBrandAndCategory(listWithResult);// AK TODO тут опять заменить 
-            {
-                var productStrings = products.Select(p =>
-            $"*{p.Brand}*\n" +
-            $"{p.Name}\n" +
-            $"{p.Category}\n" +
-            $"{p.Price}\n" +
-            $"[.]({p.ImageUrl})\n" +
-            $"[Ссылка на продукт]({p.Url})");
-                return productStrings;
-            }
-        }
+        //public async Task<IEnumerable<string>> GetFilteredProductsMessage(List<string> listWithResult) 
+        //{
+        //    var products = await _productRepository.GetProductsByBrandAndCategory(listWithResult);// AK TODO тут опять заменить 
+        //    {
+        //        var productStrings = products.Select(p =>
+        //    $"*{p.Brand}*\n" +
+        //    $"{p.Name}\n" +
+        //    $"{p.Category}\n" +
+        //    $"{p.Price}\n" +
+        //    $"[.]({p.ImageUrl})\n" +
+        //    $"[Ссылка на продукт]({p.Url})");
+        //        return productStrings;
+        //    }
+        //}
 
         public async Task SendConfirmOfSubscriprion(string chatId)
         {
