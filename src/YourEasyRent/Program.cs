@@ -20,7 +20,7 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 
 builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));  
 
-builder.Services.AddSingleton<ProductRepository>(); 
+builder.Services.AddSingleton<UserStateRepository>(); 
 
 // This is the same as it used to be
 var databaseConfig = new DataBaseConfig();
@@ -39,20 +39,16 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));
-builder.Services.AddHttpClient<IProductsSiteClient, SephoraClient>();
-builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
-builder.Services.AddSingleton<IProductRepository, ProductRepository>();     
+builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));    
 builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
+builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>();
 builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
-builder.Services.AddSingleton<IProductApiClient, ProductApiClient>();
 
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
 builder.Services.AddSingleton<IRabbitMessageProducer, RabbitMessageProducer>();
 builder.Services.AddSingleton<ITelegramCallbackHandler, TelegramCallbackHandler>();
-builder.Services.AddScoped<IProductForSubscriptionService, ProductForSubscriptionService>();
 
 
 

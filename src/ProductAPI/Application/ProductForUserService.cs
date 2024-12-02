@@ -4,7 +4,7 @@ using ProductAPI.Infrastructure;
 
 namespace ProductAPI.Application
 {
-    public class ProductForUserService
+    public class ProductForUserService:IProductForUserService
     {
         private readonly IProductRepository _productRepository;
         public ProductForUserService(IProductRepository productRepository)
@@ -22,6 +22,14 @@ namespace ProductAPI.Application
                 result.Add(avaliableResult);   
             }
             return result;
+        }
+
+        public async Task<AvaliableResultForUser> HandlerOne(ProductResultForUser product) 
+        {
+            var productDto = product.ToDto();
+            var resultProductDtos = await _productRepository.GetOneProductResultForUser(productDto);
+            AvaliableResultForUser avaliableResult = AvaliableResultForUser.FromDto(resultProductDtos);
+            return avaliableResult;
         }
     }
 }

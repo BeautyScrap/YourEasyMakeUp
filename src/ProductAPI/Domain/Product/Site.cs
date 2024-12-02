@@ -2,7 +2,7 @@
 {
     public enum Site
     {
-        Sephora
-        //Douglas
+        Sephora,
+        Douglas
     }
 }

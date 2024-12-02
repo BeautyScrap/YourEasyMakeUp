@@ -29,6 +29,12 @@ namespace YourEasyRent.UserState
         [BsonRepresentation(BsonType.String)]
         public List<MenuStatus> HistoryOfMenuStatuses { get; set; }
 
+        [BsonRepresentation(BsonType.String)]
+        public string Name { get; set; }
+
+        [BsonRepresentation(BsonType.Double)]
+        public decimal Price { get; set; }
+
     }
 
 

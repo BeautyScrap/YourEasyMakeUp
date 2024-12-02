@@ -7,11 +7,11 @@ namespace YourEasyRent.TelegramMenu
     {
         Task SendMainMenu(string chatId);
         Task SendCategoryMenu(string chatId);
-        Task SendBrandMenu(string chatId);
-        Task<IEnumerable<string>> SendResults(string chatId, List<string> listWithResult);
+        Task SendBrandMenu(string chatId, List<string> brands);
         Task SendMenuAfterResult(string chatId);
         Task SendConfirmOfSubscriprion(string chatId);
         Task SendSubscriberProduct(string chatId, ProductForSubscription product);
-        
+        Task SendOneResult(string chatId, string resultOfSearch);
+
     }
 }

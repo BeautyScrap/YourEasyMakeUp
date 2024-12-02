@@ -1,49 +1,34 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Exceptions;
-using Telegram.Bot.Polling;
-using YourEasyRent.Entities;
-using System.Data;
-using YourEasyRent.Services.Buttons;
-using Microsoft.AspNetCore.Http.Connections;
-using System.Security.Cryptography.Xml;
+﻿using YourEasyRent.Entities;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.UserState;
 using YourEasyRent.TelegramMenu;
-using System.Collections.Generic;
-using YourEasyRent.DataBase;
 using YourEasyRent.Entities.ProductForSubscription;
+using TelegramBotAPI.Services;
 
 namespace YourEasyRent.Services
 {
     public class TelegramCallbackHandler : ITelegramCallbackHandler
     {
-
         private readonly IUserStateRepository _userStateRepository;
         private readonly ITelegramSender _telegramSender;
         private readonly ILogger<TelegramCallbackHandler> _logger;
-        private readonly IProductRepository _productRepository;
         private readonly IRabbitMessageProducer _rabbitMessageProducer;
-
-
+        private readonly IProductApiClient _client;
 
         public TelegramCallbackHandler
             (
             ILogger<TelegramCallbackHandler> logger,
             IUserStateRepository userStateRepository,
             ITelegramSender telegramSender,
-            IProductRepository productRepository,
-            IRabbitMessageProducer rabbitMessageProducer
-           
+            IRabbitMessageProducer rabbitMessageProducer,
+            IProductApiClient client
             )
         {
             _logger = logger;
             _userStateRepository = userStateRepository;
             _telegramSender = telegramSender;
-            _productRepository = productRepository;
             _rabbitMessageProducer = rabbitMessageProducer ?? throw new ArgumentNullException(nameof(rabbitMessageProducer));
+            _client = client;
         }
 
         public async Task HandleUpdateAsync(TgButtonCallback tgButtonCallback)
@@ -72,7 +57,8 @@ namespace YourEasyRent.Services
                     {
                         userSearchState.AddStatusToHistory(MenuStatus.BrandMenu);
                         await _userStateRepository.UpdateAsync(userSearchState);
-                        await _telegramSender.SendBrandMenu(chatId);
+                        var brandsList = await _client.GetBrandForMenu(chatId, 5); 
+                        await _telegramSender.SendBrandMenu(chatId, brandsList);
                         return;
                     }
 
@@ -98,10 +84,15 @@ namespace YourEasyRent.Services
                         await _userStateRepository.UpdateAsync(userSearchState);
 
                         if (userSearchState.IsFinished)
-                        { 
-                            var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); // метод, который вернет резултат для переменной
+                        {
+                            var tupleWithResult = await _userStateRepository.GetBrandAndCategoryForSearch(userId); 
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
-                            await _telegramSender.SendResults(chatId, listWithResult);
+                            var resultOfSearch = await _client.GetProductResultTuple(listWithResult);
+                            userSearchState.SetProductNameAndPrice(resultOfSearch.Name, resultOfSearch.Price);
+                            await _userStateRepository.UpdateAsync(userSearchState);
+                            var resultOfSearchString = GetStringWithResult(resultOfSearch.Brand, resultOfSearch.Name, resultOfSearch.Price, resultOfSearch.Url);
+
+                            await _telegramSender.SendOneResult(chatId, resultOfSearchString);
                             await _telegramSender.SendMenuAfterResult(chatId);  
                             return;
                         }
@@ -111,60 +102,54 @@ namespace YourEasyRent.Services
 
                     if (tgButtonCallback.IsProductCategory)
                     {
-                        userSearchState.AddStatusToHistory(MenuStatus.CategoryChosen);//  можно этот метод перенести внуть метода GetProductButton
+                        userSearchState.AddStatusToHistory(MenuStatus.CategoryChosen);
                         var category = tgButtonCallback.GetProductButton();
                         userSearchState.SetCategory(category);
                         await _userStateRepository.UpdateAsync(userSearchState);
 
                         if (userSearchState.IsFinished)
                         {
-                            var tupleWithResult = await _userStateRepository.GetFilteredProductsForSearch(userId); 
+                            var tupleWithResult = await _userStateRepository.GetBrandAndCategoryForSearch(userId); 
                             var listWithResult = new List<string> { tupleWithResult.Brand, tupleWithResult.Category }.ToList();
-                            await _telegramSender.SendResults(chatId, listWithResult);
+                            var resultOfSearch = await _client.GetProductResultTuple(listWithResult);
+                            userSearchState.SetProductNameAndPrice(resultOfSearch.Name, resultOfSearch.Price);
+                            await _userStateRepository.UpdateAsync(userSearchState);
+                            var resultOfSearchString = GetStringWithResult(resultOfSearch.Brand, resultOfSearch.Name, resultOfSearch.Price, resultOfSearch.Url);
+
+                            await _telegramSender.SendOneResult(chatId, resultOfSearchString); 
                             await _telegramSender.SendMenuAfterResult(chatId);
                             return;
                         }
-                        await _telegramSender.SendCategoryMenu(chatId);
+                        var brandsList = await _client.GetBrandForMenu(chatId, 5);
+                        await _telegramSender.SendBrandMenu(chatId, brandsList);
                         return;
                     };
                 }
-                if (tgButtonCallback.IsSubscribeToProduct)
-                { 
+                if (tgButtonCallback.IsSubscribeToProduct) 
+                {  
                     UserSearchState userSearchState = await _userStateRepository.GetForUser(userId);
                     userSearchState.AddStatusToHistory(MenuStatus.SubscribedToTheProduct);
                     await _userStateRepository.UpdateAsync(userSearchState);
-                    
-                    var tupleWithResultFromUSR = await _userStateRepository.GetFilteredProductsForSearch(userId); 
-                    var listWithResult = new List<string> { tupleWithResultFromUSR.Brand, tupleWithResultFromUSR.Category }.ToList();
-
-                    var intermediateResult = await GetFilteredProductsFromProductRepository(listWithResult);
-                    var intermadiateResultList = new List<string>
-                    {
-                        intermediateResult.Brand,
-                        intermediateResult.Name,
-                        intermediateResult.Price.ToString(),
-                        intermediateResult.Url
-                    }.ToList();
-
-                    var subscriber = ProductForSubscription.TransferDataToSubscriber(userSearchState, intermadiateResultList); 
+                    var subscriber = ProductForSubscription.CreateProductForSubscription(userSearchState);
                     _rabbitMessageProducer.SendMessagAboutSubscriber(subscriber);
                     await _telegramSender.SendConfirmOfSubscriprion(chatId);
                     return;
                 }
             }
         }
-
-        public async Task<(string? Brand, string? Name, decimal? Price, string? Url)> GetFilteredProductsFromProductRepository(List<string> listWithResult)
+        public string GetStringWithResult(string? Brand, string? Name, decimal? Price, string? Url)
         {
-            var products = await _productRepository.GetProductsByBrandAndCategory(listWithResult);
-            {
-                var firstProduct = products.FirstOrDefault();
-                if (firstProduct == null)
-                {
-                    return (null, null, 0, null);
-                }
-                return (firstProduct.Brand, firstProduct.Name, firstProduct.Price, firstProduct.Url);
-            }
+            string brandPart = Brand;
+            string namePart = Name;
+            string pricePart = Price.ToString();
+            string urlPart = Url;
+
+             string productString =
+                $"*{brandPart}*\n" +
+                $"{namePart}\n" +
+                $"{pricePart}\n" +               
+                $"[Ссылка на продукт]({urlPart})";
+            return productString;
         }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using Newtonsoft.Json;
 
-namespace YourEasyRent.Entities.Douglas
+namespace ProductAPI.Domain.Douglas
 {
     public class DouglasBrand
     {
         [JsonProperty("name")]
-        public string Name { get; set; } 
-
+        public string Name { get; set; }
     }
 }

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Telegram.Bot.Types;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Entities;
-using YourEasyRent.Services.Buttons;
-using YourEasyRent.TelegramMenu.ButtonHandler;
 using YourEasyRent.UserState;
 
 namespace YourEasyRent.DataBase
@@ -43,7 +41,9 @@ namespace YourEasyRent.DataBase
                 .Set(u => u.Brand, userSearchState.Brand)
                 .Set(u => u.Category, userSearchState.Category)
                 .Set(u => u.Status, userSearchState.CurrentMenuStatus)
-                .Set(u => u.HistoryOfMenuStatuses, userSearchState.HistoryOfMenuStatuses);
+                .Set(u => u.HistoryOfMenuStatuses, userSearchState.HistoryOfMenuStatuses)
+                .Set(u => u.Name, userSearchState.Name)
+                .Set(u => u.Price, userSearchState.Price);
 
             var updateResult = await _collectionOfUserSearchState.UpdateOneAsync(filter, update);
             return updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
@@ -73,15 +73,14 @@ namespace YourEasyRent.DataBase
 
         }
 
-        public async Task<(string Brand, string Category)> GetFilteredProductsForSearch(string userId)// этот метод остается как есть тк нам нужна категория и бренд,
-                                                                                                      // чтобы найти продукт в другой базе
+        public async Task<(string Brand, string Category)> GetBrandAndCategoryForSearch(string userId)
         {
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
             var projection = Builders<UserSearchStateDTO>.Projection.Include(u =>u.Brand).Include(u => u.Category);
             var brandAndCategoryResult = await _collectionOfUserSearchState.Find(filter).Project(u =>new { u.Brand, u.Category} ).FirstOrDefaultAsync();
 
             return (brandAndCategoryResult.Brand, brandAndCategoryResult.Category);
-
         }
+
     }
 }

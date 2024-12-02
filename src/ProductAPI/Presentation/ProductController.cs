@@ -13,21 +13,21 @@ namespace ProductAPI.Controllers
 {
     [ApiController]
     [Route("")]
-    public class ProductController : ControllerBase
+    public class ProductController : ControllerBase // AK TODO  разделить контроллер на 2 части- стандартные функции и которыми пользуюсь
     {
         private readonly IProductRepository _repository;
         private readonly ILogger<ProductController> _logger;
         private readonly IRabbitMessageProducer _messageProducer;
         private readonly IProductForSubService _serviceForSub;
         private readonly IEnumerable<IProductsSiteClient> _siteClient;
-        private readonly ProductForUserService _serviceForUse;
+        private readonly IProductForUserService _serviceForUse; 
         public ProductController(
             IProductRepository productRepository, 
             ILogger<ProductController> logger,
             IRabbitMessageProducer rabbitMessage, 
             IProductForSubService serviceSub,
             IEnumerable<IProductsSiteClient> siteClient,
-            ProductForUserService serviceProduct)
+            IProductForUserService serviceProduct)
         {
             _repository = productRepository;
             _logger = logger;
@@ -56,7 +56,7 @@ namespace ProductAPI.Controllers
                     request.Brand, 
                     request.Category);
                 var foundProductList = await _serviceForUse.Handler(searchProducts);
-                if(foundProductList != null) 
+                if(foundProductList == null) 
                 { 
                     return NotFound(); 
                 }
@@ -80,7 +80,49 @@ namespace ProductAPI.Controllers
             }
             
         }
-        
+
+        [HttpPost]
+        [Route("SearchOneProductResultForUser")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<FoundProductResultResponse>>> SearchOneProductForUser([FromBody] SearchProductResultRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return BadRequest();
+                }
+                var searchProducts = ProductResultForUser.CreateProductForSearch(
+                    request.Brand,
+                    request.Category);
+                var foundProduct = await _serviceForUse.HandlerOne(searchProducts);
+                if (foundProduct == null)
+                {
+                    return NotFound();
+                }
+                var response = new FoundProductResultResponse
+                {
+                    Brand = foundProduct.Brand,
+                    Name = foundProduct.Name,
+                    Category = foundProduct.Category,
+                    Price = foundProduct.Price,
+                    ImageUrl = foundProduct.ImageUrl,
+                    Url = foundProduct.Url
+
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[Post]: Failed to check the SearchProductsResultForUser");
+                return StatusCode(500, "Failed to check the SearchProductResultRequest");
+            }
+
+        }
+
 
         [HttpPost]
         [Route("SearchProductForSubscriber")]
@@ -176,6 +218,7 @@ namespace ProductAPI.Controllers
                     }
                 }
                 await _repository.CreateMany(allListings);
+
                 return allListings;
             }
             catch (Exception ex)
@@ -373,6 +416,25 @@ namespace ProductAPI.Controllers
             {
                 _logger.LogError(ex, "[DeleteProduct]: Failed to delete user");
                 return StatusCode(500, "Failed to delete user.");
+            }
+        }
+
+        [HttpDelete("DeleteDuplicates")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteDuplicates()
+        {
+            try
+            {
+                await _repository.DeleteDuplicate();
+                _logger.LogInformation("Dublicates are deleted");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[DeleteDuplicates]: Failed to delete Duplicates");
+                return StatusCode(500, "Failed to delete ");
             }
         }
     }

@@ -1,23 +1,16 @@
-﻿using System.Linq;
+﻿using ProductAPI.Domain.Douglas;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using YourEasyRent.Entities.Douglas;
 
-namespace TelegramBotAPI.Contracts
+namespace ProductAPI.Contracts.DouglasContract
 {
     public class DouglasResponse
-
     {
         [JsonPropertyName("products")]
-
         public List<DouglasProduct> Products { get; set; }
 
         public DouglasResponse()
         {
             Products = new List<DouglasProduct>();
         }
-
     }
-
 }

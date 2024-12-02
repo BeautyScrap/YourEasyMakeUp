@@ -31,8 +31,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IMongoClient>(new MongoClient(mongoDBSettings.ConnectionString));
 builder.Services.AddHttpClient<IProductsSiteClient, SephoraClient>();
+//builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 builder.Services.AddSingleton<IProductForSubService,  ProductForSubService>();
+builder.Services.AddSingleton<IProductForUserService, ProductForUserService>(); 
 builder.Services.AddSingleton<IRabbitMessageProducer, RabbitMessageProducer>();
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()

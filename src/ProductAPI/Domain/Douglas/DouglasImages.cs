@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
 
-namespace YourEasyRent.Entities.Douglas
+namespace ProductAPI.Domain.Douglas
 {
     public class DouglasImages
     {
         [JsonProperty("url")]
-        public string Url { get; set; } 
+        public string Url { get; set; }
     }
 }

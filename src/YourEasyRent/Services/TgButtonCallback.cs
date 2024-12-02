@@ -63,12 +63,11 @@ namespace YourEasyRent.Services
             return chatId;
         }
 
-        public bool IsValidMsg()  //  может в меню бота внутрь этого метода поместить все дргие кроме isStart?
+        public bool IsValidMsg() 
         {
             try
             {
                 var nameOfButton = _update.CallbackQuery?.Data;
-
                 return nameOfButton.All(c => char.IsLetter(c) || c == '_' || c == '/'  || c == ' ');
             }
             catch (Exception ex)
@@ -80,10 +79,8 @@ namespace YourEasyRent.Services
 
         public bool IsMenuButton()
         {
-           // var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery?.Data;
-            return nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu";
-        
+            return nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu";        
         }
 
         public bool IsBrandMenuButton()
@@ -104,12 +101,10 @@ namespace YourEasyRent.Services
                 return true;
             }
             return false;
-
         }
   
         public bool IsProductButton()
         {
-            //var messageText = _update.Message?.Text;
             var nameOfButton = _update.CallbackQuery.Data;
             if( nameOfButton.StartsWith("Brand_") || nameOfButton.StartsWith("Category_"))
             {
@@ -152,7 +147,6 @@ namespace YourEasyRent.Services
                 return productButton.Replace("Category_", "");
             }
             return productButton;
-
         }
     }
 }

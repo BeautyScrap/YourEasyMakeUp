@@ -1,12 +1,10 @@
 ﻿using Newtonsoft.Json;
 
-namespace YourEasyRent.Entities.Douglas
+namespace ProductAPI.Domain.Douglas
 {
     public class DouglasPrice
     {
         [JsonProperty("value")]
-        public decimal Value { get; set; }   
-
-
+        public decimal Value { get; set; }
     }
 }

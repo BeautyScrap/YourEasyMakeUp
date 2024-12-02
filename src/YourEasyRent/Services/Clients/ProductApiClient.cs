@@ -33,31 +33,49 @@ namespace TelegramBotAPI.Services
             return brands;            
         }
 
-        public async Task<IEnumerable<string>> GetProductsResultForUser(List<string> listWithResult)
+        public async Task<string> GetOneProductResultForUser(List<string> listWithResult)
         {
             var searchProductsResultRequest = new SearchProductResultRequest()
             {
                 Brand = listWithResult[0],
                 Category = listWithResult[1]
             };
-            var httpRequest = await _client.PostAsJsonAsync($"SearchProductsResultForUser", searchProductsResultRequest);
+            var httpRequest = await _client.PostAsJsonAsync($"SearchOneProductResultForUser", searchProductsResultRequest);
             httpRequest.EnsureSuccessStatusCode();
-            var jsonString =  await httpRequest.Content.ReadAsStringAsync();
-            var productsResult = JsonSerializer.Deserialize<List<FoundProductResultResponse>>(jsonString,_options);
-            if (productsResult == null)
+            var jsonString = await httpRequest.Content.ReadAsStringAsync();
+            var productResult = JsonSerializer.Deserialize<FoundProductResultResponse>(jsonString, _options);
+            if (productResult == null)
             {
                 Console.WriteLine("Deserialization resulted in null.");
                 throw new Exception("Deserialization failed.");
             }
-            var productsString = productsResult.Select(p =>
-            $"*{p.Brand}*\n" +
-            $"{p.Name}\n" +
-            $"{p.Category}\n" +
-            $"{p.Price}\n" +
-            $"[.]({p.ImageUrl})\n" +
-            $"[Ссылка на продукт]({p.Url})");
+            var productString =
+                $"[.]({productResult.ImageUrl})\n" +
+                $"*{productResult.Brand}*\n" +
+                $"{productResult.Name}\n" +
+                $"{productResult.Category}\n" +
+                $"{productResult.Price}\n" +
+                $"[Ссылка на продукт]({productResult.Url})";
+            return productString;
+        }
 
-            return productsString;
+        public async Task<(string? Brand, string? Name, decimal Price, string? Url)> GetProductResultTuple(List<string> listWithResult)
+        {
+            var searchProductsResultRequest = new SearchProductResultRequest()
+            {
+                Brand = listWithResult[0],
+                Category = listWithResult[1]
+            };
+            var httpRequest = await _client.PostAsJsonAsync($"SearchOneProductResultForUser", searchProductsResultRequest); // остановилась тестить туть 
+            httpRequest.EnsureSuccessStatusCode();
+            var jsonString = await httpRequest.Content.ReadAsStringAsync();
+            var productResult = JsonSerializer.Deserialize<FoundProductResultResponse>(jsonString, _options);
+            if (productResult == null)
+            {
+                Console.WriteLine("Deserialization resulted in null.");
+                throw new Exception("Deserialization failed.");
+            }
+            return (productResult.Brand,  productResult.Name, productResult.Price, productResult.Url);
         }
     }
 }

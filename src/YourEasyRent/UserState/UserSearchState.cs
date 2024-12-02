@@ -10,6 +10,10 @@ namespace YourEasyRent.UserState
         public string? ChatId { get; private set; }
         public string? Category { get; private set; }
         public string? Brand { get; private set; }
+
+        public string? Name { get; private set; }
+        public decimal? Price { get; private set; }
+    
         public MenuStatus CurrentMenuStatus { get; private set; }
         public IEnumerable<MenuStatus> HistoryOfMenuStatuses
         {
@@ -32,7 +36,9 @@ namespace YourEasyRent.UserState
             Brand = dto.Brand;
             CurrentMenuStatus = dto.Status;
             HistoryOfMenuStatuses = dto.HistoryOfMenuStatuses;
-
+            Name = dto.Name;
+            Price = dto.Price;
+            
         }
         public static UserSearchState CreateNewUserSearchState(string userId) 
         {
@@ -45,6 +51,12 @@ namespace YourEasyRent.UserState
             };
             return userSearchState;
         }
+        public void SetProductNameAndPrice(string productName, decimal pdroductPrice)
+        {
+            Name = productName;
+            Price = pdroductPrice;
+        }
+
         public void SetChatId(string chatId)
         {
             ChatId = chatId;
@@ -97,6 +109,8 @@ namespace YourEasyRent.UserState
                 Category = Category,
                 Status = CurrentMenuStatus ,
                 HistoryOfMenuStatuses = _historyOfMenuStatuses,
+                Name = Name,
+                Price = Price ?? 0
             };
             return userSearchStateDTO;
         }

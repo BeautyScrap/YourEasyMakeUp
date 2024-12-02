@@ -11,7 +11,7 @@ namespace ProductAPI.Domain.Product
 
         [BsonRepresentation(BsonType.String)]
         public Site Site { get; set; }
-        public string SiteId { get; set; }
+        public string SiteId { get; set; }  //  это поле вообще можно убрать
 
         public string Brand { get; set; }
 
@@ -19,7 +19,7 @@ namespace ProductAPI.Domain.Product
 
         [BsonRepresentation(BsonType.Double)]
         public decimal Price { get; set; }
-        public string Category { get; set; } //AK TODO  не все поля передаются в базу почему то, нет категорий и 
+        public string Category { get; set; }
         public string Url { get; set; }
         public string ImageUrl { get; set; }
     }

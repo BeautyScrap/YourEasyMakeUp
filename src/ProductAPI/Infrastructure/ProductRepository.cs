@@ -45,7 +45,10 @@ namespace ProductAPI.Infrastructure
 
         public async Task CreateMany(IEnumerable<Product> products)
         {
-            await _productCollection.InsertManyAsync(products);            
+            await _productCollection.InsertManyAsync(products);// AK TODO дубликаты появляются, потому что пейджинг плохо работает и по 3 раза загружаются одинаковые данные
+            await DeleteDuplicate(); 
+
+                                                                
         }
 
         public async Task<bool> Update(Product updateProduct)
@@ -64,7 +67,7 @@ namespace ProductAPI.Infrastructure
             return deleteProduct.IsAcknowledged && deleteProduct.DeletedCount > 0;
         }
 
-        public async Task<IEnumerable<Product>> GetProductsByBrandAndCategory(List<string> listWithResult)
+        public async Task<IEnumerable<Product>> GetProductsByBrandAndCategory(List<string> listWithResult) // AK TODO в этом методе тгда нужно возвращать только один продукт, а не несколько, чтобы можно было его отследить потом
         {
             var filter = Builders<Product>.Filter.And
                 (Builders<Product>.Filter.Eq(_ => _.Brand, listWithResult[0]),
@@ -89,6 +92,7 @@ namespace ProductAPI.Infrastructure
                 IsUpsert = true
             };
             await _productCollection.UpdateOneAsync(filter, update, options);
+            await DeleteDuplicate();
         }
 
         public async Task UpsertManyProducts(IEnumerable<Product> products)
@@ -153,6 +157,43 @@ namespace ProductAPI.Infrastructure
                 results.Add(productResult);
             }
             return results;
+        }
+
+        public async Task DeleteDuplicate()
+        {
+            var groups = await _productCollection.Aggregate()
+                .Group(p => new { p.Name }, g => new
+                {
+                    Name = g.Key,
+                    Count = g.Count(),
+                    Ids = g.Select(x => x.Id).ToList()
+                }).ToListAsync();
+            var duplicateGroups = groups.Where(g => g.Count > 1);
+            foreach (var group in duplicateGroups)
+            {
+                var idsToDelete = group.Ids.Skip(1).ToList();
+                var filter = Builders<Product>.Filter.In(p => p.Id, idsToDelete);
+                await _productCollection.DeleteManyAsync(filter);
+            }
+        }
+
+        public  async Task<AvaliableResultForUserDto> GetOneProductResultForUser(ProductResultForUserDto productForUser)
+        {
+            var filter = Builders<Product>.Filter.And(
+                Builders<Product>.Filter.Eq(_ => _.Brand, productForUser.Brand),
+                Builders<Product>.Filter.Eq(_ => _.Category, productForUser.Category));
+            var product = await _productCollection.Find(filter).FirstOrDefaultAsync();
+                var productResult = new AvaliableResultForUserDto()
+                {
+                    Brand = product.Brand,
+                    Name = product.Name,
+                    Category = product.Category,
+                    Price = product.Price,
+                    ImageUrl = product.ImageUrl,
+                    Url = product.Url
+                };
+            return productResult;
+
         }
     }
 }

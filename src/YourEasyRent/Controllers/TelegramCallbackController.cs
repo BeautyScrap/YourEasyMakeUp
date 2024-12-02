@@ -37,36 +37,6 @@ public class TelegramCallbackController : ControllerBase
         _logger.LogInformation("CallbackIsDone");
         return Ok();
     }
-
-    [HttpPost]
-    [Route("telegram/subscription")]
-    public async Task<IActionResult> SendProductAnswer([FromBody] ProductForSubscriptionRequest request)// AK TODO  стоит ли сделать другой кла
-    {
-        try
-        {
-            if (request == null)
-            { 
-                return BadRequest(); 
-            }
-            ProductForSubscription product = ProductForSubscription.CreateProductForSearch
-                (
-                request.UserId,
-                request.ChatId,
-                request.Brand,
-                request.Name,
-                request.Price,
-                request.Url
-                );
-            // AK TODO  тут какой то хендлер/ Сервис должен быть , чтобы передать в него объект product  и внутри сервиса по UserId передать найденный продукт  пользаку
-        }// будет ли корректно сделать еще один хендлер для отправки сообщения?наверно да, потому что мы сами отправляем пользаку ответ, а не ждем его коллбека как в TelegramCallbackHandler сервисе
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "[SendProductAnswer] : Product answer is not correct");
-            return BadRequest(ex);
-        }
-        _logger.LogInformation("SendProductAnswerIsDone");
-        return Ok();
-    }
-
+   
 }
 
