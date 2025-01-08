@@ -22,8 +22,8 @@ namespace SubscriberAPI.Presentanion
                 .NotNull().WithMessage("The Price is not be Null")
                 .GreaterThan(0).WithMessage("The Price will be more than 0")
                 .InclusiveBetween(0.01m, 10000m);
-            RuleFor(x => x.Url)
-                .NotNull().WithMessage("The Url is not be Null");
+            //RuleFor(x => x.Url)
+            //    .NotNull().WithMessage("The Url is not be Null");
         }
 
     }

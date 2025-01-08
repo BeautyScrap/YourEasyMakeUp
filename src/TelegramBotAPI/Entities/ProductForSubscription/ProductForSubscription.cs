@@ -15,10 +15,11 @@ namespace YourEasyRent.Entities.ProductForSubscription
 
         public decimal Price { get; private set; }
         public string? Url { get; private set; }
+        public string? UrlImage { get; private set; }
         public ProductForSubscription() { }
 
         public static ProductForSubscription CreateProductForSubscription(UserSearchState userSearchState) // переносим одни данные в оъбект Subscriber
-        { 
+        {
             ProductForSubscription subscriber = new ProductForSubscription()
             {
                 UserId = userSearchState.UserId,
@@ -29,10 +30,30 @@ namespace YourEasyRent.Entities.ProductForSubscription
             };
             return subscriber;
         }
-        public override string ToString() 
+
+        public static ProductForSubscription CreateFoundNewProduct(string userId, string brand, string name, decimal price) // переносим одни данные в оъбект Subscriber
         {
-            return $"{Brand}\n{Name}\n{Price}\n[Ссылка на продукт] {Url}"; // AK TODO переместить этот метод в ProductForSubscriptionService, здесь он больше не нужен
+            ProductForSubscription subscriber = new ProductForSubscription()
+            {
+                UserId = userId,
+                Brand = brand,
+                Name = name,
+                Price = price
+            };
+            return subscriber;
         }
+
+        public override string ToString()
+        {
+            return $"{Brand}\n{Name}\n{Price}\n[Ссылка на продукт] {Url}";
+        }
+        public void SetUrlAndUrlImage(string url, string urlImage)
+        {
+            Url = url;
+            UrlImage = urlImage;
+        }
+
+
 
         //public ProductForSubscriptionDto ToDto() // Может понадобиться потом
         //{
@@ -47,6 +68,7 @@ namespace YourEasyRent.Entities.ProductForSubscription
         //    };
         //    return subscribersDto;
         //}
+
 
     }
 }

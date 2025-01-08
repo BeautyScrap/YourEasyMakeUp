@@ -155,7 +155,8 @@ namespace ProductAPI.Controllers
                     Brand = r.Brand,
                     Name = r.Name,
                     Price = r.Price,
-                    Url = r.Url
+                    Url = r.Url,
+                    UrlImage = r.UrlImage,
 
                 }).ToList();
                 return Ok(response);

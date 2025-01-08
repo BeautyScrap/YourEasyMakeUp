@@ -40,6 +40,7 @@ jobs:
         with:
           secrets: |-
             telegram-bot-token:${{ steps.auth.outputs.project_id }}/telegram_bot_token
+            postgres-con-str:${{ steps.auth.outputs.project_id }}/postgres_con_str
 
       - id: service-meta
         name: Calculate service deployment settings
@@ -74,6 +75,7 @@ jobs:
           env_vars: |
             TELEGRAM_BOT_TOKEN=${{ steps.service-meta.outputs.bot-token }}  
             PROJECT_ID=${{ steps.auth.outputs.project_id}}
+            POSTGRES_CON_STR=${{ steps.secrets-manager.outputs.postgres-con-str }}
           flags: --allow-unauthenticated
 
       - name: Output deployed url

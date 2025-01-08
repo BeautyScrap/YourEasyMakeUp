@@ -66,7 +66,7 @@ namespace TelegramBotAPI.Services
                 Brand = listWithResult[0],
                 Category = listWithResult[1]
             };
-            var httpRequest = await _client.PostAsJsonAsync($"SearchOneProductResultForUser", searchProductsResultRequest); // остановилась тестить туть 
+            var httpRequest = await _client.PostAsJsonAsync($"SearchOneProductResultForUser", searchProductsResultRequest);
             httpRequest.EnsureSuccessStatusCode();
             var jsonString = await httpRequest.Content.ReadAsStringAsync();
             var productResult = JsonSerializer.Deserialize<FoundProductResultResponse>(jsonString, _options);

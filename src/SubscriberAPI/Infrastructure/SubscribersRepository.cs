@@ -14,7 +14,7 @@ namespace SubscriberAPI.Infrastructure
             _connectionString = connectonString;
         }
 
-        public async Task CreateAsync(SubscriptionDto subscriptionDto)                                                              
+        public async Task CreateAsync(SubscriptionDto subscriptionDto)// AK TODO проверить как будет вести себя поле url  при null                                                              
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
@@ -99,7 +99,6 @@ namespace SubscriberAPI.Infrastructure
                 string query = @"
             SELECT 
                 ""user_id"" AS UserId,
-                ""brand_product"" AS Brand,
                 ""name_product"" AS Name,
                 ""price"" AS Price
             FROM public.Subscribers";

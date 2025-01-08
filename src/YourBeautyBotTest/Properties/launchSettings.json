@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "YourEasyRentTest": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "PROD_CON_STR": ""
+      }
+    }
+  }
+}

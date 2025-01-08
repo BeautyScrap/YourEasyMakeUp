@@ -45,7 +45,7 @@ namespace ProductAPI.Infrastructure
 
         public async Task CreateMany(IEnumerable<Product> products)
         {
-            await _productCollection.InsertManyAsync(products);// AK TODO дубликаты появляются, потому что пейджинг плохо работает и по 3 раза загружаются одинаковые данные
+            await _productCollection.InsertManyAsync(products);
             await DeleteDuplicate(); 
 
                                                                 
@@ -131,7 +131,8 @@ namespace ProductAPI.Infrastructure
                 Brand = product.Brand,
                 Name = product.Name,
                 Price = product.Price,
-                Url = product.Url
+                Url = product.Url,
+                UrlImage = product.ImageUrl
             };
             return result;
         }

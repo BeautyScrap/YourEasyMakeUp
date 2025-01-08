@@ -11,5 +11,6 @@ namespace ProductAPI.Domain.ProductForSubscription
         [BsonRepresentation(BsonType.Decimal128)]
         public decimal Price { get; set; }
         public string Url { get; set; }
+        public string UrlImage {  get; set; }
     }
 }

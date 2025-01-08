@@ -11,17 +11,18 @@ namespace SubscriberAPI.Domain
 
         [JsonPropertyName("userId")]
         public string UserId { get; private set; }
-        public string ChatId { get; private set; }
-        public string Brand { get; private set; }
+        public string? ChatId { get; private set; }
+        public string? Brand { get; private set; }
         public string Name { get; private set; }
         public decimal Price { get; private set; }
-        public string Url { get; private set; }
+        public string? Url { get; private set; }
+        public string? UrlImage { get; private set; }
         public Subscription() 
         { 
 
         }
 
-        public static Subscription CreateNewSubscription(string userId, string chatId, string brand, string name, decimal price, string url)
+        public static Subscription CreateNewSubscription(string userId, string? chatId, string? brand, string name, decimal price)
         {
             var subscription = new Subscription
             {
@@ -30,10 +31,23 @@ namespace SubscriberAPI.Domain
                 Brand = brand,
                 Name = name,
                 Price = price,
-                Url = url
             };
             return subscription;
         }
+        public static Subscription CreateProductforSub(string userId, string? brand, string name, decimal price, string url, string urlImage )
+        {
+            var subscription = new Subscription
+            {
+                UserId = userId,
+                Brand = brand,
+                Name = name,
+                Price = price,
+                Url = url,
+                UrlImage = urlImage
+            };
+            return subscription;
+        }
+
 
         public SubscriptionDto ToDto()
         {
@@ -44,9 +58,17 @@ namespace SubscriberAPI.Domain
                 Brand = Brand,
                 Name = Name,
                 Price = Price,
-                Url = Url
+                Url = Url,
+                UrlImage = UrlImage,
             };
             return subscribersDto;
         }
+
+        //public void SetUrlAndUrlImage(string url, string urlImage)
+        //{
+        //    Url = url;
+        //    UrlImage = urlImage;
+        //}
+        
     }
 }

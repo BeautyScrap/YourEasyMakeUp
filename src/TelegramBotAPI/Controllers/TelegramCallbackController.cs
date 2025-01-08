@@ -27,7 +27,7 @@ public class TelegramCallbackController : ControllerBase
         try
         {
             TgButtonCallback tgButtonCallback = new TgButtonCallback(update);
-            await _handler.HandleUpdateAsync(tgButtonCallback);
+            await _handler.HandleCallbackAsync(tgButtonCallback);
         }
         catch (Exception ex) 
         {

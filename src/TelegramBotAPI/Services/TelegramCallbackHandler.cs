@@ -31,7 +31,7 @@ namespace YourEasyRent.Services
             _client = client;
         }
 
-        public async Task HandleUpdateAsync(TgButtonCallback tgButtonCallback)
+        public async Task HandleCallbackAsync(TgButtonCallback tgButtonCallback)
         {
 
             var userId = tgButtonCallback.GetUserId();

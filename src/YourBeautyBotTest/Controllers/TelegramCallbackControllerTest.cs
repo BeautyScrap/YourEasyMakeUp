@@ -46,7 +46,7 @@ namespace YourEasyRentTest.Controllers
             //Arrange
             var update =  new Update();
             var exception = new Exception("Test Exception");
-            _mockHandler.Setup(h => h.HandleUpdateAsync(It.IsAny<TgButtonCallback>())).ThrowsAsync(exception);
+            _mockHandler.Setup(h => h.HandleCallbackAsync(It.IsAny<TgButtonCallback>())).ThrowsAsync(exception);
            
             //Act
             var result = await _controller.ProcessCallback(update);

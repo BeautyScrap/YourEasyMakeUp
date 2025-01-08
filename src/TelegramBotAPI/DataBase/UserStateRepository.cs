@@ -60,7 +60,7 @@ namespace YourEasyRent.DataBase
 
         }
 
-        public async Task<bool> CheckFieldsFilledForUser(string userId) // проверяет заполнены ли нужные поля у юзера
+        public async Task<bool> CheckFieldsFilledForUser(string userId)
         {
             var filter = Builders<UserSearchStateDTO>.Filter.Eq(u => u.UserId, userId);
             var dto = await _collectionOfUserSearchState.Find(filter).FirstOrDefaultAsync();

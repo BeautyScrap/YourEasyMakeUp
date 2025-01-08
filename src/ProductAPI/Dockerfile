@@ -24,4 +24,4 @@ EXPOSE 80
 WORKDIR /app
 COPY --from=builder /build/out .
 
-ENTRYPOINT ["dotnet", "YourEasyRent.dll"]
+ENTRYPOINT ["dotnet", "ProductAPI.dll"] 

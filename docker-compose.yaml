@@ -25,27 +25,76 @@ services:
     depends_on:
       - postgres
     ports:
-     - 4369:4369 
-     - 5671:5671
-     - 5672:5672
-     - 25672:25672
-     - 15671:15671
-     - 15672:15672
+      - 4369:4369
+      - 5671:5671
+      - 5672:5672
+      - 25672:25672
+      - 15671:15671
+      - 15672:15672
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-      
-  scrapper-api:
-    profiles: [all]
-    container_name: scrapper-api
-    build:
-      context: src 
-      dockerfile: YourEasyRent/Dockerfile
+
+  mongo:
+    profiles: [infra, all]
+    container_name: mongo
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
     ports:
-      - 8080:8080
+      - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+
+  subscriber-api:
+    profiles: [all]
+    container_name: subscriber-api
+    build:
+      context: src
+      dockerfile: SubscriberAPI/Dockerfile
+    environment:
+      PRODUCT_SERVICE_URL: http://product-api
+      TELEGRAM_SERVICE_URL: http://telegram-bot-api
+      POSTGRES_CONNECTION_STRING: "Host=localhost;Database=scrapper;Username=postgres;Password=mypassword123!"
+    ports:
+      - 8081:80
     depends_on:
       - postgres
       - rabbit
 
+  product-api:
+    profiles: [all]
+    container_name: product-api
+    build:
+      context: src
+      dockerfile: ProductAPI/Dockerfile
+    environment:
+      SUBSCRIBER_SERVICE_URL: http://subscriber-api
+      TELEGRAM_SERVICE_URL: http://telegram-bot-api
+      ATLAS_URI: "mongodb://localhost:27017"
+    ports:
+      - 8082:80
+    depends_on:
+      - rabbit
+      - mongo
+
+  telegram-bot-api:
+    profiles: [all]
+    container_name: telegram-bot-api
+    build:
+      context: src
+      dockerfile: TelegramBotAPI/Dockerfile
+    environment:
+      SUBSCRIBER_SERVICE_URL: http://subscriber-api
+      PRODUCT_SERVICE_URL: http://product-api
+      ATLAS_URI: "mongodb://localhost:27017"
+    ports:
+      - 8083:80
+    depends_on:
+      - rabbit
+      - mongo
+
 volumes:
   postgres-data:
+  mongo-data:

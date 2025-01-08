@@ -46,7 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\YourEasyRent\TelegramBotAPI.csproj" />
+    <ProjectReference Include="..\TelegramBotAPI\TelegramBotAPI.csproj" />
   </ItemGroup>
 
 </Project>
