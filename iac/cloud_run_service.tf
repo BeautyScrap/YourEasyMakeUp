@@ -1,3 +1,4 @@
+/*
 resource "google_cloud_run_service" "bot" {
   name     = var.bot_name
   location = var.region
@@ -141,7 +142,7 @@ resource "google_cloud_run_service" "subscriber-api" {
 
   depends_on = [google_project_service.cloud_run_googleapis_com]
 }
-
+*/
 # Allow unauthenticated users to invoke the service
 resource "google_cloud_run_service_iam_member" "run_all_users" {
   service  = google_cloud_run_service.bot.name
