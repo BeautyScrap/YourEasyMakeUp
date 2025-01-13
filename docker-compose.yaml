@@ -51,8 +51,8 @@ services:
     profiles: [all]
     container_name: subscriber-api
     build:
-      context: ./src
-      dockerfile: SubscriberAPI/Dockerfile
+      context: ./src/SubscriberAPI
+      dockerfile: Dockerfile
     environment:
       PRODUCT_SERVICE_URL: http://product-api
       TELEGRAM_SERVICE_URL: http://telegram-bot-api
@@ -67,8 +67,8 @@ services:
     profiles: [all]
     container_name: product-api
     build:
-      context: ./src
-      dockerfile: ProductAPI/Dockerfile
+      context: ./src/ProductAPI
+      dockerfile: Dockerfile
     environment:
       SUBSCRIBER_SERVICE_URL: http://subscriber-api
       TELEGRAM_SERVICE_URL: http://telegram-bot-api
@@ -83,8 +83,8 @@ services:
     profiles: [all]
     container_name: telegram-bot-api
     build:
-      context: ./src
-      dockerfile: TelegramBotAPI/Dockerfile
+      context: ./src/TelegramBotAPI
+      dockerfile: Dockerfile
     environment:
       SUBSCRIBER_SERVICE_URL: http://subscriber-api
       PRODUCT_SERVICE_URL: http://product-api
