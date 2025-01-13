@@ -60,7 +60,7 @@ resource "google_cloud_run_service" "product-api" {
   template {
     spec {
       containers {
-        image = local.bot_image_url
+        image = "eu.gcr.io/beatutyscrap/product-api:latest"
 
         ports {
           container_port = var.port
@@ -108,7 +108,7 @@ resource "google_cloud_run_service" "subscriber-api" {
   template {
     spec {
       containers {
-        image = local.bot_image_url
+        image = "eu.gcr.io/beatutyscrap/subscriber-api:latest"
 
         ports {
           container_port = var.port
