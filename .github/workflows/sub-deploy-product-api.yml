@@ -17,7 +17,7 @@ jobs:
     environment: prod
     name: Deploy product api
     concurrency:
-      group: cloudrun-deploy-${{ github.ref }}
+      group: cloudrun-deploy-product-api-${{ github.ref }}
       cancel-in-progress: true
 
     # GCP_CREDENTIALS hack is by design, otherwise env secrets are not available
