@@ -39,12 +39,12 @@ jobs:
         uses: google-github-actions/get-secretmanager-secrets@v2
         with:
           secrets: |-
-            postgres-con-str:${{ steps.auth.outputs.project_id }}/postgres_con_str
+            mongo-con-str:${{ steps.auth.outputs.project_id }}/telegram_bot_token
 
       - id: service-meta
         name: Calculate service deployment settings
         run: |
-          echo "image=eu.gcr.io/${{ steps.auth.outputs.project_id }}/subscriber-api" >> $GITHUB_OUTPUT
+          echo "image=eu.gcr.io/${{ steps.auth.outputs.project_id }}/product-api" >> $GITHUB_OUTPUT
           echo "name=bot" >> $GITHUB_OUTPUT
 
       - name: Set up Cloud SDK
@@ -57,7 +57,7 @@ jobs:
       - name: Build Docker image
         shell: bash
         run: docker build . -t ${{ steps.service-meta.outputs.image }}
-        working-directory: ./src/SubscriberAPI/
+        working-directory: ./src/ProductAPI/
       - name: Push Docker image
         shell: bash
         run: docker push ${{ steps.service-meta.outputs.image }}
@@ -71,7 +71,6 @@ jobs:
           region: europe-central2
           env_vars: |
             PROJECT_ID=${{ steps.auth.outputs.project_id}}
-            POSTGRES_CON_STR=${{ steps.secrets-manager.outputs.postgres-con-str }}
           flags: --allow-unauthenticated
 
       - name: Output deployed url

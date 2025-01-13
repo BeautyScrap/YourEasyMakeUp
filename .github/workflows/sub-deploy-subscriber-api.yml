@@ -39,15 +39,13 @@ jobs:
         uses: google-github-actions/get-secretmanager-secrets@v2
         with:
           secrets: |-
-            telegram-bot-token:${{ steps.auth.outputs.project_id }}/telegram_bot_token
             postgres-con-str:${{ steps.auth.outputs.project_id }}/postgres_con_str
 
       - id: service-meta
         name: Calculate service deployment settings
         run: |
-          echo "image=eu.gcr.io/${{ steps.auth.outputs.project_id }}/bot" >> $GITHUB_OUTPUT
+          echo "image=eu.gcr.io/${{ steps.auth.outputs.project_id }}/subscriber-api" >> $GITHUB_OUTPUT
           echo "name=bot" >> $GITHUB_OUTPUT
-          echo "bot-token=${{ steps.secrets-manager.outputs.telegram-bot-token }}" >> $GITHUB_OUTPUT
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
@@ -59,8 +57,7 @@ jobs:
       - name: Build Docker image
         shell: bash
         run: docker build . -t ${{ steps.service-meta.outputs.image }}
-        working-directory: ./src/TelegramBotAPI/
-        # AK TODO Changed on /TelegramBotAPI/
+        working-directory: ./src/SubscriberAPI/
       - name: Push Docker image
         shell: bash
         run: docker push ${{ steps.service-meta.outputs.image }}
@@ -73,16 +70,9 @@ jobs:
           image: ${{ steps.service-meta.outputs.image }}
           region: europe-central2
           env_vars: |
-            TELEGRAM_BOT_TOKEN=${{ steps.service-meta.outputs.bot-token }}  
             PROJECT_ID=${{ steps.auth.outputs.project_id}}
+            POSTGRES_CON_STR=${{ steps.secrets-manager.outputs.postgres-con-str }}
           flags: --allow-unauthenticated
 
       - name: Output deployed url
         run: echo "URL of a new service is ${{ steps.deploy.outputs.url }}"
-
-      - name: Set feature bot callback
-        if: ${{ inputs.set-webhook }} == true
-        uses: ./.github/actions/set-bot-callback
-        with:
-          bot-token: ${{ steps.service-meta.outputs.bot-token }}
-          callback-url: ${{ steps.deploy.outputs.url }}

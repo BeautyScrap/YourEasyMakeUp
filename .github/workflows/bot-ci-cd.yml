@@ -21,20 +21,20 @@ jobs:
   deploy-telegram-bot:
     needs: apply-terraform
     name: Deploy new version of bot bakcend
-    uses: ./.github/workflows/sub-deploy-telegram-bot.yml
+    uses: ./.github/workflows/sub-deploy-telegram-bot-api.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
 
   deploy-subscribers-api:
     needs: apply-terraform
     name: Deploy new version of bot bakcend
-    uses: ./.github/workflows/sub-deploy-subscribers-api.yml
+    uses: ./.github/workflows/sub-deploy-subscriber-api.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
 
   deploy-products-api:
     needs: apply-terraform
     name: Deploy new version of bot bakcend
-    uses: ./.github/workflows/sub-deploy-products-api.yml
+    uses: ./.github/workflows/sub-deploy-product-api.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
