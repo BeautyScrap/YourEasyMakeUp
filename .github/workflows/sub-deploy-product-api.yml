@@ -35,17 +35,11 @@ jobs:
         with:
           credentials_json: ${{ env.GCP_CREDENTIALS }}
 
-      - id: secrets-manager
-        uses: google-github-actions/get-secretmanager-secrets@v2
-        with:
-          secrets: |-
-            mongo-con-str:${{ steps.auth.outputs.project_id }}/telegram_bot_token
-
       - id: service-meta
         name: Calculate service deployment settings
         run: |
           echo "image=eu.gcr.io/${{ steps.auth.outputs.project_id }}/product-api" >> $GITHUB_OUTPUT
-          echo "name=bot" >> $GITHUB_OUTPUT
+          echo "name=product-api" >> $GITHUB_OUTPUT
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
@@ -58,6 +52,7 @@ jobs:
         shell: bash
         run: docker build . -t ${{ steps.service-meta.outputs.image }}
         working-directory: ./src/ProductAPI/
+
       - name: Push Docker image
         shell: bash
         run: docker push ${{ steps.service-meta.outputs.image }}

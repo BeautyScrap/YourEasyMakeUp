@@ -1,4 +1,4 @@
-name: Deploy service to cloudrun
+name: Deploy telegram bot
 on:
   workflow_call:
     inputs:
@@ -15,7 +15,7 @@ jobs:
   deploy-cloudrun-service:
     runs-on: ubuntu-latest
     environment: prod
-    name: Deploys new version of telegrofler bot
+    name: Deploys telegram bot
     concurrency:
       group: cloudrun-deploy-${{ github.ref }}
       cancel-in-progress: true
@@ -40,7 +40,6 @@ jobs:
         with:
           secrets: |-
             telegram-bot-token:${{ steps.auth.outputs.project_id }}/telegram_bot_token
-            postgres-con-str:${{ steps.auth.outputs.project_id }}/postgres_con_str
 
       - id: service-meta
         name: Calculate service deployment settings
@@ -60,7 +59,7 @@ jobs:
         shell: bash
         run: docker build . -t ${{ steps.service-meta.outputs.image }}
         working-directory: ./src/TelegramBotAPI/
-        # AK TODO Changed on /TelegramBotAPI/
+
       - name: Push Docker image
         shell: bash
         run: docker push ${{ steps.service-meta.outputs.image }}

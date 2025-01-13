@@ -45,7 +45,7 @@ jobs:
         name: Calculate service deployment settings
         run: |
           echo "image=eu.gcr.io/${{ steps.auth.outputs.project_id }}/subscriber-api" >> $GITHUB_OUTPUT
-          echo "name=bot" >> $GITHUB_OUTPUT
+          echo "name=subscriber-api" >> $GITHUB_OUTPUT
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
