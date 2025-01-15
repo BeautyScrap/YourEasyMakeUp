@@ -7,7 +7,7 @@ using YourEasyRent.Entities.ProductForSubscription;
 namespace TelegramBotAPI.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("")]
     public class TelegramUpdateProductController : ControllerBase
     {
         private readonly ITelegramUpdateHandler _updateHandler;

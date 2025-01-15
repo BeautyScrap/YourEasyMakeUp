@@ -67,16 +67,6 @@ namespace ProductAPI.Infrastructure
             return deleteProduct.IsAcknowledged && deleteProduct.DeletedCount > 0;
         }
 
-        public async Task<IEnumerable<Product>> GetProductsByBrandAndCategory(List<string> listWithResult) // AK TODO в этом методе тгда нужно возвращать только один продукт, а не несколько, чтобы можно было его отследить потом
-        {
-            var filter = Builders<Product>.Filter.And
-                (Builders<Product>.Filter.Eq(_ => _.Brand, listWithResult[0]),
-                 Builders<Product>.Filter.Eq(_ => _.Category, listWithResult[1]));
-
-            var products = await _productCollection.Find(filter).ToListAsync();
-            return products;
-        }
-
         public async Task UpsertProduct(Product product)
         {
             var filter = Builders<Product>.Filter.And
@@ -111,7 +101,6 @@ namespace ProductAPI.Infrastructure
                 .Take(10)
                 .Distinct()
                 .ToListAsync();
-
             return res;
         }
 
@@ -178,7 +167,7 @@ namespace ProductAPI.Infrastructure
             }
         }
 
-        public  async Task<AvaliableResultForUserDto> GetOneProductResultForUser(ProductResultForUserDto productForUser)
+        public async Task<AvaliableResultForUserDto> GetOneProductResultForUser(ProductResultForUserDto productForUser) // использую этот метод
         {
             var filter = Builders<Product>.Filter.And(
                 Builders<Product>.Filter.Eq(_ => _.Brand, productForUser.Brand),
@@ -194,7 +183,6 @@ namespace ProductAPI.Infrastructure
                     Url = product.Url
                 };
             return productResult;
-
         }
     }
 }

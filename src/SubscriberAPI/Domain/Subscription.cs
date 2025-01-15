@@ -17,11 +17,7 @@ namespace SubscriberAPI.Domain
         public decimal Price { get; private set; }
         public string? Url { get; private set; }
         public string? UrlImage { get; private set; }
-        public Subscription() 
-        { 
-
-        }
-
+        public Subscription() {}
         public static Subscription CreateNewSubscription(string userId, string? chatId, string? brand, string name, decimal price)
         {
             var subscription = new Subscription
@@ -34,7 +30,8 @@ namespace SubscriberAPI.Domain
             };
             return subscription;
         }
-        public static Subscription CreateProductforSub(string userId, string? brand, string name, decimal price, string url, string urlImage )
+        public static Subscription CreateProductforSub(string userId, string? brand, string name, decimal price, string url, string urlImage) //AK TODO вопрос: Считается ли этот объект подписчиком, если у него воявляются новые поля, когда я нахожу этот объект в другом сервисе?
+                                                                                                                                              //Или можно использовать второй статический метод "CreateProductforSub"
         {
             var subscription = new Subscription
             {
@@ -47,7 +44,6 @@ namespace SubscriberAPI.Domain
             };
             return subscription;
         }
-
 
         public SubscriptionDto ToDto()
         {
@@ -62,13 +58,6 @@ namespace SubscriberAPI.Domain
                 UrlImage = UrlImage,
             };
             return subscribersDto;
-        }
-
-        //public void SetUrlAndUrlImage(string url, string urlImage)
-        //{
-        //    Url = url;
-        //    UrlImage = urlImage;
-        //}
-        
+        }     
     }
 }

@@ -45,10 +45,10 @@ namespace YourEasyRent.TelegramMenu
             await _botClient.SendTextMessageAsync(chatId, null, replyMarkup: menu);
         }
 
-        public async Task SendSubscriberProduct(string chatId, ProductForSubscription product)
+        public async Task SendSubscriberProduct(string userId, ProductForSubscription product)
         {
             var result = product.ToString(); 
-            await _botClient.SendTextMessageAsync(chatId, $"WOW!The price of your product has become lower {result}", parseMode: ParseMode.Markdown);      
+            await _botClient.SendTextMessageAsync(userId, $"WOW!The price of your product has become lower!  {result}", parseMode: ParseMode.Markdown);      
         }
 
 

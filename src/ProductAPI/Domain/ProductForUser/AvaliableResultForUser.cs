@@ -4,7 +4,7 @@ namespace ProductAPI.Domain.ProductForUser
 {
     public class AvaliableResultForUser
     {
-        public string Brand { get; private set; } //AK TODO Нужно ли передавать сюда userId?
+        public string Brand { get; private set; } 
         public string Name { get; private set; }
         public string Category { get; private set; }
         public decimal Price { get; private set; }

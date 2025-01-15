@@ -24,7 +24,7 @@ namespace ProductAPI.Application
             return result;
         }
 
-        public async Task<AvaliableResultForUser> HandlerOne(ProductResultForUser product) 
+        public async Task<AvaliableResultForUser> HandlerOne(ProductResultForUser product) // использую этот метод
         {
             var productDto = product.ToDto();
             var resultProductDtos = await _productRepository.GetOneProductResultForUser(productDto);

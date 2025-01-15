@@ -5,7 +5,7 @@ using RabbitMQ.Client.Events;
 
 namespace SubscriberAPI.Application.RabbitQM
 {
-    public class RabbitMessageProducer : IRabbitMessageProducer
+    public class RabbitMessageProducer : ISubscriberRabbitMessageProducer
     {
         public void ConsumingSubscriberMessag<T>(T message)
         {

@@ -10,6 +10,7 @@ namespace SubscriberAPI.Infrastructure.Clients
     {
         public readonly HttpClient _client;
         private readonly JsonSerializerOptions _options;
+
         public ProductApiClient(HttpClient client)
         {
             _client = client;
@@ -17,10 +18,11 @@ namespace SubscriberAPI.Infrastructure.Clients
             _options = new JsonSerializerOptions()
             {
                 PropertyNameCaseInsensitive = true,
-            };        
+            };
+            client.Timeout = TimeSpan.FromSeconds(300);
         }
 
-        public async Task<List<Subscription>> GetProducts(List<Subscription> subscriptions)// AK TO DO  получаем мы не Subscription, а другой объект и уже его пересылаем в телеграм пользаку,
+        public async Task<List<Subscription>> GetProducts(List<Subscription> subscriptions)// AK TODO вопрос - получаем мы не Subscription, а другой объект и уже его пересылаем в телеграм пользаку,
                                                                                            // но это уже 2 действия для одного контроллера, поэтому  можно сделать еще один контроллер, который будет рассылать новые продукты уже в телегу,
                                                                                            // но тогда нужно будет где то хранить новые временные значения
         {
@@ -30,7 +32,7 @@ namespace SubscriberAPI.Infrastructure.Clients
                 Name = s.Name,
                 Price = s.Price,
             }).ToList();
-            var httpRequest = await _client.PostAsJsonAsync("SearchProductsForSub", request);
+            var httpRequest = await _client.PostAsJsonAsync("SearchProductForSubscriber", request);
             httpRequest.EnsureSuccessStatusCode();
             var jsonString = await httpRequest.Content.ReadAsStringAsync();
             var productResult = JsonSerializer.Deserialize<List<FoundSubProductResponse>>(jsonString, _options);

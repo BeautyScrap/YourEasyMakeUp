@@ -18,14 +18,14 @@ namespace SubscriberAPI.Presentanion
     [Route("")]
     public class SubscribersController : ControllerBase
     {
-        private readonly IRabbitMessageProducer _messageProducer;
+        private readonly ISubscriberRabbitMessageProducer _messageProducer;
         private readonly ILogger<SubscribersController> _logger;
         public readonly ISubscrieberService _sudscriberService;
         public readonly IValidator<SubscriptionRequest> _validator;
         public readonly IProductApiClient _productApiClient;
         public readonly ITelegramApiClient _telegramApiClient;
 
-        public SubscribersController(IRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger, ISubscrieberService subscrieberService, IValidator<SubscriptionRequest> validator, IProductApiClient productApiClient, ITelegramApiClient telegramApiClient)
+        public SubscribersController(ISubscriberRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger, ISubscrieberService subscrieberService, IValidator<SubscriptionRequest> validator, IProductApiClient productApiClient, ITelegramApiClient telegramApiClient)
         {
             _messageProducer = messageProducer;
             _logger = logger;
@@ -167,7 +167,7 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> CheckPriceUpdates()
+        public async Task<ActionResult> CheckPriceUpdates()// AK TODO вопрос:нужно ли разделить этот контроллер на два разных контроллера или нет?
         {
             /// var subscribers = await subsRepo.GetAll()
             /// var productNames = subscribers.Select(x=>x.ProductName)
@@ -192,11 +192,12 @@ namespace SubscriberAPI.Presentanion
             {
                 await _telegramApiClient.SendFoundProduct(product);
                 var userId = product.UserId;
+
+                // AK TODO вопрос: какой то ответ должен вернуть / код
                 await _sudscriberService.Delete(userId);// пока временное решение с удалением
-                
-                // AK TODO какой то ответ должен вернуть / код
+
                 // AK TODO  потом иду в репозиторий через сервис и помечаю там продукт у пользака, который больше не надо искать,
-                // те нужно будет еще создать поле со статусом? но пока оставлю удаление
+                // AK TODO вопрос: те нужно будет еще создать поле со статусом в sql базе "продукт найден/ не найден"? но пока оставлю удаление
             }
             return Ok();
 

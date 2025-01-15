@@ -1,6 +1,6 @@
 ﻿namespace SubscriberAPI.Application.RabbitQM
 {
-    public interface IRabbitMessageProducer
+    public interface ISubscriberRabbitMessageProducer
     {
         public void ConsumingSubscriberMessag<T>(T message);
 

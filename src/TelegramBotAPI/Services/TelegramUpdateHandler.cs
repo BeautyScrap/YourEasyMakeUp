@@ -11,10 +11,10 @@ namespace TelegramBotAPI.Services
         {
             _telegramSender = telegramSender;
         }
-        public async Task HandlerUpdateAsync(ProductForSubscription newProduct)
+        public async Task HandlerUpdateAsync(ProductForSubscription newProduct)// AK TODO вопрос: это метод что-то должен вернуть?
         {
-            var chatId = newProduct.ChatId;
-            await _telegramSender.SendSubscriberProduct(chatId, newProduct); 
+            var userId = newProduct.UserId;
+            await _telegramSender.SendSubscriberProduct(userId, newProduct); 
         }
     }
 }

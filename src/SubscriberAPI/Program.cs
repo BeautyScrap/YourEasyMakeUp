@@ -33,7 +33,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>();
 builder.Services.AddHttpClient<ITelegramApiClient, TelegramApiClient>();
-builder.Services.AddScoped<IRabbitMessageProducer, RabbitMessageProducer>();
+builder.Services.AddScoped<ISubscriberRabbitMessageProducer, RabbitMessageProducer>();
 builder.Services.AddScoped<ISubscribersRepository, SubscribersRepository>();
 builder.Services.AddScoped<ISubscrieberService, SubscriberService>();
 builder.Services.AddScoped<IValidator<SubscriptionRequest>, CreateSubscriptionRequestValidator>();  

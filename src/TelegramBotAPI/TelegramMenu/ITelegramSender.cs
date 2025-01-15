@@ -10,7 +10,7 @@ namespace YourEasyRent.TelegramMenu
         Task SendBrandMenu(string chatId, List<string> brands);
         Task SendMenuAfterResult(string chatId);
         Task SendConfirmOfSubscriprion(string chatId);
-        Task SendSubscriberProduct(string chatId, ProductForSubscription product);
+        Task SendSubscriberProduct(string userId, ProductForSubscription product);
         Task SendOneResult(string chatId, string resultOfSearch);
 
     }

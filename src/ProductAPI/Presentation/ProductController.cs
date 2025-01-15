@@ -39,7 +39,7 @@ namespace ProductAPI.Controllers
 
 
         [HttpPost]
-        [Route("SearchProductsResultForUser")]
+        [Route("SearchProductsResultForUser")] // этим методом пока не пользуюсь
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -71,7 +71,6 @@ namespace ProductAPI.Controllers
 
                 }).ToList();
                 return Ok(response);
-
             }
             catch (Exception ex)
             {
@@ -82,7 +81,7 @@ namespace ProductAPI.Controllers
         }
 
         [HttpPost]
-        [Route("SearchOneProductResultForUser")]
+        [Route("SearchOneProductResultForUser")] // Остановилась пока на этом методе с одним результатом, тк не придумала как отслеживать потом несколько результатов в телеграмме
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -310,7 +309,6 @@ namespace ProductAPI.Controllers
             {
                 var brands = await _repository.GetBrandForMenu();
                 if (brands == null) { return NotFound(); }
-
                 var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b}).ToList();
                 return Ok(response);
             }
@@ -320,8 +318,6 @@ namespace ProductAPI.Controllers
                 return StatusCode(500, "InternalServerError");
             }
         }
-
-
 
         [Route("[action]/{name}", Name = "GetProductByName")]
         [HttpGet]
