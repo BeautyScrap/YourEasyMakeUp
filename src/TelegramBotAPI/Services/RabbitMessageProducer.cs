@@ -19,7 +19,7 @@ namespace YourEasyRent.Services
             };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-            channel.QueueDeclare("SubscriberApi",
+            channel.QueueDeclare("SubscriberApi", // туть указываем название сервиса куда посылаем сообщение
                      durable: true,
                      exclusive: false,
                      autoDelete: false,
@@ -40,7 +40,7 @@ namespace YourEasyRent.Services
             };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-            channel.QueueDeclare("Your_Easy_Rent",
+            channel.QueueDeclare("TelegramBotAPI", // туть указываем название САМОГО сервиса, если он получает сообщение
                      durable: true,
                      exclusive: false,
                      autoDelete: false,
@@ -52,7 +52,7 @@ namespace YourEasyRent.Services
                 var message = Encoding.UTF8.GetString(body);
                 Console.WriteLine($" The message has been received {message}");
             };
-            channel.BasicConsume(queue: "Your_Easy_Rent", autoAck: true, consumer: consumer);
+            channel.BasicConsume(queue: "TelegramBotAPI", autoAck: true, consumer: consumer);
         }
 
     }

@@ -5,7 +5,7 @@ using RabbitMQ.Client.Events;
 
 namespace SubscriberAPI.Application.RabbitQM
 {
-    public class RabbitMessageProducer : IRabbitMessageProducer // AK TODO  изменить названия очереди для получения и отправки сообщения
+    public class RabbitMessageProducer : IRabbitMessageProducer
     {
         public void ConsumingSubscriberMessag<T>(T message)
         {
@@ -18,7 +18,7 @@ namespace SubscriberAPI.Application.RabbitQM
             };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-            channel.QueueDeclare("SubscriberApi",
+            channel.QueueDeclare("ProductApi",
                      durable: true,
                      exclusive: false,
                      autoDelete: false,
@@ -30,7 +30,7 @@ namespace SubscriberAPI.Application.RabbitQM
                 var message = Encoding.UTF8.GetString(body);
                 Console.WriteLine($" The message has been received {message}");
             };
-            channel.BasicConsume(queue: "SubscriberApi", autoAck: true, consumer: consumer);
+            channel.BasicConsume(queue: "ProductApi", autoAck: true, consumer: consumer);
         }
 
 
@@ -45,14 +45,14 @@ namespace SubscriberAPI.Application.RabbitQM
             };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-            channel.QueueDeclare("Your_Easy_Rent",
+            channel.QueueDeclare("TelegramBotAPI",
                      durable: true,
                      exclusive: false,
                      autoDelete: false,
                      arguments: null);
             var JsonString = JsonSerializer.Serialize(message);
             var body = Encoding.UTF8.GetBytes(JsonString);
-            channel.BasicPublish(exchange: "", routingKey: "Your_Easy_Rent", body: body);
+            channel.BasicPublish(exchange: "", routingKey: "TelegramBotAPI", body: body);
         }
     }
 }
