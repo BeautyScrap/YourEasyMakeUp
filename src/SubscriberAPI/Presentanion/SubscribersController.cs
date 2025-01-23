@@ -6,6 +6,7 @@ using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Contracts;
 using SubscriberAPI.Domain;
 using SubscriberAPI.Infrastructure;
+using SubscriberAPI.Infrastructure.Clients;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
@@ -17,17 +18,21 @@ namespace SubscriberAPI.Presentanion
     [Route("")]
     public class SubscribersController : ControllerBase
     {
-        private readonly IRabbitMessageProducer _messageProducer;
+        private readonly ISubscriberRabbitMessageProducer _messageProducer;
         private readonly ILogger<SubscribersController> _logger;
         public readonly ISubscrieberService _sudscriberService;
         public readonly IValidator<SubscriptionRequest> _validator;
+        public readonly IProductApiClient _productApiClient;
+        public readonly ITelegramApiClient _telegramApiClient;
 
-        public SubscribersController(IRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger, ISubscrieberService subscrieberService, IValidator<SubscriptionRequest> validator)
+        public SubscribersController(ISubscriberRabbitMessageProducer messageProducer, ILogger<SubscribersController> logger, ISubscrieberService subscrieberService, IValidator<SubscriptionRequest> validator, IProductApiClient productApiClient, ITelegramApiClient telegramApiClient)
         {
             _messageProducer = messageProducer;
             _logger = logger;
             _sudscriberService = subscrieberService;
             _validator = validator;
+            _productApiClient = productApiClient;
+            _telegramApiClient = telegramApiClient;
         }
 
         [HttpPost]
@@ -55,8 +60,7 @@ namespace SubscriberAPI.Presentanion
                     request.ChatId,
                     request.Name,
                     request.Brand,
-                    request.Price,
-                    request.Url
+                    request.Price
                     );
 
                 await _sudscriberService.Create(subscribtion);
@@ -102,7 +106,7 @@ namespace SubscriberAPI.Presentanion
         public async Task<IActionResult> GetById(string userId)
         {
             var subscription = await _sudscriberService.GetById(userId);
-            if (subscription.IsFailure)// 
+            if (subscription.IsFailure)
             {
                 return NotFound(subscription.Error.Message);   
             }
@@ -134,8 +138,7 @@ namespace SubscriberAPI.Presentanion
                     subscriptionRequest.ChatId,
                     subscriptionRequest.Brand,
                     subscriptionRequest.Name,
-                    subscriptionRequest.Price,
-                    subscriptionRequest.Url
+                    subscriptionRequest.Price
                 );
             var updatedSubscription = await _sudscriberService.Update(userId, subscription);
             if (updatedSubscription ==  false)
@@ -149,7 +152,7 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(string userId) // AK TODO  подписчиков не удаляем, а просто делаем пометку, что продукт найден
+        public async Task<IActionResult> Delete(string userId) 
         { 
             var result = await _sudscriberService.Delete(userId);
             if (result == false)
@@ -159,24 +162,19 @@ namespace SubscriberAPI.Presentanion
             return Ok(result);
         }
 
-        /// <summary>
-        ///  each 10 minutes
-        /// </summary>
-        /// <returns></returns>
-        [Route("GetFieldsForSearch")]
+        [Route("CheckPriceUpdates")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<SubscriptionResponse>>> GetFieldsForSearch()// CheckPriceUpdates
+        public async Task<ActionResult> CheckPriceUpdates()// AK TODO вопрос:нужно ли разделить этот контроллер на два разных контроллера или нет?
         {
             /// var subscribers = await subsRepo.GetAll()
             /// var productNames = subscribers.Select(x=>x.ProductName)
             /// var newPrices = await productsApiClient.GetNewPrices(productNames, DateTime.Now().Days(-1))
-            /// var matchedUsers = matchUsersWithUpdates(subs, newPrices)
+            /// var matchedUsers = matchпUsersWithUpdates(subs, newPrices)
             // var notifictaions = matchedUsers.Select(sub, price => new Notification(sub,price))
             // notifications.ForEach(n=> await tgClient.Send(n)
-            // AK TODO Сделать такой контроллер и по 2 httpClient для каждого сервиса
 
             var ListWithfSubscriptions = await _sudscriberService.GetFieldsForSearchById();
 
@@ -184,17 +182,23 @@ namespace SubscriberAPI.Presentanion
             {
                 return BadRequest();
             }
-            var response = ListWithfSubscriptions.Select(s => new SubscriptionResponse
+            var newProducts = await _productApiClient.GetProducts(ListWithfSubscriptions);
+            if (newProducts == null) 
+            { 
+                return NotFound();
+            }
+            foreach (var product in newProducts)
             {
-                UserId = s.UserId,
-                ChatId = s.ChatId,
-                Name = s.Name,
-                Brand = s.Brand,
-                Price = s.Price
-            }).ToList();
+                await _telegramApiClient.SendFoundProduct(product);
+                var userId = product.UserId;
 
-            _messageProducer.SendProductSearchMessage(response);
-            return Ok(response);
+                // AK TODO вопрос: какой то ответ должен вернуть / код
+                await _sudscriberService.Delete(userId);// пока временное решение с удалением
+
+                // AK TODO  потом иду в репозиторий через сервис и помечаю там продукт у пользака, который больше не надо искать,
+                // AK TODO вопрос: те нужно будет еще создать поле со статусом в sql базе "продукт найден/ не найден"? но пока оставлю удаление
+            }
+            return Ok();
         }
     }
 }

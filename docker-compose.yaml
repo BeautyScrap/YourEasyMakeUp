@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mypassword123!
     ports:
-      - 5432:5432
+      - "5432:5432"
     volumes:
       - ./sql-migrations:/docker-entrypoint-initdb.d
       - postgres-data:/var/lib/postgresql/data
@@ -18,34 +18,83 @@ services:
   rabbit:
     profiles: [infra, all]
     container_name: rabbit-mq
-    image: rabbitmq:3.6.10-management-alpine
+    image: rabbitmq:3-management-alpine
     environment:
       RABBITMQ_DEFAULT_USER: rmq
       RABBITMQ_DEFAULT_PASS: pass
     depends_on:
       - postgres
     ports:
-     - 4369:4369 
-     - 5671:5671
-     - 5672:5672
-     - 25672:25672
-     - 15671:15671
-     - 15672:15672
+      - "4369:4369"
+      - "5671:5671"
+      - "5672:5672"
+      - "25672:25672"
+      - "15671:15671"
+      - "15672:15672"
     volumes:
-      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
-      
-  scrapper-api:
-    profiles: [all]
-    container_name: scrapper-api
-    build:
-      context: src 
-      dockerfile: YourEasyRent/Dockerfile
+      - ~/.docker-conf/rabbitmq/data:/var/lib/rabbitmq
+      - ~/.docker-conf/rabbitmq/log:/var/log/rabbitmq
+
+  mongo:
+    profiles: [infra, all]
+    container_name: mongo
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
     ports:
-      - 8080:8080
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  subscriber-api:
+    profiles: [all]
+    container_name: subscriber-api
+    build:
+      context: ./src/SubscriberAPI
+      dockerfile: Dockerfile
+    environment:
+      PRODUCT_SERVICE_URL: http://product-api
+      TELEGRAM_SERVICE_URL: http://telegram-bot-api
+      POSTGRES_CONNECTION_STRING: "Host=postgres;Database=scrapper;Username=postgres;Password=mypassword123!"
+    ports:
+      - "8081:80"
     depends_on:
       - postgres
       - rabbit
 
+  product-api:
+    profiles: [all]
+    container_name: product-api
+    build:
+      context: ./src/ProductAPI
+      dockerfile: Dockerfile
+    environment:
+      SUBSCRIBER_SERVICE_URL: http://subscriber-api
+      TELEGRAM_SERVICE_URL: http://telegram-bot-api
+      ATLAS_URI: "mongodb://mongo:27017"
+    ports:
+      - "8082:80"
+    depends_on:
+      - rabbit
+      - mongo
+
+  telegram-bot-api:
+    profiles: [all]
+    container_name: telegram-bot-api
+    build:
+      context: ./src/TelegramBotAPI
+      dockerfile: Dockerfile
+    environment:
+      SUBSCRIBER_SERVICE_URL: http://subscriber-api
+      PRODUCT_SERVICE_URL: http://product-api
+      ATLAS_URI: "mongodb://mongo:27017"
+    ports:
+      - "8083:80"
+    depends_on:
+      - rabbit
+      - mongo
+
 volumes:
   postgres-data:
+  mongo-data:

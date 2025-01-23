@@ -5,7 +5,7 @@ using RabbitMQ.Client.Events;
 
 namespace SubscriberAPI.Application.RabbitQM
 {
-    public class RabbitMessageProducer : IRabbitMessageProducer
+    public class RabbitMessageProducer : ISubscriberRabbitMessageProducer
     {
         public void ConsumingSubscriberMessag<T>(T message)
         {
@@ -45,14 +45,14 @@ namespace SubscriberAPI.Application.RabbitQM
             };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
-            channel.QueueDeclare("Your_Easy_Rent",
+            channel.QueueDeclare("TelegramBotAPI",
                      durable: true,
                      exclusive: false,
                      autoDelete: false,
                      arguments: null);
             var JsonString = JsonSerializer.Serialize(message);
             var body = Encoding.UTF8.GetBytes(JsonString);
-            channel.BasicPublish(exchange: "", routingKey: "Your_Easy_Rent", body: body);
+            channel.BasicPublish(exchange: "", routingKey: "TelegramBotAPI", body: body);
         }
     }
 }

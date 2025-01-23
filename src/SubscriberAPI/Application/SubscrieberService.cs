@@ -26,8 +26,7 @@ namespace SubscriberAPI.Application
                 dto.ChatId,
                 dto.Brand,
                 dto.Name,
-                dto.Price,
-                dto.Url
+                dto.Price
                 )).ToList();
             return subscriptions;
         }
@@ -45,8 +44,7 @@ namespace SubscriberAPI.Application
                 subscriberDto.ChatId,
                 subscriberDto.Brand,
                 subscriberDto.Name,
-                subscriberDto.Price,
-                subscriberDto.Url
+                subscriberDto.Price
                 );
             return Result<Subscription>.Success(subscription);
         }
@@ -76,8 +74,7 @@ namespace SubscriberAPI.Application
                 dto.ChatId,
                 dto.Brand,
                 dto.Name,
-                dto.Price,
-                dto.Url
+                dto.Price
                 )).ToList();
             return listOfSubscription;
         }

@@ -1,12 +1,14 @@
 ﻿namespace SubscriberAPI.Contracts
 {
-    public record SubscriptionRequest(
-        string UserId,
-        string ChatId,
-        string Brand,
-        string Name,
-        decimal Price,
-        string Url
-        );   
-}
+    public class SubscriptionRequest 
+    {
+        public string UserId { get; set; }
+        public string? ChatId { get; set; }
+        public string Brand { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public string? Url { get; set; }
+    }
+
+}   
 

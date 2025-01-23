@@ -23,6 +23,31 @@ resource "google_secret_manager_secret_version" "bot_token" {
   }
 }
 
+resource "google_secret_manager_secret" "postgres_con_str" {
+  secret_id = "postgres_con_str"
+
+  labels = {
+    owner = "bot"
+  }
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.secretmanager_googleapis_com]
+}
+
+resource "google_secret_manager_secret_version" "postgres_con_str" {
+  secret      = google_secret_manager_secret.postgres_con_str.id
+  secret_data = "dummy"
+
+  lifecycle {
+    ignore_changes = [
+      secret_data
+    ]
+  }
+}
+
 resource "google_secret_manager_secret" "atlas_priv_key" {
   secret_id = "atlas_priv_key"
 
