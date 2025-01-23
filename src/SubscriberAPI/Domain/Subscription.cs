@@ -16,7 +16,7 @@ namespace SubscriberAPI.Domain
         public string Name { get; private set; }
         public decimal Price { get; private set; }
         public string? Url { get; private set; }
-        public string? UrlImage { get; private set; }
+        public string? UrlImage { get; private set; }// AK TODO Сюда еще можно добавить поле с Enum статусами  и метод, который будет задавать эти статусы
         public Subscription() {}
         public static Subscription CreateNewSubscription(string userId, string? chatId, string? brand, string name, decimal price)
         {

@@ -14,7 +14,7 @@ namespace SubscriberAPI.Infrastructure
             _connectionString = connectonString;
         }
 
-        public async Task CreateAsync(SubscriptionDto subscriptionDto)// AK TODO проверить как будет вести себя поле url  при null                                                              
+        public async Task CreateAsync(SubscriptionDto subscriptionDto)// AK TODO проверить как будет вести себя поле url при null                                                              
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
@@ -105,5 +105,6 @@ namespace SubscriberAPI.Infrastructure
                 return await connection.QueryAsync<SubscriptionDto>(query);
             }
         }
+        //AK TODO Для продукта, который был найден нужно сдалать метод, который будет изменять его статут, типо на "Found"
     }
 }

@@ -175,7 +175,6 @@ namespace SubscriberAPI.Presentanion
             /// var matchedUsers = matchпUsersWithUpdates(subs, newPrices)
             // var notifictaions = matchedUsers.Select(sub, price => new Notification(sub,price))
             // notifications.ForEach(n=> await tgClient.Send(n)
-            // AK TODO Сделать такой контроллер и по 2 httpClient для каждого сервиса
 
             var ListWithfSubscriptions = await _sudscriberService.GetFieldsForSearchById();
 
@@ -200,7 +199,6 @@ namespace SubscriberAPI.Presentanion
                 // AK TODO вопрос: те нужно будет еще создать поле со статусом в sql базе "продукт найден/ не найден"? но пока оставлю удаление
             }
             return Ok();
-
         }
     }
 }
