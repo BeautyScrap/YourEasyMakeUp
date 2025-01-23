@@ -4,13 +4,13 @@ using System.Text;
 using System.Text.Json;
 using Telegram.Bot.Types;
 
-namespace YourEasyRent.Services
+namespace TelegramBotAPI.Infrastructure.RabbitQM
 {
     public class RabbitMessageProducer : IRabbitMessageProducer
     {
         public void SendMessagAboutSubscriber<T>(T message)
         {
-            var factory = new ConnectionFactory 
+            var factory = new ConnectionFactory
             {
                 HostName = "localhost",
                 UserName = "rmq",
@@ -25,7 +25,7 @@ namespace YourEasyRent.Services
                      autoDelete: false,
                      arguments: null);
             var JsonString = JsonSerializer.Serialize(message);
-            var body  = Encoding.UTF8.GetBytes(JsonString);
+            var body = Encoding.UTF8.GetBytes(JsonString);
             channel.BasicPublish(exchange: "", routingKey: "SubscriberApi", body: body);
         }
 

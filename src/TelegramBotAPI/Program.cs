@@ -3,13 +3,10 @@ using MongoDB.Driver;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services;
 using Telegram.Bot;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Serialization;
 using Serilog;
-using YourEasyRent.UserState;
-using YourEasyRent.TelegramMenu;
 using TelegramBotAPI.Services;
-
+using TelegramBotAPI.Application.TelegramMenu;
+using TelegramBotAPI.Infrastructure.RabbitQM;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {

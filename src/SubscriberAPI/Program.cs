@@ -1,11 +1,11 @@
 using SubscriberAPI.Application;
-using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Infrastructure;
 using System.Text.Json;
 using FluentValidation;
 using SubscriberAPI.Contracts;
 using SubscriberAPI.Presentanion;
-using SubscriberAPI.Infrastructure.Clients;
+using SubscriberAPI.Presentanion.Clients;
+using SubscriberAPI.Infrastructure.RabbitQM;
 
 var builder = WebApplication.CreateBuilder(args);
 

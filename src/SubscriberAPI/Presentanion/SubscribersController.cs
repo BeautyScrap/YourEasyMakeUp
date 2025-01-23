@@ -1,16 +1,10 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using SubscriberAPI.Application;
-using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Contracts;
 using SubscriberAPI.Domain;
-using SubscriberAPI.Infrastructure;
-using SubscriberAPI.Infrastructure.Clients;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
-using System.Text.Json;
-using System.Xml.Linq;
+using SubscriberAPI.Infrastructure.RabbitQM;
+using SubscriberAPI.Presentanion.Clients;
 
 namespace SubscriberAPI.Presentanion
 {

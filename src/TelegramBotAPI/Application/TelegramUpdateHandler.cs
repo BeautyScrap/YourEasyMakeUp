@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TelegramBotAPI.Application.TelegramMenu;
 using YourEasyRent.Entities.ProductForSubscription;
-using YourEasyRent.TelegramMenu;
 
 namespace TelegramBotAPI.Services
 {

@@ -4,7 +4,7 @@ using SubscriberAPI.Domain;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SubscriberAPI.Infrastructure.Clients
+namespace SubscriberAPI.Presentanion.Clients
 {
     public class ProductApiClient : IProductApiClient
     {
@@ -45,8 +45,8 @@ namespace SubscriberAPI.Infrastructure.Clients
                 p.UrlImage)).ToList();
             return products;
 
-            
-                
+
+
         }
     }
 }

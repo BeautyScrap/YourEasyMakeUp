@@ -1,7 +1,7 @@
 ﻿using SubscriberAPI.Domain;
 using System.ComponentModel;
 
-namespace SubscriberAPI.Infrastructure.Clients
+namespace SubscriberAPI.Presentanion.Clients
 {
     public interface IProductApiClient
     {

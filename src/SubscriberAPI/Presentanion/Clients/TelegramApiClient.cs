@@ -2,7 +2,7 @@
 using SubscriberAPI.Domain;
 using System.Text.Json;
 
-namespace SubscriberAPI.Infrastructure.Clients
+namespace SubscriberAPI.Presentanion.Clients
 {
     public class TelegramApiClient : ITelegramApiClient
     {
@@ -11,7 +11,7 @@ namespace SubscriberAPI.Infrastructure.Clients
         public TelegramApiClient(HttpClient client)
         {
             _client = client;
-            client.BaseAddress = new Uri("https://localhost:5001/"); 
+            client.BaseAddress = new Uri("https://localhost:5001/");
             _options = new JsonSerializerOptions()
             {
                 PropertyNameCaseInsensitive = true,

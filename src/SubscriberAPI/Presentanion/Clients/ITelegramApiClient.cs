@@ -1,6 +1,6 @@
 ﻿using SubscriberAPI.Domain;
 
-namespace SubscriberAPI.Infrastructure.Clients
+namespace SubscriberAPI.Presentanion.Clients
 {
     public interface ITelegramApiClient
     {
