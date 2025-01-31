@@ -6,7 +6,6 @@ using ProductAPI.Domain.Product;
 using ProductAPI.Domain.ProductForSubscription;
 using ProductAPI.Domain.ProductForUser;
 using ProductAPI.Infrastructure;
-using ProductAPI.Infrastructure.Client;
 using SubscriberAPI.Application.RabbitQM;
 
 namespace ProductAPI.Controllers
@@ -142,7 +141,7 @@ namespace ProductAPI.Controllers
 
                     products.Add(productForSubscription);
                 }
-                var foundProductsList = await _serviceForSub.ProductHandler(products);
+                var foundProductsList = await _serviceForSub.ProductForSubHandler(products);
                 var response = foundProductsList.Select(r => new FoundProductForSubResponse
                 {
                     UserId = r.UserId,
@@ -163,25 +162,25 @@ namespace ProductAPI.Controllers
         }
 
 
-        [Route("SearchBrands", Name = "SearchBrands")]
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<FoundBrandForTelegramResponse>>> SearchBrands()
-        {
-            try
-            {
-                var brands = await _repository.GetBrandForMenu();
-                if (brands == null) { return NotFound(); }
-                var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b}).ToList();
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[SearchBrands]:Failed to found brand");
-                return StatusCode(500, "InternalServerError");
-            }
-        }
+        //[Route("SearchBrands", Name = "SearchBrands")]
+        //[HttpGet]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        //public async Task<ActionResult<List<FoundBrandForTelegramResponse>>> SearchBrands()
+        //{
+        //    try
+        //    {
+        //        var brands = await _repository.GetBrandForMenu();
+        //        if (brands == null) { return NotFound(); }
+        //        var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b}).ToList();
+        //        return Ok(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "[SearchBrands]:Failed to found brand");
+        //        return StatusCode(500, "InternalServerError");
+        //    }
+        //}
     }
 }

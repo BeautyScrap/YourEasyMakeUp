@@ -71,35 +71,37 @@ namespace ProductAPI.Infrastructure.Client
         private async Task<Product> HtmlToProduct(HtmlNode node)
         {
 
-            var idNode = node.SelectSingleNode(".//div[@class='product-tile product-tile-with-legal clickable omnibus-tile']/@data-itemid")?.GetAttributeValue("data-itemid", "");
+            //var idNode = node.SelectSingleNode(".//div[@class='product-tile product-tile-with-legal clickable omnibus-tile']/@data-itemid")?.GetAttributeValue("data-itemid", "");
             var brandNode = node.SelectSingleNode(".//span[@class='product-brand']")?.InnerText;
             var nameNode = node.SelectSingleNode(".//h3[@class='product-title bidirectional']/span[@class='summarize-description title-line title-line-bold']")?.InnerText;
             var priceString = node.SelectSingleNode(".//span[@class='price-sales-standard' or @class='product-sales-price black-price']")?.InnerText.Trim().Replace(" &#8364;", "").Replace(" Ab:", "");
             var imageUrlNode = node.SelectSingleNode(".//img[@class='product-first-img']/@src")?.GetAttributeValue("src", "");
-            var url = node.SelectSingleNode(".//a[@class='product-tile-link']/@href")?.GetAttributeValue("href", "");
+            var urlNode = node.SelectSingleNode(".//a[@class='product-tile-link']/@href")?.GetAttributeValue("href", "");
 
-            var innerProductResponse = await _httpClient.GetAsync(url);
+            var innerProductResponse = await _httpClient.GetAsync(urlNode);
             var innerProductResponseString = await innerProductResponse.Content.ReadAsStringAsync();
             var productHtmlDocument = new HtmlDocument();
             productHtmlDocument.LoadHtml(innerProductResponseString);
 
             var categoryNode = productHtmlDocument.DocumentNode.SelectSingleNode(".//div[@class='breadcrumb pdp-breadcrumb']//div[@class='breadcrumb-element'][4]/a/@title")?.GetAttributeValue("title", "");
 
-            if (idNode == null || brandNode == null || nameNode == null || priceString == null || imageUrlNode == null || url == null || categoryNode == null)
+            if ( brandNode == null || nameNode == null || priceString == null || imageUrlNode == null || urlNode == null || categoryNode == null)
             {
                 return null;
             }
-            var product = new Product
-            {
-                SiteId = idNode,
-                Brand = brandNode,
-                Name = nameNode,
-                Category = categoryNode,
-                Price = decimal.Parse(priceString),
-                Url = url,
-                ImageUrl = imageUrlNode
-            };
+            var price = decimal.Parse(priceString);
+
+            var product = Product.CreateProduct(brandNode, nameNode, price, categoryNode, urlNode, imageUrlNode);
             return product;
+            //var product = new Product
+            //{
+            //    Brand = brandNode,
+            //    Name = nameNode,
+            //    Category = categoryNode,
+            //    Price = decimal.Parse(priceString),
+            //    Url = url,
+            //    ImageUrl = imageUrlNode
+            //};
         }
     }
 }

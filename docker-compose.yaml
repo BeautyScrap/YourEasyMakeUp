@@ -35,18 +35,6 @@ services:
       - ~/.docker-conf/rabbitmq/data:/var/lib/rabbitmq
       - ~/.docker-conf/rabbitmq/log:/var/log/rabbitmq
 
-  mongo:
-    profiles: [infra, all]
-    container_name: mongo
-    image: mongo
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-
   subscriber-api:
     profiles: [all]
     container_name: subscriber-api
@@ -72,12 +60,12 @@ services:
     environment:
       SUBSCRIBER_SERVICE_URL: http://subscriber-api
       TELEGRAM_SERVICE_URL: http://telegram-bot-api
-      ATLAS_URI: "mongodb://mongo:27017"
+      POSTGRES_CONNECTION_STRING: "Host=postgres;Database=productDb;Username=postgres;Password=mypassword123!"
     ports:
       - "8082:80"
     depends_on:
+      - postgres
       - rabbit
-      - mongo
 
   telegram-bot-api:
     profiles: [all]
@@ -88,13 +76,12 @@ services:
     environment:
       SUBSCRIBER_SERVICE_URL: http://subscriber-api
       PRODUCT_SERVICE_URL: http://product-api
-      ATLAS_URI: "mongodb://mongo:27017"
+      POSTGRES_CONNECTION_STRING: "Host=postgres;Database=telegramBotDb;Username=postgres;Password=mypassword123!"
     ports:
       - "8083:80"
     depends_on:
+      - postgres
       - rabbit
-      - mongo
 
 volumes:
   postgres-data:
-  mongo-data:

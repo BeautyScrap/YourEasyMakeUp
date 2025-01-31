@@ -11,7 +11,7 @@ namespace ProductAPI.Application
         {
             _productRepository = productRepository;
         }
-        public async Task<List<AvaliableProduct>> ProductHandler(List<ProductForSub> products)
+        public async Task<List<AvaliableProduct>> ProductForSubHandler(List<ProductForSub> products)
         {
             var listWithProducts = new List<AvaliableProduct>();
 

@@ -1,12 +1,11 @@
-﻿using ProductAPI.Contracts.DouglasContract;
-using ProductAPI.Domain.Douglas;
+﻿using ProductAPI.Domain.Douglas;
 using ProductAPI.Domain.Product;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace ProductAPI.Infrastructure.Client
 {
-    public class DouglasClient 
+    public class DouglasClient //  пока дуглас не использую! только сефора
     {
         private readonly HttpClient _httpClient;
         public Site Site => Site.Douglas;
@@ -32,8 +31,8 @@ namespace ProductAPI.Infrastructure.Client
             var url = GetSectionUrl(sectionMapping[section], pagenumber);
             var httpResponse = await _httpClient.GetAsync(url);
             var jsonString = await httpResponse.Content.ReadAsStringAsync();
-            var douglasProducts = JsonSerializer.Deserialize<DouglasResponse>(jsonString, _options);
-            var products = douglasProducts.Products.Select(p => ToProduct(p));
+            var douglasProducts = JsonSerializer.Deserialize<List<DouglasProduct>>(jsonString, _options);
+            var products = douglasProducts.Select(p => Product.CreateProduct(p.Brand.Name, p.BaseProductName, p.Price.Value, p.Classifications.Name, p.Url, p.Images.Url));           
             return products;
         }
 
@@ -42,19 +41,19 @@ namespace ProductAPI.Infrastructure.Client
             return $"{_baseUrl}{section}/03?page={pagenumber}"; 
         }
 
-        private static Product ToProduct(DouglasProduct p)
-        {
-            var product = new Product
-            {
-                SiteId = p.Code,
-                Url = $"https://www.douglas.de{p.Url}",
-                Price = p.Price.Value,
-                ImageUrl = p.Images.First().Url,
-                Brand = p.Brand.Name,
-                Name = p.BaseProductName,
-                Category = p.Classifications.First().Name,
-            };
-            return product;
-        }
+        //private static Product ToProduct(DouglasProduct p)// надо придумать как изменить этот метод, потому что мне он уже не подходит
+        //{
+        //    var product = new Product
+        //    {
+        //        SiteId = p.Code,
+        //        Url = $"https://www.douglas.de{p.Url}",
+        //        Price = p.Price.Value,
+        //        ImageUrl = p.Images.First().Url,
+        //        Brand = p.Brand.Name,
+        //        Name = p.BaseProductName,
+        //        Category = p.Classifications.First().Name,
+        //    };
+        //    return product;
+        //}
     }
 }
