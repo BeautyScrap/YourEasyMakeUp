@@ -17,10 +17,11 @@ namespace ProductAPI.Domain.Product
         public Product()
         {
         }
-        public static Product CreateProduct(string brand, string name, decimal price, string category, string url, string imageUrl)
+        public static Product CreateProduct(Site site, string brand, string name, decimal price, string category, string url, string imageUrl)
         {
             Product product = new Product() 
             {
+                Site = site,
                 Brand = brand,
                 Name = name,
                 Price = price,
@@ -35,7 +36,7 @@ namespace ProductAPI.Domain.Product
         {
             ProductDto dto = new ProductDto()
             { 
-                Site = Site,
+                Site = Site.Value,// AK TODO может быть Value  подойдет, хотя наверно нет
                 Brand = Brand,
                 Name = Name,
                 Price = Price,

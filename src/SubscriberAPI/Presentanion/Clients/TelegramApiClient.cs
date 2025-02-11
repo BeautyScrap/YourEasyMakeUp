@@ -18,7 +18,7 @@ namespace SubscriberAPI.Presentanion.Clients
             };
             client.Timeout = TimeSpan.FromSeconds(300);
         }
-        public async Task SendFoundProduct(Subscription subscription)// AK TODO вопрос: я какой то ответ от другого сервиса должна получать по идем типо ОК и notFound, если пользак не получил свой продукт?
+        public async Task SendFoundProduct(Subscription subscription)// AK TODO  оставляю именно такой ответ
         {
             var request = new FoundProductForTelegramRequest()
             {
@@ -29,7 +29,7 @@ namespace SubscriberAPI.Presentanion.Clients
                 Url = subscription.Url,
                 UrlImage = subscription.UrlImage
             };
-            var httpRequest = await _client.PutAsJsonAsync("UpdateProduct", request);// AK TODO вопрос: -  метод Put  подойдет или нет?
+            var httpRequest = await _client.PutAsJsonAsync("UpdateProduct", request);
             httpRequest.EnsureSuccessStatusCode();
         }
     }

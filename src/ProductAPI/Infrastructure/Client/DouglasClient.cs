@@ -32,7 +32,7 @@ namespace ProductAPI.Infrastructure.Client
             var httpResponse = await _httpClient.GetAsync(url);
             var jsonString = await httpResponse.Content.ReadAsStringAsync();
             var douglasProducts = JsonSerializer.Deserialize<List<DouglasProduct>>(jsonString, _options);
-            var products = douglasProducts.Select(p => Product.CreateProduct(p.Brand.Name, p.BaseProductName, p.Price.Value, p.Classifications.Name, p.Url, p.Images.Url));           
+            var products = douglasProducts.Select(p => Product.CreateProduct(Site.Douglas,p.Brand.Name, p.BaseProductName, p.Price.Value, p.Classifications.Name, p.Url, p.Images.Url));           
             return products;
         }
 

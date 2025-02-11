@@ -1,4 +1,3 @@
-using MongoDB.Driver;
 using ProductAPI.Application;
 using ProductAPI.Infrastructure;
 using ProductAPI.Infrastructure.Client;
@@ -15,6 +14,7 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
     ? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
     : builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSingleton(connectionString);
 
 //builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("DataBaseSettings"));
 //builder.Services.AddSingleton<ProductRepository>();
@@ -34,14 +34,13 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//builder.Services.AddSingleton<IMongoClient>(new MongoClient(mongoDBSettings.ConnectionString));
 builder.Services.AddHttpClient<IProductsSiteClient, SephoraClient>();
 //builder.Services.AddHttpClient<IProductsSiteClient, DouglasClient>();
-//builder.Services.AddSingleton<IProductRepository, ProductRepository>();
-builder.Services.AddSingleton<IProductForSubService,  ProductForSubService>();
-builder.Services.AddSingleton<IProductForUserService, ProductForUserService>(); 
-builder.Services.AddSingleton<IProductHandler, ProductHandler>();
-builder.Services.AddSingleton<IRabbitMessageProducer, RabbitMessageProducer>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductForSubService,  ProductForSubService>();
+builder.Services.AddScoped<IProductForUserService, ProductForUserService>(); 
+builder.Services.AddScoped<IProductHandler, ProductHandler>();
+builder.Services.AddScoped<IRabbitMessageProducer, RabbitMessageProducer>();
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .WriteTo.File("log.txt",

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ProductAPI.Application;
+using ProductAPI.Contracts;
 using ProductAPI.Controllers;
 using ProductAPI.Domain.Product;
 using ProductAPI.Infrastructure;
@@ -11,13 +12,11 @@ namespace ProductAPI.Presentation
     [Route("")]
     public class StandartMethodsController : ControllerBase
     {
-        private readonly IProductRepository _repository;
         private readonly ILogger<ProductController> _logger;
         private readonly IEnumerable<IProductsSiteClient> _siteClient;
         private readonly IProductHandler _handler;
-        public StandartMethodsController(IProductRepository repository, ILogger<ProductController> logger, IEnumerable<IProductsSiteClient> client, IProductHandler handler)
+        public StandartMethodsController(ILogger<ProductController> logger, IEnumerable<IProductsSiteClient> client, IProductHandler handler)
         {
-            _repository = repository;
             _logger = logger;
             _siteClient = client;
             _handler = handler;
@@ -28,7 +27,7 @@ namespace ProductAPI.Presentation
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IEnumerable<Product>> CreateManyProducts() // использую только сефору
+        public async Task<ActionResult<List<CreateManyProductsResponse>>> CreateManyProducts() // использую только сефору
         {
             try
             {
@@ -42,47 +41,59 @@ namespace ProductAPI.Presentation
                         allListings.AddRange(products);
                     }
                 }
-                await _handler.CreateManyProductAsync(allListings);// тут я должна обращаться к сервису, который сделает из объекта dto и далее уже положит его в базу
+                await _handler.CreateManyProductAsync(allListings);
+                var response = allListings.Select(p => new CreateManyProductsResponse
+                {
+                    Site = p.Site,
+                    Brand = p.Brand,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Category = p.Category,
+                    Url = p.Url,
+                    ImageUrl = p.ImageUrl
+                }).ToList();
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[CreateManyProducts] : An error occurred while processing the request");
+                return StatusCode(500, "Internal Server Error.");
+            }
+        }
 
-                return allListings;// AK TODO Вопрос: Тут я долна что-то возвращать вообще? Может использовать patternResult?
+        [Route("UpsertAllProducts")] // UpdateManyProducts
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PutAllProducts()
+        {
+            try
+            {
+                var section = Section.Makeup;
+                var allListings = new List<Product>();
+                for (var pagenumber = 1; pagenumber < 4; pagenumber++)
+                {
+                    foreach (var client in _siteClient)
+                    {
+                        var products = await client.FetchFromSectionAndPage(section, pagenumber);
+                        allListings.AddRange(products);
+                    }
+                }
+                var result = await _handler.UpsertManyProducts(allListings);
+                if (result == false)
+                {
+                    return NotFound();
+                }
+                return Ok();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[GetProductsListings] : An error occurred while processing the request");
-                return (IEnumerable<Product>)StatusCode(500, "Internal Server Error.");
+                return StatusCode(500, "Internal Server Error.");
+
             }
         }
-
-        //[Route("UpsertAllProducts")]
-        //[HttpPut]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //public async Task<IEnumerable<Product>> PutAllProducts()
-        //{
-        //    try
-        //    {
-        //        var section = Section.Makeup;
-        //        var allListings = new List<Product>();
-        //        for (var pagenumber = 1; pagenumber < 4; pagenumber++)
-        //        {
-        //            foreach (var client in _siteClient)
-        //            {
-        //                var products = await client.FetchFromSectionAndPage(section, pagenumber);
-        //                allListings.AddRange(products);
-        //            }
-        //        }
-        //        await _repository.UpsertManyProducts(allListings);
-        //        return allListings;
-
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "[GetProductsListings] : An error occurred while processing the request");
-        //        return (IEnumerable<Product>)StatusCode(500, "Internal Server Error.");
-
-        //    }
-        //}
 
         //[HttpDelete("DeleteDuplicates")]
         //[ProducesResponseType(StatusCodes.Status200OK)]
@@ -103,27 +114,51 @@ namespace ProductAPI.Presentation
         //    }
         //}
 
-        //[HttpGet]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
-        //{
-        //    try
-        //    {
-        //        var allProducts = await _repository.GetProducts();
-        //        if (allProducts == null)
-        //        {
-        //            return NotFound();
-        //        }
-        //        return allProducts.ToList();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "[GetProducts] : An error occurred while processing the request");
-        //        return StatusCode(500, "Internal Server Error.");
-        //    }
-        //}
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        {
+            try
+            {
+                var allProducts = await _handler.GetAllProductsAsync();
+                if (allProducts == null)
+                {
+                    return NotFound();
+                }
+                return allProducts.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[GetProducts] : An error occurred while processing the request");
+                return StatusCode(500, "Internal Server Error.");
+            }
+        }
+        [HttpDelete("{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteProduct(string name)
+        {
+            try
+            {
+                var result = await _handler.DeleteProductAsync(name);
+                if (result is false)
+                {
+                    _logger.LogInformation($"Product with this name - {name} is not found");
+                    return NotFound();
+                }
+                _logger.LogInformation($"Product with this name - {name} is deleted");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[DeleteProduct]: Failed to delete user");
+                return StatusCode(500, "Failed to delete user.");
+            }
+        }
+
 
         //[HttpGet("{id:length(24)}")]
         //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Product))]
@@ -244,29 +279,5 @@ namespace ProductAPI.Presentation
         //    }
         //}
 
-        //[HttpDelete("{id}")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //public async Task<IActionResult> DeleteProduct(string id)
-        //{
-        //    try
-        //    {
-        //        var product = await _repository.Get(id);
-        //        if (product is null)
-        //        {
-        //            _logger.LogInformation($"Product with this id {id} is not found");
-        //            return NotFound();
-        //        }
-        //        await _repository.Delete(id);
-        //        _logger.LogInformation("ActionResult = {@id} - product with this id is deleted", id);
-        //        return Ok();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "[DeleteProduct]: Failed to delete user");
-        //        return StatusCode(500, "Failed to delete user.");
-        //    }
-        //}
     }
 }

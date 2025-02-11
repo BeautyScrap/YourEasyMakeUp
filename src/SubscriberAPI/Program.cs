@@ -1,6 +1,5 @@
 using SubscriberAPI.Application;
 using SubscriberAPI.Infrastructure;
-using System.Text.Json;
 using FluentValidation;
 using SubscriberAPI.Contracts;
 using SubscriberAPI.Presentanion;

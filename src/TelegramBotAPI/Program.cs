@@ -18,7 +18,7 @@ builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnC
 var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
     ? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
     : builder.Configuration.GetConnectionString("DefaultConnection");
-
+builder.Services.AddSingleton(connectionString);
 //builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));  
 
 //builder.Services.AddSingleton<UserStateRepository>(); 

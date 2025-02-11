@@ -91,17 +91,8 @@ namespace ProductAPI.Infrastructure.Client
             }
             var price = decimal.Parse(priceString);
 
-            var product = Product.CreateProduct(brandNode, nameNode, price, categoryNode, urlNode, imageUrlNode);
+            var product = Product.CreateProduct(Site.Sephora ,brandNode, nameNode, price, categoryNode, urlNode, imageUrlNode);
             return product;
-            //var product = new Product
-            //{
-            //    Brand = brandNode,
-            //    Name = nameNode,
-            //    Category = categoryNode,
-            //    Price = decimal.Parse(priceString),
-            //    Url = url,
-            //    ImageUrl = imageUrlNode
-            //};
         }
     }
 }

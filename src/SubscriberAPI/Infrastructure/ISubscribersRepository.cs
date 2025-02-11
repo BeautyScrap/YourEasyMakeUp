@@ -5,9 +5,9 @@ namespace SubscriberAPI.Infrastructure
 {
     public interface ISubscribersRepository
     {
-        Task<IEnumerable<SubscriptionDto>> GetAllSubscribersAsync(); //  тут тоже должно вернуться Dto объект, как и вдругих методах репозитория
-                                                                     //  ,а в cервисе преобразовать dto уже в объект Subscription
-        Task<SubscriptionDto> GetSubscriberAsync(string userId);
+        Task<IEnumerable<SubscriptionDto>> GetAllSubscribersAsync(); 
+        Task<SubscriptionDto> GetSubscriberAsync(string userId);// AK TODO потом переделать эти методы так, чтобы в агрементах были сами объекты,
+                                                                // а не их DTo,  и возвращали методы тоже Объекты!
         Task CreateAsync(SubscriptionDto subscriptionDto);
         Task<int> UpdateAsync(SubscriptionDto subscriptionDto);
         Task<int> DeleteAsync(string userId);

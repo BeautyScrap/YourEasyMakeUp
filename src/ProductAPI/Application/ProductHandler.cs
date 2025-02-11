@@ -11,31 +11,36 @@ namespace ProductAPI.Application
         {
             _repository = repository;
         }
-        public async Task CreateManyProductAsync(IEnumerable<Product> products)// AK TODO вопрос:до какого уровня пробрасывать лист с продуктами? или в репозиторий тоже кидать список с продуктами  dto?
+        public async Task CreateManyProductAsync(IEnumerable<Product> products)
         {
-            foreach (var product in products) 
-            { 
-                var dto = product.ToDto();
-                await _repository.CreateAsync(dto);// AK TODO lastUpdate -  потестировать как теперь продукты сохраняются в новую базу
+            await _repository.CreateMany(products);
+        }
+
+        public async Task<bool> UpsertManyProducts(IEnumerable<Product> products)
+        {
+            var result = await _repository.UpdateManyProducts(products);
+            if (result > 0)
+            {
+                return true;
             }
+            return false;
         }
-
-        public Task<bool> DeleteProductAsync(Product product)
+        public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {
-            throw new NotImplementedException();
+            var result = await _repository.GetProducts();
+            return result.ToList();
         }
-
-        public Task<IEnumerable<Product>> GetAllProductsAsync()
+        public async Task<bool> DeleteProductAsync(string name)
         {
-            throw new NotImplementedException();
+            var result = await _repository.Delete(name);
+            if (result > 0)
+            {
+                return true;
+            }
+            return false;
         }
 
-        public Task<Product> GetProductAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpsertManyProducts(IEnumerable<Product> products)
+    public Task<Product> GetProductAsync()
         {
             throw new NotImplementedException();
         }

@@ -18,20 +18,21 @@ namespace ProductAPI.Controllers
         private readonly ILogger<ProductController> _logger;
         private readonly IRabbitMessageProducer _messageProducer;
         private readonly IProductForSubService _serviceForSub;
-        private readonly IProductForUserService _serviceForUse; 
+        private readonly IProductForUserService _serviceForUser;
         public ProductController(
             IProductRepository productRepository, 
             ILogger<ProductController> logger,
             IRabbitMessageProducer rabbitMessage, 
             IProductForSubService serviceSub,
 
-            IProductForUserService serviceProduct)
+            IProductForUserService serviceProduct,
+            IProductHandler handler)
         {
             _repository = productRepository;
             _logger = logger;
             _messageProducer = rabbitMessage;
             _serviceForSub = serviceSub;
-            _serviceForUse = serviceProduct;
+            _serviceForUser = serviceProduct;
         }
 
         [HttpPost]
@@ -51,7 +52,7 @@ namespace ProductAPI.Controllers
                 var searchProducts = ProductResultForUser.CreateProductForSearch(
                     request.Brand, 
                     request.Category);
-                var foundProductList = await _serviceForUse.Handler(searchProducts);
+                var foundProductList = await _serviceForUser.Handler(searchProducts);
                 if(foundProductList == null) 
                 { 
                     return NotFound(); 
@@ -92,7 +93,7 @@ namespace ProductAPI.Controllers
                 var searchProducts = ProductResultForUser.CreateProductForSearch(
                     request.Brand,
                     request.Category);
-                var foundProduct = await _serviceForUse.HandlerOne(searchProducts);
+                var foundProduct = await _serviceForUser.HandlerOne(searchProducts);
                 if (foundProduct == null)
                 {
                     return NotFound();
@@ -101,10 +102,10 @@ namespace ProductAPI.Controllers
                 {
                     Brand = foundProduct.Brand,
                     Name = foundProduct.Name,
-                    Category = foundProduct.Category,
                     Price = foundProduct.Price,
-                    ImageUrl = foundProduct.ImageUrl,
-                    Url = foundProduct.Url
+                    Category = foundProduct.Category,
+                    Url = foundProduct.Url,
+                    ImageUrl = foundProduct.ImageUrl
 
                 };
                 return Ok(response);
@@ -162,25 +163,25 @@ namespace ProductAPI.Controllers
         }
 
 
-        //[Route("SearchBrands", Name = "SearchBrands")]
-        //[HttpGet]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        //public async Task<ActionResult<List<FoundBrandForTelegramResponse>>> SearchBrands()
-        //{
-        //    try
-        //    {
-        //        var brands = await _repository.GetBrandForMenu();
-        //        if (brands == null) { return NotFound(); }
-        //        var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b}).ToList();
-        //        return Ok(response);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "[SearchBrands]:Failed to found brand");
-        //        return StatusCode(500, "InternalServerError");
-        //    }
-        //}
+        [Route("SearchBrands", Name = "SearchBrands")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<List<FoundBrandForTelegramResponse>>> SearchBrands()
+        {
+            try
+            {
+                var brands = await _serviceForUser.GetBrandForMenu();
+                if (brands == null) { return NotFound(); }
+                var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b }).ToList();
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[SearchBrands]:Failed to found brand");
+                return StatusCode(500, "InternalServerError");
+            }
+        }
     }
 }

@@ -1,43 +1,153 @@
 ﻿using Dapper;
-using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using Npgsql;
 using ProductAPI.Domain.Product;
-using ProductAPI.Domain.ProductForSubscription;
 using ProductAPI.Domain.ProductForUser;
-using ProductAPI.Infrastructure.Persistence;
-using System.Runtime.InteropServices.Marshalling;
+using System.Xml.Linq;
+using System;
 
 namespace ProductAPI.Infrastructure
 {
     public class ProductRepository : IProductRepository
     {
-        //private readonly IMongoCollection<Product> _productCollection;//  вводим экземпляр  _productCollection класса IMongoCollection дла работы с базой данных
         private readonly ILogger<ProductRepository> _logger;
         private readonly string _connectionString;
-        public ProductRepository(string connectionString, ILogger<ProductRepository> logger) //вводим конструктор класса CatalogContext. Конструктор принимает два аргумента: DataBaseConfig configuration и IMongoClient client. Класс DataBaseConfig используется для передачи конфигурационных данных, а IMongoClient представляет клиент MongoDB, который используется для установления соединения с базой данных.
+        public ProductRepository(string connectionString, ILogger<ProductRepository> logger)
         {
             _connectionString = connectionString;
-            //var database = client.GetDatabase(configuration.DatabaseName); //переменная database инициализируется с помощью метода GetDatabase, вызываемого из объекта client, и передается имя базы данных из объекта configuration.
-            //_productCollection = database.GetCollection<Product>("Products") ?? throw new ArgumentNullException(nameof(_productCollection)); ; // GetCollection<Product> - это метод, который возвращает коллекцию объектов типа Product.
             _logger = logger;
         }
+        public async Task CreateMany(IEnumerable<Product> products) // insert добавляет строки в таблицу
+        {
+            foreach (var product in products)
+            {
+                var dto = product.ToDto();
+                using (var connection = new NpgsqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    string query =
+                        @"INSERT INTO products (site, brand, name, price, category, url, imageurl) 
+                    VALUES (@Site, @Brand, @Name, @Price, @Category, @Url, @ImageUrl)";
+                    await connection.ExecuteAsync(query, dto);
+                }
+            }
+        }
 
-        public async Task CreateAsync(ProductDto dto)// или (List<ProductDto> dto)
+
+        public async Task<int> UpdateManyProducts(IEnumerable<Product> products)// AK TODO  номальный ли метод получился с такими уровнями изоляции транзакций?
+        {
+            int totalUpdated = 0;
+            using (var connection = new NpgsqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (var transaction = await connection.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        foreach (var product in products)
+                        {
+                            var dto = product.ToDto();
+                            string query =
+                                    @"UPDATE public.products
+                                    SET site = @Site, 
+                                        brand = @Brand, 
+                                        name = @Name, 
+                                        price = @Price, 
+                                        category = @Category, 
+                                        url = @Url,
+                                        imageurl = @Imageurl
+                                    WHERE name = @Name";
+                            int result = await connection.ExecuteAsync(query, dto);
+                            totalUpdated += result;
+                        };
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw ex;
+                    }
+                }
+            }
+            return totalUpdated;
+        }
+
+        public async Task<IEnumerable<Product>> GetProducts()
+        {
+            IEnumerable<ProductDto> productDtos;
+            using (var connection = new NpgsqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                string query = @"
+            SELECT 
+                ""site"" AS Site,
+                ""brand"" AS Brand,
+                ""name"" AS Name,
+                ""price"" AS Price,
+                ""category"" AS Category,
+                ""url"" AS Url,
+                ""imageurl"" AS Imageurl
+            FROM public.products";
+                productDtos = await connection.QueryAsync<ProductDto>(query);
+            }
+            var products = productDtos.Select(dto => Product.CreateProduct
+                (
+                dto.Site.Value,
+                dto.Brand,
+                dto.Name,
+                dto.Price,
+                dto.Category,
+                dto.Url,
+                dto.ImageUrl
+                )
+            ).ToList();
+            return products;
+        }
+
+        public async Task<int> Delete(string name)
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
                 string query =
-                    @"INSERT INTO Products (site, brand, name, price, category, url, imageUrl)
-                    VALUES (@Site, @Brand, @Name, @Price, @Category, @Url, ImageUrl)";
-                await connection.ExecuteAsync(query, dto);
+                    @"DELETE
+                      FROM public.products  
+                      WHERE name = @Name";
+                return await connection.ExecuteAsync(query, new {name});
             }
         }
-        //public async Task<IEnumerable<Product>> GetProducts()
-        //{
-        //    return await _productCollection.Find(_ => true).ToListAsync();//AK TODO LastUpdate! changed all this methods to sql query and create the new tables for 2 services 
-        //}
+        public async Task<List<string>> GetBrands()
+        {
+            using (var connnection = new NpgsqlConnection(_connectionString))
+            {
+                await connnection.OpenAsync();
+                string query =
+                    @"SELECT DISTINCT ""brand""
+                      FROM public.products 
+                      LIMIT 5";
+                var brand = await connnection.QueryAsync<string>(query);
+                return brand.ToList();
+            }
+        }
+
+        public async Task<AvaliableResultForUser?> GetOneProductResultForUser(ProductResultForUser productForUser)
+        {
+            var dto = productForUser.ToDto();
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            string query =
+                    @"SELECT ""brand"" AS Brand,
+                             ""name"" AS Name,
+                             ""price"" AS Price,
+                             ""category"" AS Category,
+                             ""url"" AS Url,
+                             ""imageurl"" AS Imageurl
+                      FROM public.products
+                      WHERE brand = @Brand AND category = @Category
+                      LIMIT 1";
+            var resultDto = await connection.QueryFirstOrDefaultAsync<AvaliableResultForUserDto>(query, dto);
+            return resultDto is not null ? AvaliableResultForUser.FromDto(resultDto): null; 
+        }
+
 
         //public async Task<Product> Get(string id)
         //{
@@ -76,12 +186,7 @@ namespace ProductAPI.Infrastructure
         //    return updateResult.IsAcknowledged && updateResult.ModifiedCount > 0;
         //}
 
-        //public async Task<bool> Delete(string id)
-        //{
-        //    var filter = Builders<Product>.Filter.Eq(_ => _.Id, id);
-        //    var deleteProduct = await _productCollection.DeleteOneAsync(filter);
-        //    return deleteProduct.IsAcknowledged && deleteProduct.DeletedCount > 0;
-        //}
+
 
         //public async Task UpsertProduct(Product product)
         //{
@@ -109,16 +214,6 @@ namespace ProductAPI.Infrastructure
         //    }
         //}
 
-        //public async Task<List<string>> GetBrandForMenu()
-        //{
-        //    var res = await _productCollection
-        //        .AsQueryable()
-        //        .Select(x => x.Brand)
-        //        .Take(10)
-        //        .Distinct()
-        //        .ToListAsync();
-        //    return res;
-        //}
 
         //public async Task<AvaliableProductDto?> GetProductForOneSubscriber(ProductForSubDto productForSearch)
         //{

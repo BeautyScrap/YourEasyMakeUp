@@ -9,7 +9,7 @@ namespace ProductAPI.Application
         Task<Product> GetProductAsync();
         Task UpsertProduct(Product product);// возможно этот метод и не нужен будет
         Task<bool> UpsertManyProducts(IEnumerable<Product> products);
-        Task<bool> DeleteProductAsync(Product product);
+        Task<bool> DeleteProductAsync(string name);
 
 
     }
