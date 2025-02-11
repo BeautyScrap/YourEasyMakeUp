@@ -1,9 +1,10 @@
 ﻿using YourEasyRent.Entities;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.UserState;
-using YourEasyRent.TelegramMenu;
 using YourEasyRent.Entities.ProductForSubscription;
 using TelegramBotAPI.Services;
+using TelegramBotAPI.Application.TelegramMenu;
+using TelegramBotAPI.Infrastructure.RabbitQM;
 
 namespace YourEasyRent.Services
 {

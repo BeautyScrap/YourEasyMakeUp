@@ -17,7 +17,7 @@ namespace SubscriberAPI.Domain
         public decimal Price { get; private set; }
         public string? Url { get; private set; }
         public string? UrlImage { get; private set; }// AK TODO Сюда еще можно добавить поле с Enum статусами  и метод, который будет задавать эти статусы
-        public Subscription() {}
+        public Subscription() {} //можно сделать protected\
         public static Subscription CreateNewSubscription(string userId, string? chatId, string? brand, string name, decimal price)
         {
             var subscription = new Subscription
@@ -30,8 +30,7 @@ namespace SubscriberAPI.Domain
             };
             return subscription;
         }
-        public static Subscription CreateProductforSub(string userId, string? brand, string name, decimal price, string url, string urlImage) //AK TODO вопрос: Считается ли этот объект подписчиком, если у него воявляются новые поля, когда я нахожу этот объект в другом сервисе?
-                                                                                                                                              //Или можно использовать второй статический метод "CreateProductforSub"
+        public static Subscription CreateProductforSub(string userId, string? brand, string name, decimal price, string url, string urlImage) //AK TODO все оставляю как есть                                                                                                                                            //Или можно использовать второй статический метод "CreateProductforSub"
         {
             var subscription = new Subscription
             {

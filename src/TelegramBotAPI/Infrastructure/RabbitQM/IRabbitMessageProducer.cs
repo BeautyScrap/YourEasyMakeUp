@@ -1,4 +1,4 @@
-﻿namespace YourEasyRent.Services
+﻿namespace TelegramBotAPI.Infrastructure.RabbitQM
 {
     public interface IRabbitMessageProducer
     {

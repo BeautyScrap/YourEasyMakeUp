@@ -3,46 +3,47 @@ using MongoDB.Driver;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services;
 using Telegram.Bot;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Serialization;
 using Serilog;
-using YourEasyRent.UserState;
-using YourEasyRent.TelegramMenu;
 using TelegramBotAPI.Services;
-
+using TelegramBotAPI.Application.TelegramMenu;
+using TelegramBotAPI.Infrastructure.RabbitQM;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     ContentRootPath = AppContext.BaseDirectory,
     Args = args,
 });
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
+var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
+    ? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
+    : builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSingleton(connectionString);
+//builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));  
 
-builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));  
+//builder.Services.AddSingleton<UserStateRepository>(); 
 
-builder.Services.AddSingleton<UserStateRepository>(); 
+//// This is the same as it used to be
+//var databaseConfig = new DataBaseConfig();
+//builder.Configuration.Bind("DatabaseSettings", databaseConfig);
 
-// This is the same as it used to be
-var databaseConfig = new DataBaseConfig();
-builder.Configuration.Bind("DatabaseSettings", databaseConfig);
+//// Should be changed to be based on evironment value
+//if( Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+//{
+//    databaseConfig.ConnectionString = Environment.GetEnvironmentVariable("ATLAS_URI")!;
+//}
 
-// Should be changed to be based on evironment value
-if( Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
-{
-    databaseConfig.ConnectionString = Environment.GetEnvironmentVariable("ATLAS_URI")!;
-}
-
-builder.Services.AddSingleton(databaseConfig);
+//builder.Services.AddSingleton(databaseConfig);
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));    
+//builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));    
 builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
 builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>();
-builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
+//builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
 
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";

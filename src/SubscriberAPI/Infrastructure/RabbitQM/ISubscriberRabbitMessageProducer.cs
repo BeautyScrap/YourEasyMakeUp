@@ -1,4 +1,4 @@
-﻿namespace SubscriberAPI.Application.RabbitQM
+﻿namespace SubscriberAPI.Infrastructure.RabbitQM
 {
     public interface ISubscriberRabbitMessageProducer
     {

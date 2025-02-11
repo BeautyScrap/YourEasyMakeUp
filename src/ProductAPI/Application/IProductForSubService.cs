@@ -5,6 +5,6 @@ namespace ProductAPI.Application
 {
     public interface IProductForSubService
     {
-        Task<List<AvaliableProduct>> ProductHandler(List<ProductForSub> products);
+        Task<List<AvaliableProduct>> ProductForSubHandler(List<ProductForSub> products);
     }
 }

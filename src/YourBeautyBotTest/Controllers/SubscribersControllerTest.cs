@@ -5,11 +5,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Validations;
 using Moq;
 using SubscriberAPI.Application;
-using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Contracts;
 using SubscriberAPI.Domain;
-using SubscriberAPI.Infrastructure.Clients;
+using SubscriberAPI.Infrastructure.RabbitQM;
 using SubscriberAPI.Presentanion;
+using SubscriberAPI.Presentanion.Clients;
 using System.Security.Cryptography.Xml;
 
 namespace YourBeautyBotTest.Controllers

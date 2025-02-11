@@ -72,8 +72,7 @@ namespace YourEasyRentTest.Controllers
             //Assert
             result.Should().BeOfType<BadRequestObjectResult>();
             var badRequestResult = result as BadRequestObjectResult;
-            badRequestResult!.Value.Should().Be("Exception"); // AK TODO lastUpdate  добавила все проекты для тестирования контроллеров и всего остального
-            
+            badRequestResult!.Value.Should().Be("Exception"); 
         }
     }
 }

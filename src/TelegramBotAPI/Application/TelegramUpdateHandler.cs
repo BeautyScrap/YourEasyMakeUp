@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TelegramBotAPI.Application.TelegramMenu;
 using YourEasyRent.Entities.ProductForSubscription;
-using YourEasyRent.TelegramMenu;
 
 namespace TelegramBotAPI.Services
 {
@@ -11,7 +11,7 @@ namespace TelegramBotAPI.Services
         {
             _telegramSender = telegramSender;
         }
-        public async Task HandlerUpdateAsync(ProductForSubscription newProduct)// AK TODO вопрос: это метод что-то должен вернуть?
+        public async Task HandlerUpdateAsync(ProductForSubscription newProduct)
         {
             var userId = newProduct.UserId;
             await _telegramSender.SendSubscriberProduct(userId, newProduct); 

@@ -14,7 +14,7 @@ namespace SubscriberAPI.Infrastructure
             _connectionString = connectonString;
         }
 
-        public async Task CreateAsync(SubscriptionDto subscriptionDto)// AK TODO проверить как будет вести себя поле url при null                                                              
+        public async Task CreateAsync(SubscriptionDto subscriptionDto)// AK TODO проверить как будет вести себя поле url при null, сделать это поле null  в самом pgAdmin                                                              
         {
             using (var connection = new NpgsqlConnection(_connectionString))
             {

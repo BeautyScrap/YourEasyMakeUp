@@ -11,24 +11,25 @@ namespace ProductAPI.Application
         {
             _productRepository = productRepository;
         }
-        public async Task<List<AvaliableProduct>> ProductHandler(List<ProductForSub> products)
+        public async Task<List<AvaliableProduct>> ProductForSubHandler(List<ProductForSub> products)
         {
-            var listWithProducts = new List<AvaliableProduct>();
+            //var listWithProducts = new List<AvaliableProduct>();
 
-            foreach (var product in products)
-            {
-                var productDto = product.ToDto();
-                var userId = productDto.UserId;
+            //foreach (var product in products)
+            //{
+            //    var productDto = product.ToDto();
+            //    var userId = productDto.UserId;
 
-                var resultProductDto = await _productRepository.GetProductForOneSubscriber(productDto);
-                if (resultProductDto == null)
-                {
-                    continue;
-                }
-                AvaliableProduct avaliableProduct = AvaliableProduct.FromDto(userId, resultProductDto);
-                listWithProducts.Add(avaliableProduct); 
-            }
-            return listWithProducts;
+            //    var resultProductDto = await _productRepository.GetProductForOneSubscriber(productDto);
+            //    if (resultProductDto == null)
+            //    {
+            //        continue;
+            //    }
+            //    AvaliableProduct avaliableProduct = AvaliableProduct.FromDto(userId, resultProductDto);
+            //    listWithProducts.Add(avaliableProduct); 
+            //}
+            //return listWithProducts;
+            throw new NotImplementedException();
         }
     }
 }

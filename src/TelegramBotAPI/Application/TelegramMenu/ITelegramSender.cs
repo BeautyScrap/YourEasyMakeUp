@@ -1,7 +1,7 @@
 ﻿using YourEasyRent.Entities;
 using YourEasyRent.Entities.ProductForSubscription;
 
-namespace YourEasyRent.TelegramMenu
+namespace TelegramBotAPI.Application.TelegramMenu
 {
     public interface ITelegramSender
     {

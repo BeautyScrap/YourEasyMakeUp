@@ -6,7 +6,6 @@ using ProductAPI.Domain.Product;
 using ProductAPI.Domain.ProductForSubscription;
 using ProductAPI.Domain.ProductForUser;
 using ProductAPI.Infrastructure;
-using ProductAPI.Infrastructure.Client;
 using SubscriberAPI.Application.RabbitQM;
 
 namespace ProductAPI.Controllers
@@ -19,20 +18,21 @@ namespace ProductAPI.Controllers
         private readonly ILogger<ProductController> _logger;
         private readonly IRabbitMessageProducer _messageProducer;
         private readonly IProductForSubService _serviceForSub;
-        private readonly IProductForUserService _serviceForUse; 
+        private readonly IProductForUserService _serviceForUser;
         public ProductController(
             IProductRepository productRepository, 
             ILogger<ProductController> logger,
             IRabbitMessageProducer rabbitMessage, 
             IProductForSubService serviceSub,
 
-            IProductForUserService serviceProduct)
+            IProductForUserService serviceProduct,
+            IProductHandler handler)
         {
             _repository = productRepository;
             _logger = logger;
             _messageProducer = rabbitMessage;
             _serviceForSub = serviceSub;
-            _serviceForUse = serviceProduct;
+            _serviceForUser = serviceProduct;
         }
 
         [HttpPost]
@@ -52,7 +52,7 @@ namespace ProductAPI.Controllers
                 var searchProducts = ProductResultForUser.CreateProductForSearch(
                     request.Brand, 
                     request.Category);
-                var foundProductList = await _serviceForUse.Handler(searchProducts);
+                var foundProductList = await _serviceForUser.Handler(searchProducts);
                 if(foundProductList == null) 
                 { 
                     return NotFound(); 
@@ -93,7 +93,7 @@ namespace ProductAPI.Controllers
                 var searchProducts = ProductResultForUser.CreateProductForSearch(
                     request.Brand,
                     request.Category);
-                var foundProduct = await _serviceForUse.HandlerOne(searchProducts);
+                var foundProduct = await _serviceForUser.HandlerOne(searchProducts);
                 if (foundProduct == null)
                 {
                     return NotFound();
@@ -102,10 +102,10 @@ namespace ProductAPI.Controllers
                 {
                     Brand = foundProduct.Brand,
                     Name = foundProduct.Name,
-                    Category = foundProduct.Category,
                     Price = foundProduct.Price,
-                    ImageUrl = foundProduct.ImageUrl,
-                    Url = foundProduct.Url
+                    Category = foundProduct.Category,
+                    Url = foundProduct.Url,
+                    ImageUrl = foundProduct.ImageUrl
 
                 };
                 return Ok(response);
@@ -142,7 +142,7 @@ namespace ProductAPI.Controllers
 
                     products.Add(productForSubscription);
                 }
-                var foundProductsList = await _serviceForSub.ProductHandler(products);
+                var foundProductsList = await _serviceForSub.ProductForSubHandler(products);
                 var response = foundProductsList.Select(r => new FoundProductForSubResponse
                 {
                     UserId = r.UserId,
@@ -172,9 +172,9 @@ namespace ProductAPI.Controllers
         {
             try
             {
-                var brands = await _repository.GetBrandForMenu();
+                var brands = await _serviceForUser.GetBrandForMenu();
                 if (brands == null) { return NotFound(); }
-                var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b}).ToList();
+                var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b }).ToList();
                 return Ok(response);
             }
             catch (Exception ex)

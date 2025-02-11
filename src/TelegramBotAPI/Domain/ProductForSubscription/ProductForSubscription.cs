@@ -12,7 +12,6 @@ namespace YourEasyRent.Entities.ProductForSubscription
         public string? ChatId { get; private set; }
         public string Brand { get; private set; }
         public string Name { get; private set; }
-
         public decimal Price { get; private set; }
         public string? Url { get; private set; }
         public string? UrlImage { get; private set; }
