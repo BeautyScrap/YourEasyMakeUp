@@ -20,7 +20,7 @@ namespace ProductAPI.Infrastructure
         //
         //Task <IEnumerable<AvaliableResultForUserDto>> GetProductResultForUser(ProductResultForUserDto productForUser);
         Task <AvaliableResultForUser> GetOneProductResultForUser(ProductResultForUser productForUser);
-        //Task<AvaliableProductDto> GetProductForOneSubscriber(ProductForSubDto productForSearch);
+        Task<AvaliableProduct> GetProductForOneSubscriber(string userId,ProductForSub productForSearch);
         //Task DeleteDuplicate();
     }
 }

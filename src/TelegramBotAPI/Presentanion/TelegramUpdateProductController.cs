@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Telegram.Bot.Types;
 using TelegramBotAPI.Services;
 using YourEasyRent.Contracts.ProductForSubscription;
 using YourEasyRent.Entities.ProductForSubscription;
+using System.Text.Json;
+using YourEasyRent.Controllers;
 
 namespace TelegramBotAPI.Controllers
 {
@@ -11,9 +14,11 @@ namespace TelegramBotAPI.Controllers
     public class TelegramUpdateProductController : ControllerBase
     {
         private readonly ITelegramUpdateHandler _updateHandler;
-        public TelegramUpdateProductController(ITelegramUpdateHandler updateHandler)
+        private readonly ILogger<TelegramUpdateProductController> _logger;
+        public TelegramUpdateProductController(ITelegramUpdateHandler updateHandler, ILogger<TelegramUpdateProductController> logger)
         {
             _updateHandler = updateHandler;
+            _logger = logger;
         }
         [HttpPut]
         [Route("UpdateProduct")]
@@ -21,6 +26,7 @@ namespace TelegramBotAPI.Controllers
         {
             try
             {
+                _logger.LogInformation("Update received: {update}", JsonSerializer.Serialize(request));
                 var newProduct = ProductForSubscription.CreateFoundNewProduct
                     (
                     request.UserId,
@@ -28,12 +34,12 @@ namespace TelegramBotAPI.Controllers
                     request.Name,
                     request.Price
                     );
-                newProduct.SetUrlAndUrlImage(request.Url, request.UrlImage);
+                newProduct.SetUrlAndUrlImage(request.Url, request.ImageUrl);
                 await _updateHandler.HandlerUpdateAsync(newProduct);
                 // AK TODO тут еще проверку сделать какой ответ пришел или bool
                 return Ok();
             }
-            catch(Exception ex )
+            catch(Exception ex)
             { 
                 return BadRequest(ex.Message);
             }

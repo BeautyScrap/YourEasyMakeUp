@@ -2,16 +2,16 @@
 {
     public enum MenuStatus
     {
-        Started,
-        MainMenu,
-        BrandMenu,
-        BrandChosen,
-        CategoryMenu,
-        CategoryChosen,
-        BackOnOneStep,
-        ReadyToResult,
-        SubscribedToTheProduct,
-        MenuAfterReceivingRresult
+        Started  = 0,
+        MainMenu = 1,
+        BrandMenu = 2,
+        BrandChosen = 3,
+        CategoryMenu = 4,
+        CategoryChosen = 5,
+        BackOnOneStep = 6,
+        ReadyToResult = 7,
+        SubscribedToTheProduct = 8,
+        MenuAfterReceivingRresult = 9
     }
 
 }

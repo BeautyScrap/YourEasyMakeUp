@@ -1,6 +1,4 @@
-﻿using MongoDB.Bson;
-using Telegram.Bot.Types;
-using YourEasyRent.Entities;
+﻿using YourEasyRent.Entities;
 
 namespace YourEasyRent.UserState
 {
@@ -8,45 +6,24 @@ namespace YourEasyRent.UserState
     {
         public string UserId { get; private set; } 
         public string? ChatId { get; private set; }
-        public string? Category { get; private set; }
+        public string? Category { get; private set; }// AK TODO  чекнуть что эти поля в базе могут быть null, тк они заполняются постепенно
         public string? Brand { get; private set; }
-
         public string? Name { get; private set; }
         public decimal? Price { get; private set; }
-    
-        public MenuStatus CurrentMenuStatus { get; private set; }
-        public IEnumerable<MenuStatus> HistoryOfMenuStatuses
-        {
-            get { return _historyOfMenuStatuses; }
-            private set { _historyOfMenuStatuses = (List<MenuStatus>)value; }
-        }
+        public MenuStatus MenuStatus { get; private set; }
         public bool IsFinished => IsReadyForSearch();
-
-        private List<MenuStatus> _historyOfMenuStatuses = new List<MenuStatus>();
-
+  
         public UserSearchState()
         {
         }
 
-        public UserSearchState(UserSearchStateDTO dto)
-        {
-            UserId = dto.UserId;
-            ChatId = dto.ChatId;
-            Category = dto.Category;
-            Brand = dto.Brand;
-            CurrentMenuStatus = dto.Status;
-            HistoryOfMenuStatuses = dto.HistoryOfMenuStatuses;
-            Name = dto.Name;
-            Price = dto.Price;
-            
-        }
         public static UserSearchState CreateNewUserSearchState(string userId) 
         {
             UserSearchState userSearchState = new UserSearchState
             {
                 UserId = userId,
-                HistoryOfMenuStatuses = new List<MenuStatus>(),
-                CurrentMenuStatus = MenuStatus.Started,
+                //HistoryOfMenuStatuses = new List<MenuStatus>(),
+                MenuStatus = MenuStatus.Started,
    
             };
             return userSearchState;
@@ -64,26 +41,19 @@ namespace YourEasyRent.UserState
         public void SetBrand(string brand)
         {
             Brand = brand;
-            CurrentMenuStatus = MenuStatus.BrandChosen;
+            MenuStatus = MenuStatus.BrandChosen;
         }
 
         public void SetCategory(string category)
         {
             Category = category;
-            CurrentMenuStatus = MenuStatus.CategoryChosen;
+            MenuStatus = MenuStatus.CategoryChosen;
         }
 
         public void AddStatusToHistory(MenuStatus status)
         {
-            _historyOfMenuStatuses.Add(status);
+            MenuStatus = status;
         }
-
-        public void BackOnPreviousStep(MenuStatus status)
-        {
-            _historyOfMenuStatuses.Last();
-            _historyOfMenuStatuses.Remove(status);
-        }
-
         public void GetNextMenu()
         {
             throw new NotImplementedException(); // от того какой будет следующий статус в основном классе TCH зависит показ следующего меню
@@ -99,7 +69,7 @@ namespace YourEasyRent.UserState
             return true;
         }
 
-        public UserSearchStateDTO ToDto()
+        public  UserSearchStateDTO ToDto()
         { 
             var userSearchStateDTO = new UserSearchStateDTO()
             {
@@ -107,13 +77,31 @@ namespace YourEasyRent.UserState
                 ChatId = ChatId,
                 Brand = Brand,
                 Category = Category,
-                Status = CurrentMenuStatus ,
-                HistoryOfMenuStatuses = _historyOfMenuStatuses,
+                Menu_status = MenuStatus,
                 Name = Name,
                 Price = Price ?? 0
             };
             return userSearchStateDTO;
         }
 
+        public static UserSearchState FromDto(string userId, UserSearchStateDTO dto)
+        {
+            UserSearchState userSearchState = new UserSearchState()
+            {
+                UserId = userId,
+                ChatId = dto.ChatId,
+                Brand = dto.Brand,
+                Category = dto.Category,
+                MenuStatus = dto.Menu_status.Value,
+                Name = dto.Name,
+                Price = dto.Price,
+            };
+            return userSearchState;
+        }
+
+
+
     }
 }
+
+

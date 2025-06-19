@@ -6,6 +6,6 @@
         string Name,
         decimal Price,
         string? Url,
-        string? UrlImage);
+        string? ImageUrl);
     
 }

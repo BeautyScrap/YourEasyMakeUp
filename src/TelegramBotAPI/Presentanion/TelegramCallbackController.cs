@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using YourEasyRent.Services;
-using YourEasyRent.DataBase.Interfaces;
 using Telegram.Bot.Types;
-using YourEasyRent.Entities.ProductForSubscription;
-using YourEasyRent.Contracts.ProductForSubscription;
+using System.Text.Json;
 
 namespace YourEasyRent.Controllers;
 
@@ -22,17 +20,19 @@ public class TelegramCallbackController : ControllerBase
 
     [HttpPost] 
     [Route("telegram/callback")]  
-    public async Task<IActionResult> ProcessCallback([FromBody] Update update)
+    public async Task<IActionResult> ProcessCallback([FromBody] Update update) 
     {
         try
         {
+            _logger.LogInformation("Update received: {update}", JsonSerializer.Serialize(update));
+
             TgButtonCallback tgButtonCallback = new TgButtonCallback(update);
             await _handler.HandleCallbackAsync(tgButtonCallback);
         }
         catch (Exception ex) 
-        {
-            _logger.LogError(ex, "[ProcessCallback] : Callback is not correct");
-            return BadRequest(ex);
+        { 
+            _logger.LogError( "[ProcessCallback] : Callback is not correct",ex);
+            return BadRequest();
         }
         _logger.LogInformation("CallbackIsDone");
         return Ok();

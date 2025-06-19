@@ -14,7 +14,7 @@ namespace YourEasyRent.Entities.ProductForSubscription
         public string Name { get; private set; }
         public decimal Price { get; private set; }
         public string? Url { get; private set; }
-        public string? UrlImage { get; private set; }
+        public string? ImageUrl { get; private set; }
         public ProductForSubscription() { }
 
         public static ProductForSubscription CreateProductForSubscription(UserSearchState userSearchState) // переносим одни данные в оъбект Subscriber
@@ -46,10 +46,10 @@ namespace YourEasyRent.Entities.ProductForSubscription
         {
             return $"{Brand}\n{Name}\n{Price}\n[Ссылка на продукт] {Url}";
         }
-        public void SetUrlAndUrlImage(string url, string urlImage)
+        public void SetUrlAndUrlImage(string url, string imageUrl)
         {
             Url = url;
-            UrlImage = urlImage;
+            ImageUrl = imageUrl; // LAST Update а зачем мне вообще нуже imageUrl?
         }
 
 

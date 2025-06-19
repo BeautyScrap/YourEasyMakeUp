@@ -49,7 +49,7 @@ namespace YourEasyRentTest.Controllers
                  p.Name == request.Name &&
                  p.Price == request.Price &&
                  p.Url == request.Url &&
-                 p.UrlImage == request.UrlImage))
+                 p.ImageUrl == request.ImageUrl))
             ,Times.Once);
         }
 

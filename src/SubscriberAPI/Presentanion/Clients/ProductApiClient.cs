@@ -22,9 +22,7 @@ namespace SubscriberAPI.Presentanion.Clients
             client.Timeout = TimeSpan.FromSeconds(300);
         }
 
-        public async Task<List<Subscription>> GetProducts(List<Subscription> subscriptions)// AK TODO вопрос - получаем мы не Subscription, а другой объект и уже его пересылаем в телеграм пользаку,
-                                                                                           // но это уже 2 действия для одного контроллера, поэтому  можно сделать еще один контроллер, который будет рассылать новые продукты уже в телегу,
-                                                                                           // но тогда нужно будет где то хранить новые временные значения
+        public async Task<List<Subscription>> GetProducts(List<Subscription> subscriptions)
         {
             var request = subscriptions.Select(s => new SearchSubProductRequest()
             {
@@ -42,10 +40,8 @@ namespace SubscriberAPI.Presentanion.Clients
                 p.Name,
                 p.Price,
                 p.Url,
-                p.UrlImage)).ToList();
+                p.ImageUrl)).ToList();
             return products;
-
-
 
         }
     }

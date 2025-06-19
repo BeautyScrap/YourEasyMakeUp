@@ -7,9 +7,10 @@ namespace TelegramBotAPI.Application.TelegramMenu
         public ButtonHandler()
         {
         }
-        public async Task<InlineKeyboardMarkup> SendMainMenuKeyboard(string chatId)
+
+        public InlineKeyboardMarkup CreateMainMenuKeyboard()
         {
-            var buttonForMM = new[]
+            var mainMenuButtons = new[]
             {
                 new[]
                 {
@@ -17,67 +18,75 @@ namespace TelegramBotAPI.Application.TelegramMenu
                     InlineKeyboardButton.WithCallbackData(text: "Product Category", callbackData: "CategoryMenu"),
                 },
             };
-            return new InlineKeyboardMarkup(buttonForMM);
+            return  new InlineKeyboardMarkup(mainMenuButtons);
         }
 
-        public async Task<InlineKeyboardMarkup> SendCategoryMenuKeyboard(string chatId)
+        public InlineKeyboardMarkup CreateCategoryMenuKeyboard()
         {
-            var buttonForCategory = new[]
+            var categoryButtons = new[]
             {
                 new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Mascara",callbackData:"Category_Mascara"),
-            InlineKeyboardButton.WithCallbackData(text:"Concealer",callbackData:"Category_Concealer")},
-                new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Blush",callbackData:"Blush"),
-            InlineKeyboardButton.WithCallbackData(text:"Highlighter",callbackData:"Highlighter")},
-                new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Foundation",callbackData:"Foundation"),
-            InlineKeyboardButton.WithCallbackData(text:"Eyeshadow",callbackData:"Eyeshadow")},
-                new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Brow pencils",callbackData:"Brow pencils"),
-            InlineKeyboardButton.WithCallbackData(text:"Lipstick",callbackData:"Lipstick")},
-                new[]
-            {InlineKeyboardButton.WithCallbackData(text:"Back",callbackData: "Back")}};
-            return new InlineKeyboardMarkup(buttonForCategory);
-        }
-
-        public async Task<InlineKeyboardMarkup> SendBrandMenuKeyboard(string chatId, List<string> brands)
-        {
-            var InlineKeyboardMarkup = CreateBrandInlineKeyboardMarkup(brands);
-            return InlineKeyboardMarkup;
-        }
-
-        public InlineKeyboardMarkup CreateBrandInlineKeyboardMarkup(List<string> brands)
-        {
-            var InlineKeyboardButtons = brands.Select(brand =>
-            {
-                var buttone = InlineKeyboardButton.WithCallbackData(text: brand, callbackData: $"Brand_{brand}");
-                return new List<InlineKeyboardButton> { buttone };
-            }).ToList();
-            return new InlineKeyboardMarkup(InlineKeyboardButtons);
-        }
-        public async Task<InlineKeyboardMarkup> SendReturnToMainMenuKeyboard(string chatId)
-        {
-            var menuaAterSearchResult = new[]
-            {
-                new []
                 {
-                     InlineKeyboardButton.WithCallbackData(text: "Start a New Search",callbackData: "StartNewSearch"),
-                     InlineKeyboardButton.WithCallbackData(text: "Subscribe to the product",callbackData: "Subscribe"),
+                    InlineKeyboardButton.WithCallbackData(text: "Mascara", callbackData: "Category_Mascara"),
+                    InlineKeyboardButton.WithCallbackData(text: "Concealer", callbackData: "Category_Concealer")
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(text: "Blush", callbackData: "Category_Blush"),
+                    InlineKeyboardButton.WithCallbackData(text: "Highlighter", callbackData: "Category_Highlighter")
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(text: "Foundation", callbackData: "Category_Foundation"),
+                    InlineKeyboardButton.WithCallbackData(text: "Eyeshadow", callbackData: "Category_Eyeshadow")
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(text: "Brow pencils", callbackData: "Category_BrowPencils"),
+                    InlineKeyboardButton.WithCallbackData(text: "Lipstick", callbackData: "Category_Lipstick")
+                },
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(text: "Back", callbackData: "Back")
+                }
+            };
+            return new InlineKeyboardMarkup(categoryButtons);
+        }
+
+        public InlineKeyboardMarkup CreateBrandMenuKeyboard(List<string> brands)
+        {
+            var brandButtons = brands.Select(brand =>
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(text: brand, callbackData: $"Brand_{brand}")
+                }).ToList();
+
+            return new InlineKeyboardMarkup(brandButtons);
+        }
+
+        public InlineKeyboardMarkup CreateSearchResultMenuKeyboard()
+        {
+            var searchResultButtons = new[]
+            {
+                new[]
+                {
+                    InlineKeyboardButton.WithCallbackData(text: "Start a New Search", callbackData: "StartNewSearch"),
+                    InlineKeyboardButton.WithCallbackData(text: "Subscribe to the product", callbackData: "Subscribe"),
                 },
             };
-            return new InlineKeyboardMarkup(menuaAterSearchResult);
+            return new InlineKeyboardMarkup(searchResultButtons);
         }
-        public async Task<InlineKeyboardMarkup> SendNewSearchKeyboard(string chatId)
+
+        public InlineKeyboardMarkup CreateNewSearchKeyboard()
         {
-            var menuaAterSubscription = new[]
+            var newSearchButton = new[]
             {
-                new []
+                new[]
                 {
-                     InlineKeyboardButton.WithCallbackData(text: "Start a New Search",callbackData: "StartNewSearch")
+                    InlineKeyboardButton.WithCallbackData(text: "Start a New Search", callbackData: "StartNewSearch")
                 },
             };
-            return new InlineKeyboardMarkup(menuaAterSubscription);
+            return new InlineKeyboardMarkup(newSearchButton);
         }
     }
 }

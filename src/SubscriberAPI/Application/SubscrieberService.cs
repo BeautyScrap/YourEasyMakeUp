@@ -4,7 +4,7 @@ using SubscriberAPI.Infrastructure;
 
 namespace SubscriberAPI.Application
 {
-    public class SubscriberService : ISubscrieberService // по идеи тут я возвращаю именно Subscription, а в репозитории именно SubscriptionDto
+    public class SubscriberService : ISubscrieberService
     {
         private readonly ISubscribersRepository _subscribersRepository;
 
@@ -14,8 +14,8 @@ namespace SubscriberAPI.Application
         }
         public async Task Create(Subscription subscription)
         {
-            var subscriptionDto = subscription.ToDto();
-            await _subscribersRepository.CreateAsync(subscriptionDto);//  получаем подписчика и тут переделываем этот объект в дто
+
+            await _subscribersRepository.CreateAsync(subscription);
         }
 
         public async Task<IEnumerable<Subscription>> GetAllAsync()
@@ -51,14 +51,14 @@ namespace SubscriberAPI.Application
 
         public async Task<bool> Update(string userId, Subscription subscription)
         {
-            var subscriptionDto = subscription.ToDto();
             var subscriberByUserId = await _subscribersRepository.GetSubscriberAsync(userId);
             if (subscriberByUserId == null)
             {
                 return false;
             }
-            var updateResult = await _subscribersRepository.UpdateAsync(subscriptionDto);
+            var updateResult = await _subscribersRepository.UpdateAsync(subscription);
             return updateResult > 0;
+
         }
         public async Task<bool> Delete(string userId)
         {
@@ -68,15 +68,14 @@ namespace SubscriberAPI.Application
 
         public async Task<List<Subscription>> GetFieldsForSearchById()
         {
-            var subscribersDtos = (await _subscribersRepository.GetFieldsForSearchAsync()).ToList();
-            var listOfSubscription = subscribersDtos.Select(dto => Subscription.CreateNewSubscription(
-                dto.UserId,
-                dto.ChatId,
-                dto.Brand,
-                dto.Name,
-                dto.Price
-                )).ToList();
-            return listOfSubscription;
+            var subscribers = (await _subscribersRepository.GetFieldsForSearchAsync()).ToList();    
+
+            return subscribers;
+        }
+
+        public async Task<bool> UpdateStatusForFoundProduct(string userId, string name)
+        {
+           return await _subscribersRepository.UpdateStatusFoundProduct(userId, name) > 0;
         }
     }
 }

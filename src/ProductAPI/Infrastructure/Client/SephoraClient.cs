@@ -10,7 +10,7 @@ namespace ProductAPI.Infrastructure.Client
         private readonly HttpClient _httpClient;
         private readonly Dictionary<Section, string> sectionMapping = new()
         {
-            [Section.Makeup] = "make-up"//  думаю можно будет прописывать значение прям с цифрами make-up-c302 для разных разделов
+            [Section.Makeup] = "make-up"
         };
         public Site Site => Site.Sephora;
         public SephoraClient(HttpClient httpClient)

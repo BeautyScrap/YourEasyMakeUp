@@ -2,7 +2,7 @@
 using Microsoft.VisualBasic;
 using System.Numerics;
 using Telegram.Bot.Types;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 namespace YourEasyRent.Services
 {
@@ -11,24 +11,24 @@ namespace YourEasyRent.Services
         private readonly Update _update;
         public bool IsStart => IsBotStart();
         public bool IsValidMessage => IsValidMsg();
-        public bool IsValueMenuMessage  => IsMenuButton();
+        public bool IsValueMenuMessage => IsMenuButton();
         public bool IsBrandMenu => IsBrandMenuButton();
         public bool IsCategoryMenu => IsCategoryMenuButton();
         public bool IsValueProductButton => IsProductButton();
-        public bool IsProductBrand=> IsProductBrandButton();
-        public bool IsProductCategory=> IsProductCategoryButton();
+        public bool IsProductBrand => IsProductBrandButton();
+        public bool IsProductCategory => IsProductCategoryButton();
         public bool IsSubscribeToProduct => IsSubscribeButton();
 
 
         public TgButtonCallback(Update update)
         {
-            _update = update;
+            _update = update ?? throw new ArgumentNullException(nameof(update));
         }
 
         private bool IsSubscribeButton()
         {
             var nameOfButton = _update.CallbackQuery?.Data;
-            if(nameOfButton == "Subscribe")
+            if (nameOfButton == "Subscribe")
             {
                 return true;
             }
@@ -55,7 +55,7 @@ namespace YourEasyRent.Services
         public string GetChatId()
         {
             var chatId = _update.Message?.Chat.Id.ToString();
-            if(chatId == null)
+            if (chatId == null)
             {
                 chatId = _update.CallbackQuery?.From.Id.ToString();
                 return chatId;
@@ -63,24 +63,24 @@ namespace YourEasyRent.Services
             return chatId;
         }
 
-        public bool IsValidMsg() 
+        public bool IsValidMsg()
         {
             try
             {
                 var nameOfButton = _update.CallbackQuery?.Data;
-                return nameOfButton.All(c => char.IsLetter(c) || c == '_' || c == '/'  || c == ' ');
+                return nameOfButton.All(c => char.IsLetter(c) || c == '_' || c == '/' || c == ' ');
             }
             catch (Exception ex)
             {
                 throw new Exception("The user did not send a message", ex);
             }
-                        
+
         }
 
         public bool IsMenuButton()
         {
             var nameOfButton = _update.CallbackQuery?.Data;
-            return nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu";        
+            return nameOfButton == "BrandMenu" || nameOfButton == "CategoryMenu";
         }
 
         public bool IsBrandMenuButton()
@@ -102,11 +102,11 @@ namespace YourEasyRent.Services
             }
             return false;
         }
-  
+
         public bool IsProductButton()
         {
             var nameOfButton = _update.CallbackQuery.Data;
-            if( nameOfButton.StartsWith("Brand_") || nameOfButton.StartsWith("Category_"))
+            if (nameOfButton.StartsWith("Brand_") || nameOfButton.StartsWith("Category_"))
             {
                 return true;
             }
@@ -149,4 +149,6 @@ namespace YourEasyRent.Services
             return productButton;
         }
     }
+
+
 }

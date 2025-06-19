@@ -10,7 +10,7 @@ namespace ProductAPI.Domain.ProductForSubscription
         public string Name { get; private set; }
         public decimal Price { get; private set; }
         public string Url { get; private set; }
-        public string UrlImage {  get; private set; }
+        public string ImageUrl {  get; private set; }
         public AvaliableProduct() { }
 
         public static AvaliableProduct FromDto(string userId, AvaliableProductDto dto)
@@ -22,7 +22,7 @@ namespace ProductAPI.Domain.ProductForSubscription
                 Name = dto.Name,
                 Price = dto.Price,
                 Url = dto.Url,
-                UrlImage = dto.UrlImage,
+                ImageUrl = dto.ImageUrl,
             };
             return product;
         }

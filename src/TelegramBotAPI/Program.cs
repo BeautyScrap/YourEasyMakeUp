@@ -1,5 +1,4 @@
 using YourEasyRent.DataBase;
-using MongoDB.Driver;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services;
 using Telegram.Bot;
@@ -7,12 +6,14 @@ using Serilog;
 using TelegramBotAPI.Services;
 using TelegramBotAPI.Application.TelegramMenu;
 using TelegramBotAPI.Infrastructure.RabbitQM;
+using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
     ContentRootPath = AppContext.BaseDirectory,
     Args = args,
 });
+
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
 var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
@@ -35,15 +36,31 @@ builder.Services.AddSingleton(connectionString);
 
 //builder.Services.AddSingleton(databaseConfig);
 
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ContractResolver = new DefaultContractResolver
+    {
+        NamingStrategy = new SnakeCaseNamingStrategy()
+    };
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 //builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));    
-builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
-builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>();
-//builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
+builder.Services.AddSingleton<ITelegramSender,  TelegramSender>();
+builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>()
+    .ConfigurePrimaryHttpMessageHandler(() =>
+    {
+        return new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2), // Более частое обновление TCP-соединений
+            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30), // Закрывать неиспользуемые соединения
+            MaxConnectionsPerServer = 50 // Этот параметр ограничивает количество одновременных TCP-соединений к одному серверу
+        };
+    })
+    .SetHandlerLifetime(Timeout.InfiniteTimeSpan); 
+builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
 
 
 var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";

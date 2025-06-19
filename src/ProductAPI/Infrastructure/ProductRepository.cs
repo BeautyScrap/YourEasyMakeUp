@@ -4,6 +4,8 @@ using ProductAPI.Domain.Product;
 using ProductAPI.Domain.ProductForUser;
 using System.Xml.Linq;
 using System;
+using ProductAPI.Domain.ProductForSubscription;
+using System.Transactions;
 
 namespace ProductAPI.Infrastructure
 {
@@ -16,26 +18,31 @@ namespace ProductAPI.Infrastructure
             _connectionString = connectionString;
             _logger = logger;
         }
-        public async Task CreateMany(IEnumerable<Product> products) // insert добавляет строки в таблицу
+        public async Task CreateMany(IEnumerable<Product> products)
         {
-            foreach (var product in products)
+            List<ProductDto> dtos = products.Select(products => products.ToDto()).ToList();
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            using var transaction = await connection.BeginTransactionAsync();
+            try
             {
-                var dto = product.ToDto();
-                using (var connection = new NpgsqlConnection(_connectionString))
-                {
-                    await connection.OpenAsync();
-                    string query =
-                        @"INSERT INTO products (site, brand, name, price, category, url, imageurl) 
-                    VALUES (@Site, @Brand, @Name, @Price, @Category, @Url, @ImageUrl)";
-                    await connection.ExecuteAsync(query, dto);
-                }
+                string query =
+                    @"INSERT INTO products (site, brand, name, price, category, url, imageurl)
+                                VALUES (@Site, @Brand, @Name, @Price, @Category, @Url, @ImageUrl)";
+                await connection.ExecuteAsync(query, dtos, transaction);
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
             }
         }
 
 
-        public async Task<int> UpdateManyProducts(IEnumerable<Product> products)// AK TODO  номальный ли метод получился с такими уровнями изоляции транзакций?
+        public async Task<int> UpdateManyProducts(IEnumerable<Product> products)
         {
-            int totalUpdated = 0;
+            List<ProductDto> dtos = products.Select(products =>products.ToDto()).ToList();  
             using (var connection = new NpgsqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
@@ -43,10 +50,7 @@ namespace ProductAPI.Infrastructure
                 {
                     try
                     {
-                        foreach (var product in products)
-                        {
-                            var dto = product.ToDto();
-                            string query =
+                        string query =
                                     @"UPDATE public.products
                                     SET site = @Site, 
                                         brand = @Brand, 
@@ -56,19 +60,17 @@ namespace ProductAPI.Infrastructure
                                         url = @Url,
                                         imageurl = @Imageurl
                                     WHERE name = @Name";
-                            int result = await connection.ExecuteAsync(query, dto);
-                            totalUpdated += result;
-                        };
+                        int result = await connection.ExecuteAsync(query, dtos,transaction);
                         await transaction.CommitAsync();
+                        return result;
                     }
-                    catch (Exception ex)
+                    catch 
                     {
                         await transaction.RollbackAsync();
-                        throw ex;
+                        throw;
                     }
                 }
             }
-            return totalUpdated;
         }
 
         public async Task<IEnumerable<Product>> GetProducts()
@@ -77,17 +79,17 @@ namespace ProductAPI.Infrastructure
             using (var connection = new NpgsqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                string query = @"
-            SELECT 
-                ""site"" AS Site,
-                ""brand"" AS Brand,
-                ""name"" AS Name,
-                ""price"" AS Price,
-                ""category"" AS Category,
-                ""url"" AS Url,
-                ""imageurl"" AS Imageurl
-            FROM public.products";
-                productDtos = await connection.QueryAsync<ProductDto>(query);
+                string query =
+                            @"SELECT 
+                                ""site"" AS Site,
+                                ""brand"" AS Brand,
+                                ""name"" AS Name,
+                                ""price"" AS Price,
+                                ""category"" AS Category,
+                                ""url"" AS Url,
+                                ""imageurl"" AS Imageurl
+                            FROM public.products";
+                productDtos = await connection.QueryAsync<ProductDto>(query);             
             }
             var products = productDtos.Select(dto => Product.CreateProduct
                 (
@@ -98,9 +100,9 @@ namespace ProductAPI.Infrastructure
                 dto.Category,
                 dto.Url,
                 dto.ImageUrl
-                )
-            ).ToList();
+                )).ToList();
             return products;
+            
         }
 
         public async Task<int> Delete(string name)
@@ -146,6 +148,24 @@ namespace ProductAPI.Infrastructure
                       LIMIT 1";
             var resultDto = await connection.QueryFirstOrDefaultAsync<AvaliableResultForUserDto>(query, dto);
             return resultDto is not null ? AvaliableResultForUser.FromDto(resultDto): null; 
+        }
+
+        public  async Task<AvaliableProduct?> GetProductForOneSubscriber(string userId, ProductForSub productForSearch)
+        {
+            var dto = productForSearch.ToDto();
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+            string query =
+                @"SELECT ""brand"" AS Brand,
+                         ""name"" AS Name,
+                         ""price"" AS Price,
+                         ""category"" AS Category,
+                         ""url"" AS Url,
+                         ""imageurl"" AS Imageurl
+                 FROM public.products
+                 WHERE name = @Name AND price < @Price";
+            var resultDto = await connection.QueryFirstOrDefaultAsync<AvaliableProductDto>(query, dto);
+            return resultDto is not null ? AvaliableProduct.FromDto(userId, resultDto) : null; 
         }
 
 
@@ -232,7 +252,7 @@ namespace ProductAPI.Infrastructure
         //        Name = product.Name,
         //        Price = product.Price,
         //        Url = product.Url,
-        //        UrlImage = product.ImageUrl
+        //        ImageUrl = product.ImageUrl
         //    };
         //    return result;
         //}

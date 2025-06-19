@@ -16,8 +16,10 @@ namespace SubscriberAPI.Domain
         public string Name { get; private set; }
         public decimal Price { get; private set; }
         public string? Url { get; private set; }
-        public string? UrlImage { get; private set; }// AK TODO Сюда еще можно добавить поле с Enum статусами  и метод, который будет задавать эти статусы
-        public Subscription() {} //можно сделать protected\
+        public string? ImageUrl { get; private set; }
+        public SubStatus? Status { get; private set; }
+
+        protected Subscription() {} 
         public static Subscription CreateNewSubscription(string userId, string? chatId, string? brand, string name, decimal price)
         {
             var subscription = new Subscription
@@ -27,10 +29,12 @@ namespace SubscriberAPI.Domain
                 Brand = brand,
                 Name = name,
                 Price = price,
+                Status = SubStatus.NewSubscription
+
             };
             return subscription;
         }
-        public static Subscription CreateProductforSub(string userId, string? brand, string name, decimal price, string url, string urlImage) //AK TODO все оставляю как есть                                                                                                                                            //Или можно использовать второй статический метод "CreateProductforSub"
+        public static Subscription CreateProductforSub(string userId, string? brand, string name, decimal price, string url, string imageUrl) //AK TODO все оставляю как есть                                                                                                                                            //Или можно использовать второй статический метод "CreateProductforSub"
         {
             var subscription = new Subscription
             {
@@ -39,7 +43,7 @@ namespace SubscriberAPI.Domain
                 Name = name,
                 Price = price,
                 Url = url,
-                UrlImage = urlImage
+                ImageUrl = imageUrl
             };
             return subscription;
         }
@@ -54,7 +58,8 @@ namespace SubscriberAPI.Domain
                 Name = Name,
                 Price = Price,
                 Url = Url,
-                UrlImage = UrlImage,
+                //ImageUrl = ImageUrl,
+                Status = Status
             };
             return subscribersDto;
         }     

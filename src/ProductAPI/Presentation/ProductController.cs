@@ -14,13 +14,11 @@ namespace ProductAPI.Controllers
     [Route("")]
     public class ProductController : ControllerBase 
     {
-        private readonly IProductRepository _repository;
         private readonly ILogger<ProductController> _logger;
         private readonly IRabbitMessageProducer _messageProducer;
         private readonly IProductForSubService _serviceForSub;
         private readonly IProductForUserService _serviceForUser;
-        public ProductController(
-            IProductRepository productRepository, 
+        public ProductController( 
             ILogger<ProductController> logger,
             IRabbitMessageProducer rabbitMessage, 
             IProductForSubService serviceSub,
@@ -28,7 +26,6 @@ namespace ProductAPI.Controllers
             IProductForUserService serviceProduct,
             IProductHandler handler)
         {
-            _repository = productRepository;
             _logger = logger;
             _messageProducer = rabbitMessage;
             _serviceForSub = serviceSub;
@@ -150,7 +147,7 @@ namespace ProductAPI.Controllers
                     Name = r.Name,
                     Price = r.Price,
                     Url = r.Url,
-                    UrlImage = r.UrlImage,
+                    ImageUrl = r.ImageUrl,
 
                 }).ToList();
                 return Ok(response);
