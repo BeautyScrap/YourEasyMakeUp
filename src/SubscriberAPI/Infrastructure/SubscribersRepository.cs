@@ -183,7 +183,7 @@ namespace SubscriberAPI.Infrastructure
             string query =
                 @"UPDATE public.Subscribers
                         SET status = @Status
-                        WHERE user_id = @UserId AND name_product = @NameProduct";
+                        WHERE user_id = @UserId AND name_product = @Name";
             var result = await connection.ExecuteAsync(query, new
             {
                 UserId = userId,

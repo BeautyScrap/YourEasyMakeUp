@@ -16,16 +16,6 @@ var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMEN
     : builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton(connectionString);
 
-//builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("DataBaseSettings"));
-//builder.Services.AddSingleton<ProductRepository>();
-//var mongoDBSettings = new MongoDBSettings();
-//builder.Configuration.Bind("DataBaseSettings", mongoDBSettings);
-//if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
-//{
-//    mongoDBSettings.ConnectionString = Environment.GetEnvironmentVariable("ATLAS_URI")!;
-//}
-//builder.Services.AddSingleton(mongoDBSettings);
-// Add services to the container.
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

@@ -120,7 +120,7 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] SubscriptionRequest subscriptionRequest, string userId)// Когда мы вообще используем этот контроллер и методы??
+        public async Task<IActionResult> Update([FromBody] SubscriptionRequest subscriptionRequest, string userId)
         {
             if (subscriptionRequest is null)
             {
@@ -156,7 +156,7 @@ namespace SubscriberAPI.Presentanion
             return Ok(result);
         }
 
-        [Route("CheckPriceUpdates")] // AK TODO  Last Updated протестировать этот метод!
+        [Route("CheckPriceUpdates")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -177,7 +177,6 @@ namespace SubscriberAPI.Presentanion
             foreach (var product in newProducts)
             {
                 await _telegramApiClient.SendFoundProduct(product);
-                // AK TODO вопрос: какой то ответ должен вернуть / код
                 var userId = product.UserId;
                 var name = product.Name;
                 await _sudscriberService.UpdateStatusForFoundProduct(userId, name);

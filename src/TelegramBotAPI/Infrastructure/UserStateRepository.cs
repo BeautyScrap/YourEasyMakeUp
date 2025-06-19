@@ -92,7 +92,7 @@ namespace YourEasyRent.DataBase
 
 
 
-        public async Task<UserSearchState> GetForUser(string userId)//AK TODO  LAST UPDATE надо протестировать как работают эти 2 метода
+        public async Task<UserSearchState> GetForUser(string userId)
         {
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();

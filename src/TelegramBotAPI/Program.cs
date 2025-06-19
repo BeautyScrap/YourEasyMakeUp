@@ -20,22 +20,6 @@ var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMEN
     ? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
     : builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddSingleton(connectionString);
-//builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));  
-
-//builder.Services.AddSingleton<UserStateRepository>(); 
-
-//// This is the same as it used to be
-//var databaseConfig = new DataBaseConfig();
-//builder.Configuration.Bind("DatabaseSettings", databaseConfig);
-
-//// Should be changed to be based on evironment value
-//if( Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
-//{
-//    databaseConfig.ConnectionString = Environment.GetEnvironmentVariable("ATLAS_URI")!;
-//}
-
-//builder.Services.AddSingleton(databaseConfig);
-
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ContractResolver = new DefaultContractResolver
@@ -46,8 +30,7 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-//builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));    
+builder.Services.AddSwaggerGen();   
 builder.Services.AddSingleton<ITelegramSender,  TelegramSender>();
 builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>()
     .ConfigurePrimaryHttpMessageHandler(() =>

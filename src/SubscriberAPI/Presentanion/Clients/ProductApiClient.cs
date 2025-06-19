@@ -2,7 +2,6 @@
 using SubscriberAPI.Contracts.ProductForSubscription;
 using SubscriberAPI.Domain;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace SubscriberAPI.Presentanion.Clients
 {

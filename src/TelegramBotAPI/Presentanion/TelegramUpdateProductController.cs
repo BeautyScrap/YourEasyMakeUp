@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Telegram.Bot.Types;
+﻿using Microsoft.AspNetCore.Mvc;
 using TelegramBotAPI.Services;
 using YourEasyRent.Contracts.ProductForSubscription;
 using YourEasyRent.Entities.ProductForSubscription;
 using System.Text.Json;
-using YourEasyRent.Controllers;
+
 
 namespace TelegramBotAPI.Controllers
 {

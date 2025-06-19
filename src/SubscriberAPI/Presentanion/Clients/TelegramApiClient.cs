@@ -1,21 +1,27 @@
-﻿using SubscriberAPI.Contracts.ProductForSubscription;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using SubscriberAPI.Contracts.ProductForSubscription;
 using SubscriberAPI.Domain;
-using System.Text.Json;
+using System.Text;
 
 namespace SubscriberAPI.Presentanion.Clients
 {
     public class TelegramApiClient : ITelegramApiClient
     {
         public readonly HttpClient _client;
-        private readonly JsonSerializerOptions _options;
+        private readonly JsonSerializerSettings _serializerSettings;
         public TelegramApiClient(HttpClient client)
         {
             _client = client;
             client.BaseAddress = new Uri("https://localhost:5001/");
-            _options = new JsonSerializerOptions()
+            _serializerSettings = new JsonSerializerSettings 
             {
-                PropertyNameCaseInsensitive = true,
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                }
             };
+
             client.Timeout = TimeSpan.FromSeconds(300);
         }
         public async Task SendFoundProduct(Subscription subscription)
@@ -31,8 +37,10 @@ namespace SubscriberAPI.Presentanion.Clients
                     Url = subscription.Url,
                     ImageUrl = subscription.ImageUrl
                 };
-                var httpRequest = await _client.PutAsJsonAsync("UpdateProduct", request, _options);
-                httpRequest.EnsureSuccessStatusCode();// AK TODO  LAST UPDATE  вылезает ошибка 404, нужно еще раз протестировать этот запрос
+                var json = JsonConvert.SerializeObject(request, _serializerSettings);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var httpRequest = await _client.PutAsync("UpdateProduct", content);
+                httpRequest.EnsureSuccessStatusCode();
                 if (!httpRequest.IsSuccessStatusCode)
                 {
                     var responseContent = await httpRequest.Content.ReadAsStringAsync();
