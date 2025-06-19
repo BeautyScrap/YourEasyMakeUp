@@ -1,6 +1,4 @@
-﻿using MongoDB.Driver;
-
-namespace ProductAPI.Domain.ProductForUser
+﻿namespace ProductAPI.Domain.ProductForUser
 {
     public class ProductResultForUser
     {

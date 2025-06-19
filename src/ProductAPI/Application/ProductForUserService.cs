@@ -1,5 +1,4 @@
-﻿using MongoDB.Driver;
-using ProductAPI.Domain.ProductForUser;
+﻿using ProductAPI.Domain.ProductForUser;
 using ProductAPI.Infrastructure;
 using ZstdSharp.Unsafe;
 
