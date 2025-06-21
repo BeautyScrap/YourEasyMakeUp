@@ -12,11 +12,11 @@ on:
     types: [opened, edited, synchronize]
 
 jobs:
-  apply-terraform:
-    name: Deploy new infra to gcloud and atlas
-    uses: ./.github/workflows/sub-apply-terraform.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+  # apply-terraform:
+  #   name: Deploy new infra to gcloud and atlas
+  #   uses: ./.github/workflows/sub-apply-terraform.yml
+  #   secrets:
+  #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
 
   deploy-telegram-bot:
     needs: apply-terraform
