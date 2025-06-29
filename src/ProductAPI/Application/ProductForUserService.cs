@@ -1,6 +1,5 @@
 ﻿using ProductAPI.Domain.ProductForUser;
 using ProductAPI.Infrastructure;
-using ZstdSharp.Unsafe;
 
 namespace ProductAPI.Application
 {

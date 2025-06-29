@@ -35,7 +35,7 @@ public class TelegramCallbackController : ControllerBase
         catch (Exception ex) 
         { 
             _logger.LogError( "[ProcessCallback] : Callback is not correct",ex);
-            return BadRequest();
+            return BadRequest(ex);
         }
         _logger.LogInformation("CallbackIsDone");
         return Ok();

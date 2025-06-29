@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using ProductAPI.Application;
+using ProductAPI.Application.RabbitMQ;
 using ProductAPI.Contracts.ProductForSubscription;
 using ProductAPI.Contracts.TelegramContract;
 using ProductAPI.Domain.Product;
 using ProductAPI.Domain.ProductForSubscription;
 using ProductAPI.Domain.ProductForUser;
 using ProductAPI.Infrastructure;
-using SubscriberAPI.Application.RabbitQM;
 
 namespace ProductAPI.Controllers
 {
@@ -23,8 +23,7 @@ namespace ProductAPI.Controllers
             IRabbitMessageProducer rabbitMessage, 
             IProductForSubService serviceSub,
 
-            IProductForUserService serviceProduct,
-            IProductHandler handler)
+            IProductForUserService serviceProduct)
         {
             _logger = logger;
             _messageProducer = rabbitMessage;
@@ -79,7 +78,7 @@ namespace ProductAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<FoundProductResultResponse>>> SearchOneProductForUser([FromBody] SearchProductResultRequest request)
+        public async Task<ActionResult<FoundProductResultResponse>> SearchOneProductForUser([FromBody] SearchProductResultRequest request)
         {
             try
             {
@@ -87,10 +86,10 @@ namespace ProductAPI.Controllers
                 {
                     return BadRequest();
                 }
-                var searchProducts = ProductResultForUser.CreateProductForSearch(
+                var searchProduct = ProductResultForUser.CreateProductForSearch(
                     request.Brand,
                     request.Category);
-                var foundProduct = await _serviceForUser.HandlerOne(searchProducts);
+                var foundProduct = await _serviceForUser.HandlerOne(searchProduct);
                 if (foundProduct == null)
                 {
                     return NotFound();

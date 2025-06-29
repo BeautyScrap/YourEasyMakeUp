@@ -1,8 +1,8 @@
 using ProductAPI.Application;
+using ProductAPI.Application.RabbitMQ;
 using ProductAPI.Infrastructure;
 using ProductAPI.Infrastructure.Client;
 using Serilog;
-using SubscriberAPI.Application.RabbitQM;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {

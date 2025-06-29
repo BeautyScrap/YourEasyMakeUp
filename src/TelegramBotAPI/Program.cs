@@ -14,7 +14,9 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     Args = args,
 });
 
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddUserSecrets<Program>() 
+    .AddEnvironmentVariables();
 
 var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
     ? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
@@ -46,7 +48,7 @@ builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>()
 builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
 
 
-var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
+var botToken = builder.Configuration["TelegramBot:Token"];
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
 builder.Services.AddSingleton<IRabbitMessageProducer, RabbitMessageProducer>();
 builder.Services.AddSingleton<ITelegramCallbackHandler, TelegramCallbackHandler>();

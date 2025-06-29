@@ -1,10 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Telegram.Bot.Types;
 using YourEasyRent.Controllers;
 using YourEasyRent.Services;
@@ -15,7 +10,6 @@ namespace YourEasyRentTest.Controllers
 {
     public class TelegramCallbackControllerTest
     {
-
 
         private readonly TelegramCallbackController _controller;
         private readonly Mock<ILogger<TelegramCallbackController>> _mockLogger; 
@@ -53,6 +47,7 @@ namespace YourEasyRentTest.Controllers
             //Assert
             var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
             badRequestResult.Value.Should().Be(exception);
+
         }
 
     }
