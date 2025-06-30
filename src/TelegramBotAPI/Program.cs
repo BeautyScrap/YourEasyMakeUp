@@ -1,15 +1,12 @@
 using YourEasyRent.DataBase;
-using MongoDB.Driver;
 using YourEasyRent.DataBase.Interfaces;
 using YourEasyRent.Services;
 using Telegram.Bot;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Serialization;
 using Serilog;
-using YourEasyRent.UserState;
-using YourEasyRent.TelegramMenu;
 using TelegramBotAPI.Services;
-
+using TelegramBotAPI.Application.TelegramMenu;
+using TelegramBotAPI.Infrastructure.RabbitQM;
+using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -17,35 +14,41 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     Args = args,
 });
 
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddUserSecrets<Program>() 
+    .AddEnvironmentVariables();
 
-builder.Services.Configure<DataBaseConfig>(builder.Configuration.GetSection("DataBaseSettings"));  
-
-builder.Services.AddSingleton<UserStateRepository>(); 
-
-// This is the same as it used to be
-var databaseConfig = new DataBaseConfig();
-builder.Configuration.Bind("DatabaseSettings", databaseConfig);
-
-// Should be changed to be based on evironment value
-if( Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
+var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production"
+    ? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
+    : builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSingleton(connectionString);
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
-    databaseConfig.ConnectionString = Environment.GetEnvironmentVariable("ATLAS_URI")!;
-}
-
-builder.Services.AddSingleton(databaseConfig);
-
-builder.Services.AddControllers().AddNewtonsoftJson();
+    options.SerializerSettings.ContractResolver = new DefaultContractResolver
+    {
+        NamingStrategy = new SnakeCaseNamingStrategy()
+    };
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<IMongoClient>(new MongoClient(databaseConfig.ConnectionString));    
-builder.Services.AddSingleton<ITelegramSender,  TelegramSender>(); 
-builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>();
+builder.Services.AddSwaggerGen();   
+builder.Services.AddSingleton<ITelegramSender,  TelegramSender>();
+builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>()
+    .ConfigurePrimaryHttpMessageHandler(() =>
+    {
+        return new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2), // Более частое обновление TCP-соединений
+            PooledConnectionIdleTimeout = TimeSpan.FromSeconds(30), // Закрывать неиспользуемые соединения
+            MaxConnectionsPerServer = 50 // Этот параметр ограничивает количество одновременных TCP-соединений к одному серверу
+        };
+    })
+    .SetHandlerLifetime(Timeout.InfiniteTimeSpan); 
 builder.Services.AddSingleton<IUserStateRepository, UserStateRepository>();
 
 
-var botToken = "6081137075:AAH52hfdtr9lGG1imfafvIDUIwNchtMlkjw";
+var botToken = builder.Configuration["TelegramBot:Token"];
 builder.Services.AddSingleton<ITelegramBotClient>(_ =>new TelegramBotClient(botToken));
 builder.Services.AddSingleton<IRabbitMessageProducer, RabbitMessageProducer>();
 builder.Services.AddSingleton<ITelegramCallbackHandler, TelegramCallbackHandler>();

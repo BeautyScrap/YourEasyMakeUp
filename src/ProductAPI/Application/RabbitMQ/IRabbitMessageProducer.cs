@@ -1,4 +1,4 @@
-﻿namespace SubscriberAPI.Application.RabbitQM
+﻿namespace ProductAPI.Application.RabbitMQ
 {
     public interface IRabbitMessageProducer
     {

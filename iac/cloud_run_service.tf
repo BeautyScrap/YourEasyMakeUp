@@ -122,11 +122,6 @@ resource "google_cloud_run_service" "subscriber-api" {
         }
 
         env {
-          name  = "ATLAS_URI"
-          value = local.atlas_uri
-        }
-
-        env {
           name  = "ASPNETCORE_ENVIRONMENT"
           value = "Production"
         }

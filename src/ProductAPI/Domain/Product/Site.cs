@@ -2,7 +2,7 @@
 {
     public enum Site
     {
-        Sephora,
+        Sephora, // AK TODO проставился 0 вместо названия сайта, надо будет подумать как поправить
         Douglas
     }
 }

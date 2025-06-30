@@ -1,12 +1,7 @@
 ﻿using FluentAssertions;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TelegramBotAPI.Controllers;
 using TelegramBotAPI.Services;
 using YourEasyRent.Contracts.ProductForSubscription;
@@ -18,25 +13,27 @@ namespace YourEasyRentTest.Controllers
     {
         private readonly TelegramUpdateProductController _controller;
         private readonly Mock<ITelegramUpdateHandler> _mockHandler;
+        private readonly Mock<ILogger<TelegramUpdateProductController>> _mockLogger;
 
         public TelegramUpdateProductControllerTest()
         {
             _mockHandler = new Mock<ITelegramUpdateHandler>();
-            _controller = new TelegramUpdateProductController(_mockHandler.Object); 
+            _mockLogger = new Mock<ILogger<TelegramUpdateProductController>>();
+            _controller = new TelegramUpdateProductController(_mockHandler.Object, _mockLogger.Object);
         }
         [Fact]
         public async Task PutProduct_ReturnOkResult_WhenUpdateIsSuccessful()
         {
             // Arrange
             var request = new ProductForSubscriptionRequest
-                (
-                "user123",          
-                "BrandX",          
-                "ProductName",       
-                99.99m,               
-                "http://example.com", 
-                "http://example.com/image.jpg" 
-                );
+            {
+                UserId = "user123",
+                Brand = "BrandX",
+                Name = "ProductName",
+                Price = 99.99m,
+                Url = "http://example.com",
+                ImageUrl = "http://example.com/image.jpg"
+            }; 
 
             //Act
             var result = await _controller.PutProducts(request);
@@ -49,7 +46,7 @@ namespace YourEasyRentTest.Controllers
                  p.Name == request.Name &&
                  p.Price == request.Price &&
                  p.Url == request.Url &&
-                 p.UrlImage == request.UrlImage))
+                 p.ImageUrl == request.ImageUrl))
             ,Times.Once);
         }
 
@@ -58,22 +55,23 @@ namespace YourEasyRentTest.Controllers
         {
             //Arrange
             var request = new ProductForSubscriptionRequest
-               (
-               "user123",            
-               "BrandX",             
-               "ProductName",        
-               99.99m,           
-               "http://example.com", 
-               "http://example.com/image.jpg"
-               );
+            {
+               UserId = "user123",
+               Brand = "BrandX",
+             Name =  "ProductName",
+               Price = 99.99m,
+               Url = "http://example.com",
+               ImageUrl = "http://example.com/image.jpg"
+            };                              
             _mockHandler.Setup(handler => handler.HandlerUpdateAsync(It.IsAny<ProductForSubscription>())).ThrowsAsync(new Exception("Exception"));
+
             // Act
             var result = await _controller.PutProducts(request);
+
             //Assert
             result.Should().BeOfType<BadRequestObjectResult>();
             var badRequestResult = result as BadRequestObjectResult;
-            badRequestResult!.Value.Should().Be("Exception"); // AK TODO lastUpdate  добавила все проекты для тестирования контроллеров и всего остального
-            
+            badRequestResult!.Value.Should().Be("Exception"); 
         }
     }
 }

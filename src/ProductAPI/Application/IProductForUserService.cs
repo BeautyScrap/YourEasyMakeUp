@@ -7,5 +7,7 @@ namespace ProductAPI.Application
     {
         Task<List<AvaliableResultForUser>> Handler(ProductResultForUser product);
         Task<AvaliableResultForUser> HandlerOne(ProductResultForUser product);
+        Task<List<string>> GetBrandForMenu();
+
     }
 }

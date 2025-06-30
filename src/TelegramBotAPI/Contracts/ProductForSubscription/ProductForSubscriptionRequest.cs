@@ -1,11 +1,13 @@
 ﻿namespace YourEasyRent.Contracts.ProductForSubscription
 {
-    public record ProductForSubscriptionRequest(
-        string UserId,
-        string Brand,
-        string Name,
-        decimal Price,
-        string? Url,
-        string? UrlImage);
+    public class ProductForSubscriptionRequest
+    {
+        public string UserId { get; set; }
+        public string Brand { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public string? Url { get; set; }
+        public string? ImageUrl { get; set; }
+    };
     
 }

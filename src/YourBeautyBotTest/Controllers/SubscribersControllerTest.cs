@@ -1,15 +1,16 @@
-﻿using FluentValidation;
+﻿using FluentAssertions;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Validations;
 using Moq;
 using SubscriberAPI.Application;
-using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Contracts;
 using SubscriberAPI.Domain;
-using SubscriberAPI.Infrastructure.Clients;
+using SubscriberAPI.Infrastructure.RabbitQM;
 using SubscriberAPI.Presentanion;
+using SubscriberAPI.Presentanion.Clients;
 using System.Security.Cryptography.Xml;
 
 namespace YourBeautyBotTest.Controllers
@@ -103,5 +104,46 @@ namespace YourBeautyBotTest.Controllers
                    invocation.Arguments[0].ToString() == "Information" &&
                    invocation.Arguments[2].ToString() == "The subscriber is null");
         }
+
+
+        [Fact]
+        public async Task CheckPriceUpdates_ReturnsOk_WhenProductFoundAndProcessed()
+        {
+            //Arrange
+            var subscription = Subscription.CreateNewSubscription("TestUserId", "TestChatId", "TestBrand", "TestName", 1);
+             var listWithfSubscriptions = new List<Subscription> { subscription };
+            _mockService
+                .Setup(s => s.GetFieldsForSearchById())
+                .ReturnsAsync(listWithfSubscriptions);
+
+            _mockPdClient
+                .Setup(v => v.GetProducts(listWithfSubscriptions))
+                .ReturnsAsync(listWithfSubscriptions);    
+
+            _mockTgClient
+                .Setup(x => x.SendFoundProduct(subscription))
+                .Returns(Task.CompletedTask);
+            _mockService.Setup(s => s.UpdateStatusForFoundProduct("TestUserId", "TestName")).ReturnsAsync(true);
+
+            //Act
+            var result = await _subscribersController.CheckPriceUpdates();
+
+            //Assert
+            result.Should().BeOfType<OkResult>();
+
+        }
+
+        [Fact]
+        public async Task CheckPriceUpdates_ReturnsBadRequest_WhenListSubscriptionIsNull()
+        {
+            //Arrange
+            _mockService.Setup(s =>s.GetFieldsForSearchById()).ReturnsAsync((List<Subscription>?)null);
+            //Act
+            var result = await _subscribersController.CheckPriceUpdates();
+
+            //Assert
+            result.Should().BeOfType<BadRequestResult>();
+        }
+
     }
 }

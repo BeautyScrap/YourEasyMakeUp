@@ -1,16 +1,10 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using SubscriberAPI.Application;
-using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Contracts;
 using SubscriberAPI.Domain;
-using SubscriberAPI.Infrastructure;
-using SubscriberAPI.Infrastructure.Clients;
-using System.Reflection.Metadata;
-using System.Reflection.Metadata.Ecma335;
-using System.Text.Json;
-using System.Xml.Linq;
+using SubscriberAPI.Infrastructure.RabbitQM;
+using SubscriberAPI.Presentanion.Clients;
 
 namespace SubscriberAPI.Presentanion
 {
@@ -167,15 +161,8 @@ namespace SubscriberAPI.Presentanion
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> CheckPriceUpdates()// AK TODO вопрос:нужно ли разделить этот контроллер на два разных контроллера или нет?
+        public async Task<ActionResult> CheckPriceUpdates()
         {
-            /// var subscribers = await subsRepo.GetAll()
-            /// var productNames = subscribers.Select(x=>x.ProductName)
-            /// var newPrices = await productsApiClient.GetNewPrices(productNames, DateTime.Now().Days(-1))
-            /// var matchedUsers = matchпUsersWithUpdates(subs, newPrices)
-            // var notifictaions = matchedUsers.Select(sub, price => new Notification(sub,price))
-            // notifications.ForEach(n=> await tgClient.Send(n)
-
             var ListWithfSubscriptions = await _sudscriberService.GetFieldsForSearchById();
 
             if (ListWithfSubscriptions == null)
@@ -191,12 +178,8 @@ namespace SubscriberAPI.Presentanion
             {
                 await _telegramApiClient.SendFoundProduct(product);
                 var userId = product.UserId;
-
-                // AK TODO вопрос: какой то ответ должен вернуть / код
-                await _sudscriberService.Delete(userId);// пока временное решение с удалением
-
-                // AK TODO  потом иду в репозиторий через сервис и помечаю там продукт у пользака, который больше не надо искать,
-                // AK TODO вопрос: те нужно будет еще создать поле со статусом в sql базе "продукт найден/ не найден"? но пока оставлю удаление
+                var name = product.Name;
+                await _sudscriberService.UpdateStatusForFoundProduct(userId, name);
             }
             return Ok();
         }

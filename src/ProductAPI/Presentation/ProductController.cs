@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using ProductAPI.Application;
+using ProductAPI.Application.RabbitMQ;
 using ProductAPI.Contracts.ProductForSubscription;
 using ProductAPI.Contracts.TelegramContract;
 using ProductAPI.Domain.Product;
 using ProductAPI.Domain.ProductForSubscription;
 using ProductAPI.Domain.ProductForUser;
 using ProductAPI.Infrastructure;
-using ProductAPI.Infrastructure.Client;
-using SubscriberAPI.Application.RabbitQM;
 
 namespace ProductAPI.Controllers
 {
@@ -15,24 +14,21 @@ namespace ProductAPI.Controllers
     [Route("")]
     public class ProductController : ControllerBase 
     {
-        private readonly IProductRepository _repository;
         private readonly ILogger<ProductController> _logger;
         private readonly IRabbitMessageProducer _messageProducer;
         private readonly IProductForSubService _serviceForSub;
-        private readonly IProductForUserService _serviceForUse; 
-        public ProductController(
-            IProductRepository productRepository, 
+        private readonly IProductForUserService _serviceForUser;
+        public ProductController( 
             ILogger<ProductController> logger,
             IRabbitMessageProducer rabbitMessage, 
             IProductForSubService serviceSub,
 
             IProductForUserService serviceProduct)
         {
-            _repository = productRepository;
             _logger = logger;
             _messageProducer = rabbitMessage;
             _serviceForSub = serviceSub;
-            _serviceForUse = serviceProduct;
+            _serviceForUser = serviceProduct;
         }
 
         [HttpPost]
@@ -52,7 +48,7 @@ namespace ProductAPI.Controllers
                 var searchProducts = ProductResultForUser.CreateProductForSearch(
                     request.Brand, 
                     request.Category);
-                var foundProductList = await _serviceForUse.Handler(searchProducts);
+                var foundProductList = await _serviceForUser.Handler(searchProducts);
                 if(foundProductList == null) 
                 { 
                     return NotFound(); 
@@ -82,7 +78,7 @@ namespace ProductAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<List<FoundProductResultResponse>>> SearchOneProductForUser([FromBody] SearchProductResultRequest request)
+        public async Task<ActionResult<FoundProductResultResponse>> SearchOneProductForUser([FromBody] SearchProductResultRequest request)
         {
             try
             {
@@ -90,10 +86,10 @@ namespace ProductAPI.Controllers
                 {
                     return BadRequest();
                 }
-                var searchProducts = ProductResultForUser.CreateProductForSearch(
+                var searchProduct = ProductResultForUser.CreateProductForSearch(
                     request.Brand,
                     request.Category);
-                var foundProduct = await _serviceForUse.HandlerOne(searchProducts);
+                var foundProduct = await _serviceForUser.HandlerOne(searchProduct);
                 if (foundProduct == null)
                 {
                     return NotFound();
@@ -102,10 +98,10 @@ namespace ProductAPI.Controllers
                 {
                     Brand = foundProduct.Brand,
                     Name = foundProduct.Name,
-                    Category = foundProduct.Category,
                     Price = foundProduct.Price,
-                    ImageUrl = foundProduct.ImageUrl,
-                    Url = foundProduct.Url
+                    Category = foundProduct.Category,
+                    Url = foundProduct.Url,
+                    ImageUrl = foundProduct.ImageUrl
 
                 };
                 return Ok(response);
@@ -142,7 +138,7 @@ namespace ProductAPI.Controllers
 
                     products.Add(productForSubscription);
                 }
-                var foundProductsList = await _serviceForSub.ProductHandler(products);
+                var foundProductsList = await _serviceForSub.ProductForSubHandler(products);
                 var response = foundProductsList.Select(r => new FoundProductForSubResponse
                 {
                     UserId = r.UserId,
@@ -150,7 +146,7 @@ namespace ProductAPI.Controllers
                     Name = r.Name,
                     Price = r.Price,
                     Url = r.Url,
-                    UrlImage = r.UrlImage,
+                    ImageUrl = r.ImageUrl,
 
                 }).ToList();
                 return Ok(response);
@@ -172,9 +168,9 @@ namespace ProductAPI.Controllers
         {
             try
             {
-                var brands = await _repository.GetBrandForMenu();
+                var brands = await _serviceForUser.GetBrandForMenu();
                 if (brands == null) { return NotFound(); }
-                var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b}).ToList();
+                var response = brands.Select(b => new FoundBrandForTelegramResponse() { Brand = b }).ToList();
                 return Ok(response);
             }
             catch (Exception ex)

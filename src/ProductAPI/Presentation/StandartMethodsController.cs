@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ProductAPI.Application;
+using ProductAPI.Contracts;
 using ProductAPI.Controllers;
 using ProductAPI.Domain.Product;
 using ProductAPI.Infrastructure;
@@ -10,14 +12,14 @@ namespace ProductAPI.Presentation
     [Route("")]
     public class StandartMethodsController : ControllerBase
     {
-        private readonly IProductRepository _repository;
         private readonly ILogger<ProductController> _logger;
         private readonly IEnumerable<IProductsSiteClient> _siteClient;
-        public StandartMethodsController(IProductRepository repository, ILogger<ProductController> logger, IEnumerable<IProductsSiteClient> client)
+        private readonly IProductHandler _handler;
+        public StandartMethodsController(ILogger<ProductController> logger, IEnumerable<IProductsSiteClient> client, IProductHandler handler)
         {
-            _repository = repository;
             _logger = logger;
             _siteClient = client;
+            _handler = handler;
         }
 
         [Route("CreateManyProducts")]
@@ -25,7 +27,7 @@ namespace ProductAPI.Presentation
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IEnumerable<Product>> CreateManyProducts()
+        public async Task<ActionResult<List<CreateManyProductsResponse>>> CreateManyProducts() // использую только сефору
         {
             try
             {
@@ -39,24 +41,32 @@ namespace ProductAPI.Presentation
                         allListings.AddRange(products);
                     }
                 }
-                await _repository.CreateMany(allListings);
-
-                return allListings;
+                await _handler.CreateManyProductAsync(allListings);
+                var response = allListings.Select(p => new CreateManyProductsResponse
+                {
+                    Site = p.Site,
+                    Brand = p.Brand,
+                    Name = p.Name,
+                    Price = p.Price,
+                    Category = p.Category,
+                    Url = p.Url,
+                    ImageUrl = p.ImageUrl
+                }).ToList();
+                return response;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[GetProductsListings] : An error occurred while processing the request");
-                return (IEnumerable<Product>)StatusCode(500, "Internal Server Error.");
-
+                _logger.LogError(ex, "[CreateManyProducts] : An error occurred while processing the request");
+                return StatusCode(500, "Internal Server Error.");
             }
         }
 
-        [Route("UpsertAllProducts")]
+        [Route("UpsertAllProducts")] // UpdateManyProducts
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IEnumerable<Product>> PutAllProducts()
+        public async Task<IActionResult> PutAllProducts()
         {
             try
             {
@@ -70,36 +80,39 @@ namespace ProductAPI.Presentation
                         allListings.AddRange(products);
                     }
                 }
-                await _repository.UpsertManyProducts(allListings);
-                return allListings;
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[GetProductsListings] : An error occurred while processing the request");
-                return (IEnumerable<Product>)StatusCode(500, "Internal Server Error.");
-
-            }
-        }
-
-        [HttpDelete("DeleteDuplicates")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteDuplicates()
-        {
-            try
-            {
-                await _repository.DeleteDuplicate();
-                _logger.LogInformation("Dublicates are deleted");
+                var result = await _handler.UpsertManyProducts(allListings);
+                if (result == false)
+                {
+                    return NotFound();
+                }
                 return Ok();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[DeleteDuplicates]: Failed to delete Duplicates");
-                return StatusCode(500, "Failed to delete ");
+                _logger.LogError(ex, "[GetProductsListings] : An error occurred while processing the request");
+                return StatusCode(500, "Internal Server Error.");
+
             }
         }
+
+        //[HttpDelete("DeleteDuplicates")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        //public async Task<IActionResult> DeleteDuplicates()
+        //{
+        //    try
+        //    {
+        //        await _repository.DeleteDuplicate();
+        //        _logger.LogInformation("Dublicates are deleted");
+        //        return Ok();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "[DeleteDuplicates]: Failed to delete Duplicates");
+        //        return StatusCode(500, "Failed to delete ");
+        //    }
+        //}
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -109,7 +122,7 @@ namespace ProductAPI.Presentation
         {
             try
             {
-                var allProducts = await _repository.GetProducts();
+                var allProducts = await _handler.GetAllProductsAsync();
                 if (allProducts == null)
                 {
                     return NotFound();
@@ -122,142 +135,21 @@ namespace ProductAPI.Presentation
                 return StatusCode(500, "Internal Server Error.");
             }
         }
-
-        [HttpGet("{id:length(24)}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Product))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Product>> Get(string id)
-        {
-            try
-            {
-                var product = await _repository.Get(id);
-                if (product == null)
-                {
-                    _logger.LogError($"Product with {id} is not found.");
-                    return NotFound();
-                }
-                _logger.LogInformation("ActionResult = {@product}", product);
-                return Ok(product);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[GetProductById]: Product not found in the database");
-                return StatusCode(500, "Internal Server Error. Product not found");
-            }
-        }
-
-        [Route("[action]/{brand}", Name = "GetProductByBrand")]
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProductByBrand(string brand)
-        {
-            try
-            {
-                var brandProducts = await _repository.GetByBrand(brand);
-                if (brandProducts == null)
-                {
-                    var result = Enumerable.Empty<Product>().ToList();
-                    return Ok(result);
-                }
-                _logger.LogInformation("ActionResult = {@brand}", brand);
-                return Ok(brandProducts);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[GetProductByBrand]: Brand of Product is not found in the database");
-                return StatusCode(404, "Brand not found");
-            }
-        }
-
-        [Route("[action]/{name}", Name = "GetProductByName")]
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Product>> GetProductByName(string name)
-        {
-            try
-            {
-                var nameProduct = await _repository.GetByName(name);
-                _logger.LogInformation("ActionResult = {@name}", name);
-                return Ok(nameProduct);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[GetProductByName]: Name of Product is not found in the database");
-                return StatusCode(404, "Unable to process the request. Name not found");
-            }
-        }
-
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
-        public async Task<IActionResult> Post([FromBody] Product newProduct)
-        {
-            try
-            {
-                await _repository.Create(newProduct);
-                if (newProduct != null)
-                {
-                    _logger.LogInformation("ActionResult = {@newProduct}", newProduct);
-                    return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
-                }
-
-                return BadRequest();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[Post]: Failed to create user");
-                return StatusCode(500, "Failed to create user.");
-            }
-        }
-
-        [HttpPut("{id:length(24)}")]
+        [HttpDelete("{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateProduct(string id, Product updateProduct)
+        public async Task<IActionResult> DeleteProduct(string name)
         {
             try
             {
-                var product = await _repository.Get(id);
-                if (product is null)
+                var result = await _handler.DeleteProductAsync(name);
+                if (result is false)
                 {
-                    _logger.LogInformation($"Product with this id {id} is not found");
+                    _logger.LogInformation($"Product with this name - {name} is not found");
                     return NotFound();
                 }
-
-                updateProduct.Id = product.Id;
-                await _repository.Update(updateProduct);
-                _logger.LogInformation("ActionResult = {@id} - product with this id is updated", id);
-                return Ok();
-
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[UpdateProduct]: Failed to update user");
-                return StatusCode(500, "Failed to update user.");
-            }
-        }
-
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteProduct(string id)
-        {
-            try
-            {
-                var product = await _repository.Get(id);
-                if (product is null)
-                {
-                    _logger.LogInformation($"Product with this id {id} is not found");
-                    return NotFound();
-                }
-                await _repository.Delete(id);
-                _logger.LogInformation("ActionResult = {@id} - product with this id is deleted", id);
+                _logger.LogInformation($"Product with this name - {name} is deleted");
                 return Ok();
             }
             catch (Exception ex)
@@ -266,5 +158,126 @@ namespace ProductAPI.Presentation
                 return StatusCode(500, "Failed to delete user.");
             }
         }
+
+
+        //[HttpGet("{id:length(24)}")]
+        //[ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Product))]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<ActionResult<Product>> Get(string id)
+        //{
+        //    try
+        //    {
+        //        var product = await _repository.Get(id);
+        //        if (product == null)
+        //        {
+        //            _logger.LogError($"Product with {id} is not found.");
+        //            return NotFound();
+        //        }
+        //        _logger.LogInformation("ActionResult = {@product}", product);
+        //        return Ok(product);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "[GetProductById]: Product not found in the database");
+        //        return StatusCode(500, "Internal Server Error. Product not found");
+        //    }
+        //}
+
+        //[Route("[action]/{brand}", Name = "GetProductByBrand")]
+        //[HttpGet]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<ActionResult<IEnumerable<Product>>> GetProductByBrand(string brand)
+        //{
+        //    try
+        //    {
+        //        var brandProducts = await _repository.GetByBrand(brand);
+        //        if (brandProducts == null)
+        //        {
+        //            var result = Enumerable.Empty<Product>().ToList();
+        //            return Ok(result);
+        //        }
+        //        _logger.LogInformation("ActionResult = {@brand}", brand);
+        //        return Ok(brandProducts);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "[GetProductByBrand]: Brand of Product is not found in the database");
+        //        return StatusCode(404, "Brand not found");
+        //    }
+        //}
+
+        //[Route("[action]/{name}", Name = "GetProductByName")]
+        //[HttpGet]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<ActionResult<Product>> GetProductByName(string name)
+        //{
+        //    try
+        //    {
+        //        var nameProduct = await _repository.GetByName(name);
+        //        _logger.LogInformation("ActionResult = {@name}", name);
+        //        return Ok(nameProduct);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "[GetProductByName]: Name of Product is not found in the database");
+        //        return StatusCode(404, "Unable to process the request. Name not found");
+        //    }
+        //}
+
+        //[HttpPost]
+        //[ProducesResponseType(StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        //public async Task<IActionResult> Post([FromBody] Product newProduct)
+        //{
+        //    try
+        //    {
+        //        await _repository.Create(newProduct);
+        //        if (newProduct != null)
+        //        {
+        //            _logger.LogInformation("ActionResult = {@newProduct}", newProduct);
+        //            return CreatedAtAction(nameof(Get), new { id = newProduct.Id }, newProduct);
+        //        }
+
+        //        return BadRequest();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "[Post]: Failed to create user");
+        //        return StatusCode(500, "Failed to create user.");
+        //    }
+        //}
+
+        //[HttpPut("{id:length(24)}")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        //public async Task<IActionResult> UpdateProduct(string id, Product updateProduct)
+        //{
+        //    try
+        //    {
+        //        var product = await _repository.Get(id);
+        //        if (product is null)
+        //        {
+        //            _logger.LogInformation($"Product with this id {id} is not found");
+        //            return NotFound();
+        //        }
+
+        //        updateProduct.Id = product.Id;
+        //        await _repository.Update(updateProduct);
+        //        _logger.LogInformation("ActionResult = {@id} - product with this id is updated", id);
+        //        return Ok();
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "[UpdateProduct]: Failed to update user");
+        //        return StatusCode(500, "Failed to update user.");
+        //    }
+        //}
+
     }
 }

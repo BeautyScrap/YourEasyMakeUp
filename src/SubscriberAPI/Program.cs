@@ -1,11 +1,10 @@
 using SubscriberAPI.Application;
-using SubscriberAPI.Application.RabbitQM;
 using SubscriberAPI.Infrastructure;
-using System.Text.Json;
 using FluentValidation;
 using SubscriberAPI.Contracts;
 using SubscriberAPI.Presentanion;
-using SubscriberAPI.Infrastructure.Clients;
+using SubscriberAPI.Presentanion.Clients;
+using SubscriberAPI.Infrastructure.RabbitQM;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,18 +20,15 @@ var connectionString = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMEN
     ? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
     : builder.Configuration.GetConnectionString("DefaultConnection");
 
-//if (string.IsNullOrEmpty(connectionString))
-//{
-//    throw new InvalidOperationException("Database connection string is not configured.");
-//}
 
 builder.Services.AddSingleton(connectionString);
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpClient<IProductApiClient, ProductApiClient>();
-builder.Services.AddHttpClient<ITelegramApiClient, TelegramApiClient>();
+builder.Services.ConfigureHttpClient<IProductApiClient, ProductApiClient>();
+builder.Services.ConfigureHttpClient<ITelegramApiClient, TelegramApiClient>();
 builder.Services.AddScoped<ISubscriberRabbitMessageProducer, RabbitMessageProducer>();
 builder.Services.AddScoped<ISubscribersRepository, SubscribersRepository>();
 builder.Services.AddScoped<ISubscrieberService, SubscriberService>();

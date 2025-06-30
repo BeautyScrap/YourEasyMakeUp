@@ -12,28 +12,28 @@ on:
     types: [opened, edited, synchronize]
 
 jobs:
-  apply-terraform:
-    name: Deploy new infra to gcloud and atlas
-    uses: ./.github/workflows/sub-apply-terraform.yml
-    secrets:
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+  # apply-terraform:
+  #   name: Deploy new infra to gcloud and atlas
+  #   uses: ./.github/workflows/sub-apply-terraform.yml
+  #   secrets:
+  #     GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
 
   deploy-telegram-bot:
-    needs: apply-terraform
+    # needs: apply-terraform
     name: Deploy new version of bot bakcend
     uses: ./.github/workflows/sub-deploy-telegram-bot-api.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
 
   deploy-subscribers-api:
-    needs: apply-terraform
+    # needs: apply-terraform
     name: Deploy new version of bot bakcend
     uses: ./.github/workflows/sub-deploy-subscriber-api.yml
     secrets:
       GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
 
   deploy-products-api:
-    needs: apply-terraform
+    # needs: apply-terraform
     name: Deploy new version of bot bakcend
     uses: ./.github/workflows/sub-deploy-product-api.yml
     secrets:

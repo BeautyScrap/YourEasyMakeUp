@@ -5,30 +5,35 @@ namespace ProductAPI.Application
 {
     public class ProductForSubService : IProductForSubService
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IProductRepository _repository;
 
         public ProductForSubService(IProductRepository productRepository)
         {
-            _productRepository = productRepository;
+            _repository = productRepository;
         }
-        public async Task<List<AvaliableProduct>> ProductHandler(List<ProductForSub> products)
+        public async Task<List<AvaliableProduct>> ProductForSubHandler(List<ProductForSub> products)
         {
             var listWithProducts = new List<AvaliableProduct>();
 
             foreach (var product in products)
             {
-                var productDto = product.ToDto();
-                var userId = productDto.UserId;
-
-                var resultProductDto = await _productRepository.GetProductForOneSubscriber(productDto);
-                if (resultProductDto == null)
+                var userId = product.UserId;
+                var foundProduct = await _repository.GetProductForOneSubscriber(userId,product);
+                if (foundProduct == null)
                 {
                     continue;
                 }
-                AvaliableProduct avaliableProduct = AvaliableProduct.FromDto(userId, resultProductDto);
-                listWithProducts.Add(avaliableProduct); 
+                listWithProducts.Add(foundProduct);
             }
             return listWithProducts;
         }
+            //    var productDto = product.ToDto();
+            //    var userId = productDto.UserId;
+
+            //    var resultProductDto = await _productRepository.GetProductForOneSubscriber(productDto);
+            //    AvaliableProduct avaliableProduct = AvaliableProduct.FromDto(userId, resultProductDto);
+            //    listWithProducts.Add(avaliableProduct); 
+            //}
+            //return listWithProducts;
     }
 }
