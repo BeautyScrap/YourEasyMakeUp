@@ -34,7 +34,7 @@ namespace TelegramBotAPI.Controllers
                     );
                 newProduct.SetUrlAndUrlImage(request.Url, request.ImageUrl);
                 await _updateHandler.HandlerUpdateAsync(newProduct);
-                // AK TODO тут еще проверку сделать какой ответ пришел или bool
+                // AK TODO тут еще проверку сделать какой ответ пришел или booll
                 return Ok();
             }
             catch(Exception ex)
